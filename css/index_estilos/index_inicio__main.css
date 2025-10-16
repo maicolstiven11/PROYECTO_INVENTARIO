@@ -1,0 +1,29 @@
+.main__titulo{
+    border-top: 2px solid rgba(0, 0, 0, 0.562) ;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.562);
+    font-family: 'MiFuente';
+    font-size: 40px;
+    text-decoration: none;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    height: 90px;
+    align-content: center;
+    align-items: center;
+    text-decoration-color: none;
+    color: var(--color-letras);
+    transition: font-size 0.3s ease ;
+
+
+}
+.main__titulo:hover{
+    font-size: 43px;
+}
+main{
+    display: flex;
+    grid-area: main;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    background-color: var(--color-fondo);
+
+}

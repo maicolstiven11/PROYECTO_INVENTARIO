@@ -1,0 +1,49 @@
+main{
+    display: flex;
+    grid-area: main;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    background-color: var(--color-fondo);
+
+}
+.main__titulo{
+    font-size: 30px;
+    margin-bottom: 6px;
+    font-family: "mifuente";
+    font-weight: lighter;
+    color: var(--color-letras);
+
+}
+
+.main__subtitulo{
+    font-family: "mifuente";
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: var(--color-letras);
+}
+
+.seccion__inicioResgistrar{
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    gap: 60px;
+}
+
+.seccion__inicioResgistrar a{
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.inicio_sesion{
+    font-family: "mifuente";
+    color: #004B76;
+    border-bottom: 2px solid black ;
+}
+
+
+.registrarse{
+    color: #A6A6A6;
+}
