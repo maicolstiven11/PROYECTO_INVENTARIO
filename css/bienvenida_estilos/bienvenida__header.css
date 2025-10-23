@@ -1,19 +1,16 @@
-
 *{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    
 }
 :root{
     --color-fondo:white;
     --color-header:#e2f0f9;
     --color-footer:#e2f0f9;
     --color-letras:black;
-    --boton-iniciarSesion:#004B76;
 }
 @font-face{
-    font-family: 'MiFuente';
+    font-family: 'mifuente';
     src: url("/assets/Abhaya_Libre/AbhayaLibre-Regular.ttf") ; 
     font-style: normal;
 }
@@ -25,7 +22,7 @@ body{
         "header"
         "main"
         "footer";
-    height: 100vh;
+    min-height: 100vh;
 }
 header{
     grid-area: header;
@@ -37,8 +34,8 @@ header{
     align-items: center ;
     width: 100%;
     height: 120px;
-    
 }
 .navbar__logo{
     height: 80px;
+
 }

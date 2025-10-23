@@ -9,7 +9,6 @@ main{
     cursor: default; /*evita que el cursor cambien en elementos que no se necesitan */
     user-select: none; /*sirve para que el usuario no seleccione texto pero lo use para que no se vea como si estuviera escibiendo */
 
-
 }
 .main__titulo{
     font-size: 30px;
@@ -35,6 +34,7 @@ main{
     align-items: center;
     gap: 60px;
     margin-bottom: 35px;
+
 }
 
 .seccion__inicioResgistrar a{
@@ -44,11 +44,12 @@ main{
 
 .inicio_sesion{
     font-family: "mifuente";
-    color: #004B76;
-    border-bottom: 2px solid black ;
+    color: var(--letras-form);
 }
 
 
 .registrarse{
-    color: #A6A6A6;
+    font-family: "mifuente";
+    color: #004B76;
+    border-bottom: 2px solid black ;
 }

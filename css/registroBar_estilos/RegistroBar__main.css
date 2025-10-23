@@ -9,7 +9,6 @@ main{
     cursor: default; /*evita que el cursor cambien en elementos que no se necesitan */
     user-select: none; /*sirve para que el usuario no seleccione texto pero lo use para que no se vea como si estuviera escibiendo */
 
-
 }
 .main__titulo{
     font-size: 30px;
@@ -28,27 +27,3 @@ main{
     color: var(--color-letras);
 }
 
-.seccion__inicioResgistrar{
-    display: flex;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-    gap: 60px;
-    margin-bottom: 35px;
-}
-
-.seccion__inicioResgistrar a{
-    text-decoration: none;
-    font-size: 18px;
-}
-
-.inicio_sesion{
-    font-family: "mifuente";
-    color: #004B76;
-    border-bottom: 2px solid black ;
-}
-
-
-.registrarse{
-    color: #A6A6A6;
-}

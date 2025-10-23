@@ -25,5 +25,7 @@ main{
     text-align: center;
     height: 100%;
     background-color: var(--color-fondo);
+    cursor: default; /*evita que el cursor cambien en elementos que no se necesitan */
+    user-select: none; /*sirve para que el usuario no seleccione texto pero lo use para que no se vea como si estuviera escibiendo */
 
 }

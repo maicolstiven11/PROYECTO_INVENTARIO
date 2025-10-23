@@ -1,0 +1,43 @@
+main{
+    display: flex;
+    grid-area: main;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    background-color: var(--color-fondo);
+    gap: 10px;
+    cursor: default; /*evita que el cursor cambien en elementos que no se necesitan */
+    user-select: none; /*sirve para que el usuario no seleccione texto pero lo use para que no se vea como si estuviera escibiendo */
+
+}
+main img{
+    margin: 0 auto;
+    width: 150px;
+    height: auto;
+
+}
+.main__bienvenida{
+    font-family: 'mifuente';
+    font-size: 55px;
+    color: var(--color-letras);
+    font-weight: lighter;
+}
+.contenedor_titulo{
+    width:100%;
+    height: 30px;
+
+}
+.main__sistema{
+    font-family: "mifuene";
+    text-decoration: none;
+    text-decoration-color: none;
+    color: var(--color-letras);
+    font-size: 19px;
+    font-weight: bold;
+    transition: font-size 0.3s ease ;
+}
+.main__sistema:hover{
+    font-size: 21px;
+}
+

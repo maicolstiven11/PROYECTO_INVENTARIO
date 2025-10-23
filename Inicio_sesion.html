@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio de sesion</title>
     <link rel="stylesheet" href="css/Inicio_sesion.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 <body>
     <header>
@@ -18,15 +20,22 @@
         <h2 class="main__subtitulo">Contabilidad-Sistematica</h2>
         <section class="seccion__inicioResgistrar">
             <a href="#" class="inicio_sesion">Iniciar sesion</a>
-            <a href="#" class="registrarse">Registrarse</a>
+            <a href="registroUser.html" class="registrarse">Registrarse</a>
         </section>
 
         <form class="main__formulario">
-            <label for="email" class="formulario__email__icon"></label>
-            <input class="form__input_email" type="email" name="email" required placeholder="Email">
+            <div class="campo">
+                <label for="email" class="formulario__email__icon"></label>
+                <i class="fas fa-envelope icono"></i>
+                <input class="form__input_email" type="email" name="email" required placeholder="Email">
+            </div>
 
-            <label for="password" class="formulario__password__icon"></label>
-            <input class="form__input_email" type="password"  name="password" required placeholder="Contraseña">
+            <div class="campo">
+                <label for="password" class="formulario__password__icon"></label>
+                <i class="fas fa-lock icono"></i>
+                <input class="form__input_email" type="password"  name="password" required placeholder="Contraseña">      
+            </div>
+
             <div class="contenedor__btnLogin">
                 <button class="formulario__btnLogin" >Inciar sesion</button>
             </div>
@@ -46,7 +55,7 @@
     </main>
     <footer>
 
-    </footer>
+    </footer> 
     
 </body>
 </html>

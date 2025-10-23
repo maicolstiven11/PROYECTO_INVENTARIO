@@ -10,7 +10,8 @@
     --color-header:#e2f0f9;
     --color-footer:#e2f0f9;
     --color-letras:black;
-    --boton-iniciarSesion:#004B76;
+    --boton-continuar:#004B76;
+    --letras-form: #A6A6A6;
 }
 @font-face{
     font-family: 'MiFuente';

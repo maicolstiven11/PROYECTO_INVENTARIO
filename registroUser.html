@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse</title>
+    <link rel="stylesheet" href="css/registro.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <img class="navbar__logo" src="assets/img/LOGO.png" alt="logo_sistema">
+        </nav>
+
+    </header>
+    <main>
+        <h1 class="main__titulo">Registrarse</h1>
+        <h2 class="main__subtitulo">Contabilidad-Sistematica</h2>
+        <section class="seccion__inicioResgistrar">
+            <a href="Inicio_sesion.html" class="inicio_sesion">Iniciar sesion</a>
+            <a href="#" class="registrarse">Registrarse</a>
+        </section>
+
+        <form class="main__formulario">
+            <div class="form__iconTiposDoc">
+                <i class="fas fa-angle-down icono" ></i>
+                <select  class="form__tiposDocumento" required>
+                    <option  disabled selected> Tipo de documento</option>
+                    <option >Cédula de ciudadanía</option>
+                    <option >Tarjeta de identidad</option>
+                    <option >Cédula de extranjería</option>
+                    <option >Pasaporte</option>
+                </select>
+            </div>
+            <div class="form__iconDocum">
+                <i class="fas fa-caret-right icono"></i>
+                <label for="formulario__documento"></label>
+                <input type="text" id="numero-documento" name="numero-documento" placeholder="Número de documento" required>
+            </div>
+
+            <div class="estilo_difuminado">
+                <div class="contenedor__btnRegistro">
+                    <a href="registroUser2.html" class="formulario__btnRegistro" >Continuar</a>
+                </div>
+            </div>
+
+
+
+        </form>
+
+
+            
+        
+    </main>
+    <footer>
+
+    </footer> 
+    
+</body>
+</html>
