@@ -1,5 +1,4 @@
 
-
 .main__formulario{
     display: flex;
     justify-content: center;
@@ -34,6 +33,56 @@
     box-shadow: 0 0 5px #004B76;
 }
 
+
+.fondo-blur {
+    position: absolute; /*para sacarlo del flujo y moverlo para donde yo queira*/
+    height:75vh ;
+    width: 100%;
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+
+.registro_confirmacion {
+    font-family: "mifuente";
+    background: #dfdfdf8a;
+    padding: 60px;
+    border-radius: 50px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    max-width: 400px;
+    width: 90%;
+}
+
+.registro_confirmacion img {
+    width: 70px;
+    margin-top: 20px;
+}
+.contenedor_boton{
+    position: absolute;
+    bottom: 30px;
+    right: 80px;
+    padding: 20px;
+    width: 170px;
+    border-radius: 50px;
+    background-color: var(--color-header);
+}
+
+
+.boton_nex{
+    text-decoration: none;
+    font-family: "mifuente";
+    font-weight: bold;
+    font-size: 20px;
+    color: var(--color-letras);
+    transition: font-size 0.3s ease;
+}
+.boton_nex:hover{
+    font-size: 22px;
+}
 
 
 .formulario__btnRegistro{

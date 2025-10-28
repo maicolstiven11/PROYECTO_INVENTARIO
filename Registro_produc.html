@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de los productos</title>
+    <link rel="stylesheet" href="css/registro_produc.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <img class="navbar__logo" src="assets/img/LOGO.png" alt="logo_sistema">
+        </nav>
+    </header>
+    <main>
+        <h1 class="main__titulo">Contabilidad-Sistematica</h1>
+        <h2 class="main__subtitulo">Registre los productos</h2>
+        <h2 class="main__subtitulo">de: </h2>
+        <h3 class="main__nameBar">fuente de soda la jenny</h3>
+        <section class="main__contenedorForm">
+            <form class="main__formulario" enctype="multipart/form-data"> <!-- solo se pueden adjuntar imagenes -->
+                <div class="campo">
+                    <label for="name" class="formulario__nombre"></label>
+                    <input id="name" class="form__input_name" type="text" required placeholder="Nombre del producto">
+                </div >
+                <div class="campo">
+                    <label for="precio_producto"></label>
+                    <input type="text" id="precio_producto" name="precio_producto" placeholder="Precio del producto" required>
+                </div>
+                <div class="campo_img">
+                    <label for="imagen" class="boton_img">Imagen del producto</label>
+                    <input type="file" id="imagen" accept="image/*" required>
+                    <div id="preview" class="cuadro-imagen"></div>
+                </div>
+                <div class="contenedor__btnfinalizar">
+                    <a href="#" class="formulario__btnfin" >Finalizar</a>
+                </div>
+            </form>
+        </section>
+    </main>
+    <footer>
+
+    </footer> 
+</body>
+</html>

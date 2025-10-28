@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro 2</title>
-    <link rel="stylesheet" href="css/registro2.css">
+    <title>Registro bar finalizado</title>
+    <link rel="stylesheet" href="css/registroBar_fin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
@@ -16,28 +16,27 @@
 
     </header>
     <main>
-        <h1 class="main__titulo">Inicio sesion</h1>
+        <h1 class="main__titulo">Registre su bar</h1>
         <h2 class="main__subtitulo">Contabilidad-Sistematica</h2>
-        <section class="seccion__inicioResgistrar">
-            <a href="Inicio_sesion.html" class="inicio_sesion">Iniciar sesion</a>
-            <a href="#" class="registrarse">Registrarse</a>
+        
+        <section class="fondo-blur">
+            <div class="registro_confirmacion">
+                <h2>Registro finalizado con satisfacción</h2>
+                <img src="assets/img/icono_correcto.png" alt="icono_correcto">
+            </div>
+            <div class="contenedor_boton">
+                <a class="boton_nex" href="Registro_produc.html">SIGUENTE --></a>
+            </div>
+            
         </section>
-
         <form class="main__formulario">
             <div class="campo">
                 <label for="name" class="formulario__nombre"></label>
-                <input id="name" class="form__input_name" type="text" required placeholder="Nombre">
+                <input id="name" class="form__input_name" type="text" required placeholder="Nombre del bar">
             </div>
-
-
             <div class="campo">
-                <label for="email" class="formulario__email__icon"></label>
-                <input id="email" class="form__input_email" type="email"    required placeholder="Correo">      
-            </div>
-
-            <div class="campo">
-                <label for="password" class="formulario__password__icon"></label>
-                <input id="password" class="form__input_password" type="password"    required placeholder="Contraseña">      
+                <label for="direccion" class="formulario__direccion"></label>
+                <input id="direccion" class="form__input_direccion" type="text"    required placeholder="Direccion">      
             </div>
 
             <div class="estilo_difuminado">
