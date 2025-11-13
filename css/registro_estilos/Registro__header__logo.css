@@ -5,13 +5,7 @@
     box-sizing: border-box;
     
 }
-:root{
-    --color-fondo:white;
-    --color-header:#e2f0f9;
-    --color-footer:#e2f0f9;
-    --color-letras:black;
-    --boton-continuar:#004B76;
-}
+
 @font-face{
     font-family: 'MiFuente';
     src: url("/assets/Abhaya_Libre/AbhayaLibre-Regular.ttf") ; 
