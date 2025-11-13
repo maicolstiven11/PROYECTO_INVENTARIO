@@ -35,7 +35,7 @@
 
 
 .fondo-blur {
-    position: absolute; /*para sacarlo del flujo y moverlo para donde yo queira*/
+    position: absolute; /*para sacarlo del flujo y moverlo para donde yo quiera*/
     height:75vh ;
     width: 100%;
     backdrop-filter: blur(4px);
@@ -65,11 +65,15 @@
     position: absolute;
     bottom: 30px;
     right: 80px;
-    padding: 20px;
+    height: 60px;
     width: 180px;
     border-radius: 50px;
     background-color: var(--color-header);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
 
 
 .boton_nex{

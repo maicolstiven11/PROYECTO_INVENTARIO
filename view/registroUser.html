@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrarse</title>
-    <link rel="stylesheet" href="css/registro.css">
+    <link rel="stylesheet" href="/css/registro.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
 <body>
     <header>
         <nav class="navbar">
-            <img class="navbar__logo" src="assets/img/LOGO.png" alt="logo_sistema">
+            <img class="navbar__logo" src="/assets/img/LOGO.png" alt="logo_sistema">
         </nav>
 
     </header>
@@ -19,11 +19,11 @@
         <h1 class="main__titulo">Registrarse</h1>
         <h2 class="main__subtitulo">Contabilidad-Sistematica</h2>
         <section class="seccion__inicioResgistrar">
-            <a href="Inicio_sesion.html" class="inicio_sesion">Iniciar sesion</a>
+            <a href="/view/Inicio_sesion.html" class="inicio_sesion">Iniciar sesion</a>
             <a href="#" class="registrarse">Registrarse</a>
         </section>
 
-        <form class="main__formulario">
+        <form class="main__formulario" action="/view/registroUser2.html">
             <div class="form__iconTiposDoc">
                 <i class="fas fa-angle-down icono" ></i>
                 <select  class="form__tiposDocumento" required>
@@ -39,9 +39,7 @@
             </div>
 
             <div class="estilo_difuminado">
-                <div class="contenedor__btnRegistro">
-                    <a href="registroUser2.html" class="formulario__btnRegistro" >Continuar</a>
-                </div>
+                <button class="contenedor__btnRegistro">Continuar</button>
             </div>
 
 
