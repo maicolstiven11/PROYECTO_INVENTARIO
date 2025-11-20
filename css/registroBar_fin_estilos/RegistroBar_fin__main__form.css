@@ -82,9 +82,10 @@
     font-weight: bold;
     font-size: 20px;
     color: var(--color-letras);
-    transition: font-size 0.3s ease;
+    transition: transform 0.3s ease;
 }
 .boton_nex:hover{
+    transform:scale(1.1) ;
     font-size: 22px;
 }
 

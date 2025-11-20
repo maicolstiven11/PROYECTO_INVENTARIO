@@ -1,90 +1,37 @@
-.main__contenedorForm{
+.main__section__prd_regist{
     display: flex;
-    justify-content: center;
-    align-items: center;
     margin: 0 auto;
-    width: 380px;
-    
-    box-shadow: 0 0 10px rgba(80, 80, 80, 0.404);
-}
-
-.main__formulario{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    margin-top: 30px;
-    gap: 30px;
-    margin-bottom: 30px;
-}
-
-
-.campo input{
-    width: 240px;
-    border: none;
-    border-bottom: 1px solid #A6A6A6 ;
-    padding: 10px;
-    transition: all 0.3s ease;
-    text-align: center;
-
-}
-
-
-.main__formulario input::placeholder{
-    text-align: center;
+    padding: 30px;
+    box-shadow: 0 0 10px #50505067;
     font-family: "mifuente";
-    font-size: 20px;
-    color: var(--letras-form);
+    margin-bottom: 60px;
 }
-
-.main__formulario input:focus{
-    text-align: center;
-    outline: none;
-    border-color: var(--boton-iniciarSesion);
-    box-shadow: 0 0 5px #004B76;
-}
-
-.formulario-imagen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-}
-
-.boton_img {
-    font-family: "mifuente";
-    color: var(--letras-form);
-    cursor: pointer;
-    font-size: 19px;
-}
-
-input[type="file"] {
-    display: none;
-}
-
-.cuadro-imagen {
+.main__section__prd_regist div img{
     margin-top: 20px;
-    width: 200px;
-    height: 175px;
-    border: 2px solid #ccc;
-    border-radius: 12px;
-    background-color: #f9f9f9;
+    width: 60px;
+}
+
+.main__section__rutas{
     display: flex;
+
     justify-content: center;
     align-items: center;
+    gap: 60px;
+    height: 140px;
+}
+.main__section__rutas i{
+    font-size: 45px;
+    color: var(--color-letras);
 }
 
-
-.contenedor__btnfinalizar{
-    align-items: center;
-    font-family: "mifuente";
+.section__agg, .section__fin_regis {
     padding: 10px;
-    width: 230px;
-    border-radius: 20px;
-    background-color: #32BA7C; 
-    color: white;
-    border: none;
-   cursor: pointer;
+    height: 120px;
+    text-decoration: none;
+    color: var(--color-letras);
 }
 
+.main__section__rutas h3{
+    font-family: "mifuente";
+}
 

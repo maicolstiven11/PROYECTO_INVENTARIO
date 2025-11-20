@@ -78,13 +78,14 @@ input[type="file"] {
 .contenedor__btnfinalizar{
     align-items: center;
     font-family: "mifuente";
+    font-size: 16px;
     padding: 10px;
     width: 230px;
     border-radius: 20px;
-    background-color: #32BA7C; 
+    background-color: var(--boton-finalizado); 
     color: white;
     border: none;
-   cursor: pointer;
+    cursor: pointer;
 }
 
 

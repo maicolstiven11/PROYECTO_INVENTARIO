@@ -32,9 +32,8 @@ main{
     font-family: "mifuente";
     font-weight: bold;
     color: var(--color-letras);
-    
     margin: 0 auto;
-    margin-bottom: 50px;
+    margin-bottom: 15px;
     
 }
 
