@@ -1,0 +1,39 @@
+main{
+    display: flex;
+    grid-area: main;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    background-color: var(--color-fondo);
+    cursor: default; /*evita que el cursor cambien en elementos que no se necesitan */
+    user-select: none; /*sirve para que el usuario no seleccione texto pero lo use para que no se vea como si estuviera escibiendo */
+
+}
+.main__titulo{
+    position: absolute;
+    font-family: "mifuente";
+    font-size: 24px;
+    font-weight: bold;
+    top: 140px;
+    left: 30px;
+    color: var(--color-letras);
+}
+
+.main__subtitulo{
+    font-size: 25px;
+    margin-bottom: 6px;
+    font-family: "mifuente";
+    font-weight: lighter;
+    color: var(--color-letras);
+}
+.main__nameBar{
+    font-size: 25px;
+    font-family: "mifuente";
+    font-weight: bold;
+    color: var(--color-letras);
+    margin: 0 auto;
+    margin-bottom: 15px;
+    
+}
+

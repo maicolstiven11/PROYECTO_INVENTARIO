@@ -1,0 +1,56 @@
+.fondo-blur {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 70px;
+}
+
+.main__titulo{
+    margin-bottom: 40px;
+    font-family: "mifuente";
+}
+
+.registro_confirmacion {
+    font-family: "mifuente";
+    background: var(--color-fondo);
+    padding: 60px;
+    border-radius: 50px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    max-width: 400px;
+    width: 90%;
+}
+
+.registro_confirmacion img {
+    width: 70px;
+    margin-top: 20px;
+}
+.contenedor_boton{
+    position: absolute;
+    bottom: 140px;
+    right: 80px;
+    height: 60px;
+    width: 180px;
+    border-radius: 50px;
+    background-color: var(--color-header);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+.boton_nex{
+    text-decoration: none;
+    font-family: "mifuente";
+    font-weight: bold;
+    font-size: 20px;
+    color: var(--color-letras);
+    transition: transform 0.3s ease;
+}
+.boton_nex:hover{
+    transform:scale(1.1) ;
+    font-size: 22px;
+}
+
+

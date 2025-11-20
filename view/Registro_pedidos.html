@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de los productos</title>
+    <link rel="stylesheet" href="/css/registro_pedidos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <img class="navbar__logo" src="/assets/img/LOGO.png" alt="logo_sistema">
+        </nav>
+    </header>
+    <main>
+        <h1 class="main__titulo">Contabilidad-Sistematica</h1>
+        <h2 class="main__subtitulo">Registre los pedidos</h2>
+        <h2 class="main__subtitulo">de: </h2>
+        <h3 class="main__nameBar">fuente de soda la jenny</h3>
+        <section class="main__contenedorForm">
+            <form class="main__formulario" action="/view/Pedido_registrado.html"  > 
+                <div class="campo">
+                    <label for="name" class="formulario__nombre"></label>
+                    <input id="name" class="form__input_name" type="text" required placeholder="Nombre del pedido">
+                </div >
+                <div class="campo">
+                    <label for="precio_producto"></label>
+                    <input type="text" id="precio_producto" name="precio_producto" placeholder="Precio del pedido" required>
+                </div>
+                <div class="campo">
+                    <label for="precio_producto"></label>
+                    <input type="number" id="precio_producto" name="precio_producto" placeholder="Cantidad de unidades" required>
+                </div>
+                <div class="form__iconTiposDoc">
+                    <i class="fas fa-angle-down icono" ></i>
+                    <select  class="form__tiposDocumento" required>
+                        <option  disabled selected> Producto del pedido</option>
+                        <option >Poker</option>
+                        <option >Aguila</option>
+                        <option >Tumix</option>
+                    </select>
+                </div>
+                <div class="campo_img">
+                    <label for="imagen" class="boton_img">Imagen del producto</label>
+                    <input type="file" id="imagen" accept="image/*" >
+                    <div id="preview" class="cuadro-imagen"></div>
+                </div>
+                <button class="contenedor__btnfinalizar">Finalizar</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+
+    </footer> 
+</body>
+</html>
