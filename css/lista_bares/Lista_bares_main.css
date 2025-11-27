@@ -1,17 +1,16 @@
 body {
     font-family: "mifuente";
-    background-color: #f0f0f0;
     margin: 0;
 
 }
 
 main {
-
     margin: auto;
-    background-color: #fff;
+    background-color: var(--color-fondo);
     border-radius: 8px;
-    padding: 15px;
+    padding: 30px;
     box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    height: 57vh;
 }
 
 h2 {
@@ -20,24 +19,41 @@ h2 {
 }
 
 .lista-bares {
-    max-height: 250px;
+    max-height: 400px;
     overflow-y: scroll;
-    
     direction: rtl; /* fuerza el scroll a la izquierda */
     border-top: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
     padding-left: 100px; /* espacio para el scroll */
+    
+}
+::-webkit-scrollbar{
+  height: 10px;
+  width: 10px;
 }
 
+::-webkit-scrollbar-track{
+  background: linear-gradient(0deg,rgba(0, 0, 0, 1) 0%, rgba(217, 217, 217, 1) 50%, rgba(0, 0, 0, 1) 100%);
+
+
+}
+
+::-webkit-scrollbar-thumb{
+  background:rgba(255, 255, 255, 0.635) ;
+  border-radius: 10px;
+    border: 0.5px solid black;
+}
+
+
 .contenido-scroll {
-    direction: ltr; /* revierte el contenido para que se vea normal */
+    direction: ltr; 
 }
 
 .bar-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    padding: 10px ;
     border-bottom: 1px solid #eee;
 }
 
@@ -54,27 +70,77 @@ h2 {
     color: red;
     font-size: 14px;
 }
-
-.acciones button {
-    margin-left: 5px;
-    padding: 5px 8px;
-    font-size: 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+.acciones{
+  display: flex;
+  margin-left: 105px;
 }
 
-.start-btn {
-    background-color: #4CAF50;
-    color: white;
+.acciones img{
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  height: 40px;
+}
+a{
+  text-decoration: none;
+  display: flex;
 }
 
-.delete-btn {
-    background-color: #f44336;
-    color: white;
+.acciones {
+  display: flex;
+  gap: 20px;
+  padding: 23px;
 }
 
-.view-btn {
-    background-color: #2196F3;
-    color: white;
+.acciones a {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  color: #333;
 }
+
+.acciones a h3 {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  top: -35px;
+  color: black;
+  padding: 2px ;
+  border-radius: 6px;
+  font-size: 14px;
+  opacity: 0;              /* oculto por defecto */
+  transition: opacity 0.3s ease;
+  pointer-events: none;    /* no bloquea clics */
+}
+
+.acciones a:hover h3 {
+  opacity: 1;              /* aparece al hacer hover */
+}
+
+
+
+.acciones a:hover img {
+  transform: scale(1.05);  /* efecto zoom al pasar */
+}
+.btn-regresar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px ;
+  background: var(--boton-regresar);
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 10px;
+}
+
+.btn-regresar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
