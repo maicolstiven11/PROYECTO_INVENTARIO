@@ -1,0 +1,56 @@
+main{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 70px;
+}
+.contenedor__menu{
+    display: flex;
+    gap: 120px;
+    flex-direction: row;
+
+
+}
+.contenedor__menu div{
+    display: flex;
+    width: 215px;
+    height: 260px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.fondo_img{
+    width: 20px;
+    height: 10px;
+    border-radius: 100%;
+    background-color: var(--fondo-menu);
+    transition: all 0.5s ease;
+
+}
+.fondo_img:hover{
+    box-shadow: 0px 0px 10px black ;
+}
+.contenedor__menu img{
+    height: 120px;
+    width:120px;
+}
+a{
+    text-decoration: none;
+}
+.contenedor__menu p{
+    margin-top: 15px;
+    font-family: "mifuente";
+    text-align: center;
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--color-letras);
+}
+
+
+h1{
+    font-family: "mifuente";
+    text-align: center;
+    
+
+}
