@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <img class="navbar__logo" src="/assets/img/LOGO.png" alt="logo_sistema">
+        </nav>
+    </header>
+    <main class="inventario">
+        <h1 class="inventario__titulo">Contabilidad-Sistematica</h1>
+        <h2 class="inventario__subtitulo">Registre el stok de <br> productos iniciales</h2>
+
+        <div class="inventario__buscador">
+            <input type="text" class="buscador__input" placeholder="Buscar producto">
+        </div>
+
+        <section class="inventario__lista">
+            <table class="lista__tabla">
+            <thead class="tabla__encabezado">
+                <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Imagen</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody class="tabla__cuerpo">
+                <tr class="tabla__fila">
+                <td>1</td>
+                <td>Poker</td>
+                <td><img src="poker.jpg" alt="Poker" class="producto__imagen"></td>
+                <td>$13000</td>
+                <td><input type="number" class="producto__cantidad"></td>
+                </tr>
+                <tr class="tabla__fila">
+                <td>2</td>
+                <td>Aguila</td>
+                <td><img src="aguila.jpg" alt="Aguila" class="producto__imagen"></td>
+                <td>$16500</td>
+                <td><input type="number" class="producto__cantidad"></td>
+                </tr>
+                <tr class="tabla__fila">
+                <td>3</td>
+                <td>Cigarros Lucky</td>
+                <td><img src="lucky.jpg" alt="Lucky Strike" class="producto__imagen"></td>
+                <td>$12000</td>
+                <td><input type="number" class="producto__cantidad"></td>
+                </tr>
+            </tbody>
+            </table>
+
+            <span class="inventario__nota">(Ingrese la cantidad de <br> producto inicial que tienes a la venta)</span>
+            <button class="inventario__boton">Finalizar el registro</button>
+        </section>
+    </main>
+
+    <footer>
+
+    </footer>
+
+    
+</body>
+</html>

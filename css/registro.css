@@ -1,6 +1,5 @@
 @import url(Variables_root/Root.css);
-@import url(registro_estilos/Registro__header__logo.css);
+@import url(/css/estilos_header.css);
+@import url(/css/estilos_footer.css);
 @import url(registro_estilos/Registro__main.css);
 @import url(registro_estilos/Registro__main__form.css);
-@import url(registro_estilos/Registro_footer.css);
-@import url(registro_estilos/Registro__header__logo.css);

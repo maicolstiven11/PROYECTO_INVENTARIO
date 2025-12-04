@@ -1,5 +1,5 @@
 @import url(Variables_root/Root.css);
-@import url(registroBar_fin_estilos/RegistroBar_fin__header__logo.css);
+@import url(/css/estilos_header.css);
+@import url(/css/estilos_footer.css);
 @import url(registroBar_fin_estilos/RegistroBar_fin__main.css);
 @import url(registroBar_fin_estilos/RegistroBar_fin__main__form.css);
-@import url(registroBar_fin_estilos/RegistroBar_fin_footer.css);
