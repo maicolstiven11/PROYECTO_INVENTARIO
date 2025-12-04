@@ -17,7 +17,7 @@
 }
 
 
-.form__tiposDocumento{
+.form__tiposControl{
     width: 240px;
     border: none;
     border-bottom: 1px solid #A6A6A6 ;
@@ -33,7 +33,7 @@
 
 
 
-.form__tiposDocumento:focus {
+.form__tiposControl:focus {
     text-align: center;
     font-family: "mifuente";
     color: #000000;

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/agregar_venta.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <img class="navbar__logo" src="/assets/img/LOGO.png" alt="logo_sistema">
+        </nav>
+    </header>
+    <main>
+        <div class="venta">
+            <div class="venta__contenedor">
+
+                <h1 class="venta__titulo">Registrar Venta</h1>
+
+                <form class="formulario-venta" autocomplete="off">
+
+                    <!-- PRODUCTO -->
+                    <div class="formulario-venta__grupo">
+                        <label for="producto" class="formulario-venta__label">Producto</label>
+
+                        <input 
+                            id="producto" 
+                            name="producto" 
+                            type="text"
+                            list="lista-productos"
+                            class="formulario-venta__input formulario-venta__input--sugerencias"
+                            placeholder="Escribe el nombre del producto..."
+                        >
+
+                        <datalist id="lista-productos">
+                            <option value="POKER"></option>
+                            <option value="AGUILA"></option>
+                            <option value="LUCKY VERDE"></option>
+                            <option value="GATORADE"></option>
+                            <option value="AGUA"></option>
+                        </datalist>
+                    </div>
+
+                    <!-- CANTIDAD Y PRECIO -->
+                    <div class="formulario-venta__fila">
+
+                        <div class="formulario-venta__grupo formulario-venta__grupo--col">
+                            <label for="cantidad" class="formulario-venta__label">Cantidad</label>
+                            <input 
+                                id="cantidad" 
+                                name="cantidad" 
+                                type="number" 
+                                class="formulario-venta__input"
+                                placeholder="Ej: 1"
+                                min="1"
+                            >
+                        </div>
+
+                        <div class="formulario-venta__grupo formulario-venta__grupo--col">
+                            <label for="precio" class="formulario-venta__label">Precio unitario</label>
+                            <input 
+                                id="precio" 
+                                name="precio" 
+                                type="text" 
+                                class="formulario-venta__input formulario-venta__input--solo-lectura"
+                                placeholder="Automático (demo)"
+                                readonly
+                            >
+                        </div>
+
+                    </div>
+
+                    <!-- SUBTOTAL -->
+                    <div class="formulario-venta__grupo">
+                        <label for="subtotal" class="formulario-venta__label">Subtotal</label>
+                        <input 
+                            id="subtotal" 
+                            name="subtotal" 
+                            type="text" 
+                            class="formulario-venta__input formulario-venta__input--solo-lectura"
+                            placeholder="Subtotal automático"
+                            readonly 
+                        >
+                    </div><!-- readonly me sirve para que el usuario no escriba nada en el formulario-->
+
+                    <!-- FECHA -->
+                    <div class="formulario-venta__grupo">
+                        <label for="fecha" class="formulario-venta__label">Fecha</label>
+                        <input 
+                            id="fecha" 
+                            name="fecha" 
+                            type="date"
+                            class="formulario-venta__input"
+                        >
+                    </div>
+
+                    <!-- VENDEDOR -->
+                    <div class="formulario-venta__grupo">
+                        <label for="vendedor" class="formulario-venta__label">Vendedor</label>
+                        <input 
+                            id="vendedor" 
+                            name="vendedor" 
+                            type="text"
+                            class="formulario-venta__input"
+                            placeholder="Ej: Maicol"
+                        >
+                    </div>
+
+                    <!-- TOTAL Y BOTÓN -->
+                    <div class="formulario-venta__pie">
+                        <div class="formulario-venta__total">
+                            <span class="formulario-venta__total-texto">TOTAL:</span>
+                            <span class="formulario-venta__total-valor">$0.00</span>
+                        </div>
+
+                        <button type="submit" class="formulario-venta__boton">
+                            Registrar venta
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </main>
+    <footer>    
+
+    </footer>
+</body>
+</html>
