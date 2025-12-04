@@ -1,0 +1,98 @@
+.pagina-inventario {
+    display: flex;
+    min-height: 100vh;
+    background: var(--color-fondo);
+    color: var(--color-letras);
+}
+
+/* -------- ASIDE -------- */
+
+.navegacion {
+    width: 230px;
+    background: var(--fondo-menu);
+    padding: 20px;
+}
+
+.navegacion__titulo {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+}
+
+.navegacion__lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.navegacion__item {
+    margin-bottom: 10px;
+}
+
+.navegacion__enlace {
+    text-decoration: none;
+    color: var(--color-letras);
+    padding: 10px;
+    display: block;
+    border-radius: 6px;
+}
+
+.navegacion__enlace:hover {
+    background: rgba(0,0,0,0.1);
+}
+
+/* -------- CONTENIDO PRINCIPAL -------- */
+
+.contenido {
+    flex: 1;
+    padding: 30px;
+}
+
+.contenido__titulo {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+}
+
+.contenido__negocio {
+    font-weight: bold;
+}
+
+/* -------- BOTONES DE ACCIÓN -------- */
+
+.acciones {
+    display: flex;
+    gap: 15px;
+}
+
+.acciones__boton {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: white;
+}
+
+/* Botones según tipo */
+.acciones__boton--gasto {
+    background: #c0392b; /* rojo suave */
+}
+
+.acciones__boton--gasto:hover {
+    background: #a93226;
+}
+
+.acciones__boton--pedido {
+    background: #2980b9; /* azul */
+}
+
+.acciones__boton--pedido:hover {
+    background: #2471a3;
+}
+
+.acciones__boton--venta {
+    background: var(--boton-finalizado); /* verde que ya tienes */
+}
+
+.acciones__boton--venta:hover {
+    background: #2e995f;
+}

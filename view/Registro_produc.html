@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de los productos</title>
     <link rel="stylesheet" href="/css/registro_produc.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 <body>
     <header>
@@ -27,11 +29,32 @@
                     <label for="precio_producto"></label>
                     <input type="text" id="precio_producto" name="precio_producto" placeholder="Precio del producto" required>
                 </div>
+                <div class="campo">
+                    <label for="precio_producto"></label>
+                    <input type="text" id="precio_producto" name="precio_producto" placeholder="marca" required>
+                </div>    
+                <div class="form__iconTiposDoc">
+                    <i class="fas fa-angle-down icono" ></i>
+                    <select  class="form__tiposDocumento" required>
+                        <option  disabled selected> Tipo</option>
+                        <option >Venta</option>
+                        <option >Gasto</option>
+                    </select>
+                </div>                
+                <div class="campo">
+                    <label for="fecha_vencimiento"></label>
+                    <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" placeholder="fecha_vencimiento" required>
+                </div>         
+                <div class="campo">
+                    <label for="cantidad_medida"></label>
+                    <input type="text" id="cantidad_medida" name="cantidad_medida" placeholder="cantidad de medida" required>
+                </div>
                 <div class="campo_img">
                     <label for="imagen" class="boton_img">Imagen del producto</label>
                     <input type="file" id="imagen" accept="image/*" >
                     <div id="preview" class="cuadro-imagen"></div>
                 </div>
+                
                 <button class="contenedor__btnfinalizar">Finalizar</button>
             </form>
         </section>

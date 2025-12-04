@@ -13,7 +13,7 @@ main{
 .main__titulo{
     position: absolute;
     font-family: "mifuente";
-    font-size: 28px;
+    font-size: 21px;
     font-weight: bold;
     top: 140px;
     left: 30px;
@@ -21,14 +21,14 @@ main{
 }
 
 .main__subtitulo{
-    font-size: 30px;
+    font-size: 18px;
     margin-bottom: 6px;
     font-family: "mifuente";
     font-weight: lighter;
     color: var(--color-letras);
 }
 .main__nameBar{
-    font-size: 30px;
+    font-size: 19px;
     font-family: "mifuente";
     font-weight: bold;
     color: var(--color-letras);
