@@ -89,22 +89,27 @@
   border-radius: 4px;
 }
 .inventario__nota{
-    text-align: center;
+
+  text-align: center;
 }
 .inventario__boton-finalizar {
-    width: 170px;
-    margin: 0 auto;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.8rem 1.5rem;
-    color: rgb(0, 0, 0);
-    font-weight: bold;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s ease;
-    margin-bottom: 70px;
+  width: 170px;
+  margin: 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  color: rgb(0, 0, 0);
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  margin-bottom: 70px;
+  background-color: var(--fondo-menu);
+  text-decoration: none;
+  display: flex;
+ 
 }
 
 .inventario__boton-finalizar:hover {

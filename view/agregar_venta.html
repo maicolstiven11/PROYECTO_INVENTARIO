@@ -5,20 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="/css/agregar_venta.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 <body>
+
     <header>
         <nav class="navbar">
             <img class="navbar__logo" src="/assets/img/LOGO.png" alt="logo_sistema">
         </nav>
     </header>
     <main>
+
         <div class="venta">
             <div class="venta__contenedor">
 
                 <h1 class="venta__titulo">Registrar Venta</h1>
 
-                <form class="formulario-venta" autocomplete="off">
+                <form class="formulario-venta" action="venta_registrada_inv" >
 
                     <!-- PRODUCTO -->
                     <div class="formulario-venta__grupo">
@@ -39,9 +43,19 @@
                             <option value="LUCKY VERDE"></option>
                             <option value="GATORADE"></option>
                             <option value="AGUA"></option>
+                                                        <option value="POKER"></option>
+                            <option value="AGUILA"></option>
+                            <option value="LUCKY VERDE"></option>
+                            <option value="GATORADE"></option>
+                            <option value="AGUA"></option>
+                                                        <option value="POKER"></option>
+                            <option value="AGUILA"></option>
+                            <option value="LUCKY VERDE"></option>
+                            <option value="GATORADE"></option>
+                            <option value="AGUA"></option>
                         </datalist>
                     </div>
-
+                    
                     <!-- CANTIDAD Y PRECIO -->
                     <div class="formulario-venta__fila">
 
@@ -64,7 +78,7 @@
                                 name="precio" 
                                 type="text" 
                                 class="formulario-venta__input formulario-venta__input--solo-lectura"
-                                placeholder="Automático (demo)"
+                                placeholder="Automatico "
                                 readonly
                             >
                         </div>
@@ -79,7 +93,7 @@
                             name="subtotal" 
                             type="text" 
                             class="formulario-venta__input formulario-venta__input--solo-lectura"
-                            placeholder="Subtotal automático"
+                            placeholder="Subtotal automatico"
                             readonly 
                         >
                     </div><!-- readonly me sirve para que el usuario no escriba nada en el formulario-->
@@ -95,26 +109,19 @@
                         >
                     </div>
 
-                    <!-- VENDEDOR -->
-                    <div class="formulario-venta__grupo">
-                        <label for="vendedor" class="formulario-venta__label">Vendedor</label>
-                        <input 
-                            id="vendedor" 
-                            name="vendedor" 
-                            type="text"
-                            class="formulario-venta__input"
-                            placeholder="Ej: Maicol"
-                        >
-                    </div>
 
-                    <!-- TOTAL Y BOTÓN -->
+
+
                     <div class="formulario-venta__pie">
+                        <a href="/view/menu_inventario.html" class="btn-regresar">
+                            <i class="fa-solid fa-arrow-left"></i> Regresar
+                        </a>
                         <div class="formulario-venta__total">
                             <span class="formulario-venta__total-texto">TOTAL:</span>
                             <span class="formulario-venta__total-valor">$0.00</span>
                         </div>
 
-                        <button type="submit" class="formulario-venta__boton">
+                        <button href="#" class="formulario-venta__boton">
                             Registrar venta
                         </button>
                     </div>

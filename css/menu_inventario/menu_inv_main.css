@@ -1,98 +1,303 @@
-.pagina-inventario {
-    display: flex;
-    min-height: 100vh;
-    background: var(--color-fondo);
-    color: var(--color-letras);
-}
-
-/* -------- ASIDE -------- */
-
-.navegacion {
-    width: 230px;
-    background: var(--fondo-menu);
-    padding: 20px;
-}
-
-.navegacion__titulo {
-    font-size: 1.4rem;
-    margin-bottom: 15px;
-}
-
-.navegacion__lista {
-    list-style: none;
-    padding: 0;
+/* RESETEO Y BASE */
+* {
+    font-family: "mifuente", sans-serif;
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.navegacion__item {
-    margin-bottom: 10px;
-}
-
-.navegacion__enlace {
-    text-decoration: none;
-    color: var(--color-letras);
-    padding: 10px;
-    display: block;
-    border-radius: 6px;
-}
-
-.navegacion__enlace:hover {
-    background: rgba(0,0,0,0.1);
-}
-
-/* -------- CONTENIDO PRINCIPAL -------- */
-
-.contenido {
-    flex: 1;
-    padding: 30px;
-}
-
-.contenido__titulo {
-    font-size: 1.8rem;
-    margin-bottom: 25px;
-}
-
-.contenido__negocio {
-    font-weight: bold;
-}
-
-/* -------- BOTONES DE ACCIÓN -------- */
-
-.acciones {
+/* LAYOUT PRINCIPAL */
+main {
+    grid-area: main;
+    width: 100%;
+    height: 100%;
+    /* Ocupa todo el espacio disponible en la fila del grid */
+    overflow-y: auto;
+    /* Permite scroll interno si el contenido es muy largo */
     display: flex;
+    background-color: #f4f7f6;
+}
+
+/* SIDEBAR (ASIDE) */
+.aside {
+    width: 280px;
+    padding: 30px 20px;
+    border-right: 1px solid #eaeaea;
+    background-color: #ffffff;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    /* Si el contenido es muy largo, el aside también debería scrollear o quedarse fijo. 
+       Al estar dentro de main con overflow-y: auto, scrolleará con el contenido. 
+       Si se quiere fijo, se necesitaría otro layout interno. 
+       Por ahora, lo dejamos fluir con el main. */
+}
+
+.aside__title {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 40px;
+    color: #2c3e50;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.aside__nav {
+    display: flex;
+    flex-direction: column;
     gap: 15px;
 }
 
-.acciones__boton {
-    padding: 12px 18px;
+.aside__link {
+    text-decoration: none;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 20px;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid transparent;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.aside__link:hover {
+    background-color: #eef2f5;
+    color: #004B76;
+    transform: translateX(5px);
+    border-color: rgba(0, 75, 118, 0.1);
+}
+
+.aside__icon {
+    font-size: 1.4rem;
+    color: #7f8c8d;
+    transition: color 0.3s ease;
+    width: 24px;
+    text-align: center;
+}
+
+.aside__link:hover .aside__icon {
+    color: #004B76;
+}
+
+/* CONTENIDO PRINCIPAL */
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 40px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.content__inicio {
+    text-align: center;
+    margin-bottom: 50px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.content__title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.content__subtitle {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    font-weight: 400;
+}
+
+.content__divider {
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(to right, #004B76, #32BA7C);
+    margin: 20px auto 0;
     border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    cursor: pointer;
-    color: white;
+    border-radius: 2px;
 }
 
-/* Botones según tipo */
-.acciones__boton--gasto {
-    background: #c0392b; /* rojo suave */
+/* TARJETAS (CARDS) */
+.cards {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 30px;
+    width: 100%;
+    max-width: 1000px;
 }
 
-.acciones__boton--gasto:hover {
-    background: #a93226;
+.card {
+    background: white;
+    width: 240px;
+    height: 200px;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
 }
 
-.acciones__boton--pedido {
-    background: #2980b9; /* azul */
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #004B76, #32BA7C);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
 }
 
-.acciones__boton--pedido:hover {
-    background: #2471a3;
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    border-color: #f0f0f0;
 }
 
-.acciones__boton--venta {
-    background: var(--boton-finalizado); /* verde que ya tienes */
+.card:hover::before {
+    transform: scaleX(1);
 }
 
-.acciones__boton--venta:hover {
-    background: #2e995f;
+.card__title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #34495e;
+    text-align: center;
+    margin: 0;
+}
+
+.card__icon {
+    font-size: 2.5rem;
+    color: #004B76;
+    transition: transform 0.3s ease;
+}
+
+.card:hover .card__icon {
+    transform: scale(1.1);
+    color: #32BA7C;
+}
+
+/* =========================================
+   MEDIA QUERIES (RESPONSIVE)
+   ========================================= */
+
+@media (max-width: 900px) {
+    main {
+        flex-direction: column;
+        height: auto;
+        /* En móviles permitimos que crezca si es necesario, aunque el grid padre lo limitará a menos que se ajuste también */
+        overflow-y: visible;
+        /* Dejar que el scroll lo maneje el body si el layout cambia */
+    }
+
+    /* Nota: Si el layout padre (body grid) sigue siendo 100vh, main scrolleará. 
+       Si en móvil el body cambia a auto, entonces main crecerá. 
+       Asumimos que el body grid se mantiene. */
+
+    .aside {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #eaeaea;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    .aside__title {
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+    }
+
+    .aside__nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .aside__link {
+        flex-direction: column;
+        width: 100px;
+        padding: 10px;
+        font-size: 0.8rem;
+        text-align: center;
+        gap: 8px;
+    }
+
+    .aside__link:hover {
+        transform: translateY(-3px);
+    }
+
+    .aside__icon {
+        font-size: 1.4rem;
+        margin-bottom: 0;
+    }
+
+    .content {
+        padding: 30px 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .aside__nav {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        width: 100%;
+    }
+
+    .aside__link {
+        width: 100%;
+        flex-direction: row;
+        justify-content: flex-start;
+        text-align: left;
+        padding: 12px;
+    }
+
+    .aside__icon {
+        font-size: 1.2rem;
+    }
+
+    .content__title {
+        font-size: 1.8rem;
+    }
+
+    .cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 320px;
+        height: auto;
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 20px;
+        text-align: left;
+    }
+
+    .card__icon {
+        font-size: 2rem;
+        order: -1;
+    }
+
+    .card__title {
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
 }
