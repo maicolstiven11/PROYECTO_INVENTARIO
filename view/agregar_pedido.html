@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Pedido Proveedor</title>
+    <link rel="stylesheet" href="/css/agg_pedido.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+    <header>
+        <nav class="navbar">
+            <img class="navbar__logo" src="/assets/img/LOGO.png" alt="logo_sistema">
+        </nav>
+    </header>
+    <main>
+
+        <div class="pedido">
+            <div class="pedido__contenedor">
+
+                <h1 class="pedido__titulo">Registrar Pedido a Proveedor</h1>
+
+                <form class="formulario-pedido" action="/view/pedido_finalizado.html">
+
+                    <!-- PROVEEDOR -->
+                    <div class="formulario-pedido__grupo">
+                        <label for="proveedor" class="formulario-pedido__label">Proveedor</label>
+                        <input id="proveedor" name="id_proveedor" type="text" list="lista-proveedores"
+                            class="formulario-pedido__input formulario-pedido__input--sugerencias"
+                            placeholder="Buscar proveedor..." required>
+                        <datalist id="lista-proveedores">
+                            <option value="Bavaria"></option>
+                            <option value="Coca Cola"></option>
+                            <option value="Postobon"></option>
+                        </datalist>
+                    </div>
+
+                    <!-- INVENTARIO / PRODUCTO -->
+                    <div class="formulario-pedido__grupo">
+                        <label for="inventario" class="formulario-pedido__label">Producto / Inventario</label>
+                        <input id="inventario" name="id_inventario" type="text" list="lista-inventario"
+                            class="formulario-pedido__input formulario-pedido__input--sugerencias"
+                            placeholder="Buscar producto en inventario..." required>
+                        <datalist id="lista-inventario">
+                            <option value="Cerveza Poker"></option>
+                            <option value="Cerveza Aguila"></option>
+                            <option value="Gaseosa"></option>
+                        </datalist>
+                    </div>
+
+                    <!-- FECHAS -->
+                    <div class="formulario-pedido__fila">
+                        <div class="formulario-pedido__grupo formulario-pedido__grupo--col">
+                            <label for="fecha_pedido" class="formulario-pedido__label">Fecha Pedido</label>
+                            <input id="fecha_pedido" name="fecha_pedido" type="date" class="formulario-pedido__input"
+                                required>
+                        </div>
+
+                        <div class="formulario-pedido__grupo formulario-pedido__grupo--col">
+                            <label for="fecha_entrega" class="formulario-pedido__label">Fecha Entrega</label>
+                            <input id="fecha_entrega" name="fecha_entrega" type="date" class="formulario-pedido__input"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- CANTIDAD Y PRECIO (Para calculos) -->
+                    <!-- Aunque no estan en la tabla explicita, son necesarios para subtotal -->
+                    <div class="formulario-pedido__fila">
+                        <div class="formulario-pedido__grupo formulario-pedido__grupo--col">
+                            <label for="cantidad" class="formulario-pedido__label">Cantidad</label>
+                            <input id="cantidad" name="cantidad" type="number" class="formulario-pedido__input"
+                                placeholder="Ej: 10" min="1">
+                        </div>
+                        <div class="formulario-pedido__grupo formulario-pedido__grupo--col">
+                            <label for="precio_unidad" class="formulario-pedido__label">Precio Unidad</label>
+                            <input id="precio_unidad" name="precio_unidad" type="number"
+                                class="formulario-pedido__input" placeholder="Ej: 2000" min="0">
+                        </div>
+                    </div>
+
+                    <!-- FINANCIALS -->
+                    <div class="formulario-pedido__fila">
+                        <div class="formulario-pedido__grupo formulario-pedido__grupo--col">
+                            <label for="subtotal" class="formulario-pedido__label">Subtotal</label>
+                            <input id="subtotal" name="subtotal" type="text"
+                                class="formulario-pedido__input formulario-pedido__input--solo-lectura"
+                                placeholder="Auto" readonly>
+                        </div>
+                        <div class="formulario-pedido__grupo formulario-pedido__grupo--col">
+                            <label for="iva_pedido" class="formulario-pedido__label">IVA</label>
+                            <input id="iva_pedido" name="iva_pedido" type="text"
+                                class="formulario-pedido__input formulario-pedido__input--solo-lectura"
+                                placeholder="Auto" readonly>
+                        </div>
+                    </div>
+
+                    <div class="formulario-pedido__grupo">
+                        <label for="total_pedido" class="formulario-pedido__label">Total Pedido</label>
+                        <input id="total_pedido" name="total_pedido" type="text"
+                            class="formulario-pedido__input formulario-pedido__input--solo-lectura"
+                            placeholder="Total a pagar" readonly>
+                    </div>
+
+                    <div class="formulario-pedido__pie">
+                        <a href="/view/menu_inventario.html" class="btn-regresar">
+                            <i class="fa-solid fa-arrow-left"></i> Regresar
+                        </a>
+                        <div class="formulario-pedido__total">
+                            <span class="formulario-pedido__total-texto">TOTAL:</span>
+                            <span class="formulario-pedido__total-valor">$0.00</span>
+                        </div>
+
+                        <button type="submit" class="formulario-pedido__boton">
+                            Registrar Pedido
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </main>
+    <footer>
+    </footer>
+</body>
+
+</html>

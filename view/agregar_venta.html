@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
+
 <body>
 
     <header>
@@ -22,20 +24,15 @@
 
                 <h1 class="venta__titulo">Registrar Venta</h1>
 
-                <form class="formulario-venta" action="venta_registrada_inv" >
+                <form class="formulario-venta" action="/view/venta_finalizada.html">
 
                     <!-- PRODUCTO -->
                     <div class="formulario-venta__grupo">
                         <label for="producto" class="formulario-venta__label">Producto</label>
 
-                        <input 
-                            id="producto" 
-                            name="producto" 
-                            type="text"
-                            list="lista-productos"
+                        <input id="producto" name="producto" type="text" list="lista-productos"
                             class="formulario-venta__input formulario-venta__input--sugerencias"
-                            placeholder="Escribe el nombre del producto..."
-                        >
+                            placeholder="Escribe el nombre del producto...">
 
                         <datalist id="lista-productos">
                             <option value="POKER"></option>
@@ -43,44 +40,33 @@
                             <option value="LUCKY VERDE"></option>
                             <option value="GATORADE"></option>
                             <option value="AGUA"></option>
-                                                        <option value="POKER"></option>
+                            <option value="POKER"></option>
                             <option value="AGUILA"></option>
                             <option value="LUCKY VERDE"></option>
                             <option value="GATORADE"></option>
                             <option value="AGUA"></option>
-                                                        <option value="POKER"></option>
+                            <option value="POKER"></option>
                             <option value="AGUILA"></option>
                             <option value="LUCKY VERDE"></option>
                             <option value="GATORADE"></option>
                             <option value="AGUA"></option>
                         </datalist>
                     </div>
-                    
+
                     <!-- CANTIDAD Y PRECIO -->
                     <div class="formulario-venta__fila">
 
                         <div class="formulario-venta__grupo formulario-venta__grupo--col">
                             <label for="cantidad" class="formulario-venta__label">Cantidad</label>
-                            <input 
-                                id="cantidad" 
-                                name="cantidad" 
-                                type="number" 
-                                class="formulario-venta__input"
-                                placeholder="Ej: 1"
-                                min="1"
-                            >
+                            <input id="cantidad" name="cantidad" type="number" class="formulario-venta__input"
+                                placeholder="Ej: 1" min="1">
                         </div>
 
                         <div class="formulario-venta__grupo formulario-venta__grupo--col">
                             <label for="precio" class="formulario-venta__label">Precio unitario</label>
-                            <input 
-                                id="precio" 
-                                name="precio" 
-                                type="text" 
+                            <input id="precio" name="precio" type="text"
                                 class="formulario-venta__input formulario-venta__input--solo-lectura"
-                                placeholder="Automatico "
-                                readonly
-                            >
+                                placeholder="Automatico " readonly>
                         </div>
 
                     </div>
@@ -88,25 +74,15 @@
                     <!-- SUBTOTAL -->
                     <div class="formulario-venta__grupo">
                         <label for="subtotal" class="formulario-venta__label">Subtotal</label>
-                        <input 
-                            id="subtotal" 
-                            name="subtotal" 
-                            type="text" 
+                        <input id="subtotal" name="subtotal" type="text"
                             class="formulario-venta__input formulario-venta__input--solo-lectura"
-                            placeholder="Subtotal automatico"
-                            readonly 
-                        >
+                            placeholder="Subtotal automatico" readonly>
                     </div><!-- readonly me sirve para que el usuario no escriba nada en el formulario-->
 
                     <!-- FECHA -->
                     <div class="formulario-venta__grupo">
                         <label for="fecha" class="formulario-venta__label">Fecha</label>
-                        <input 
-                            id="fecha" 
-                            name="fecha" 
-                            type="date"
-                            class="formulario-venta__input"
-                        >
+                        <input id="fecha" name="fecha" type="date" class="formulario-venta__input">
                     </div>
 
 
@@ -130,8 +106,9 @@
             </div>
         </div>
     </main>
-    <footer>    
+    <footer>
 
     </footer>
 </body>
+
 </html>

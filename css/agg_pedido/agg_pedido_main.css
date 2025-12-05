@@ -1,0 +1,121 @@
+* {
+    font-family: "mifuente";
+}
+
+main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+.pedido__contenedor {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pedido__titulo {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--color-letras);
+}
+
+.formulario-pedido__grupo {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.formulario-pedido__label {
+    margin-bottom: 5px;
+    color: var(--color-letras);
+}
+
+.formulario-pedido__input {
+    padding: 10px;
+    border: 1px solid var(--color-letras);
+    border-radius: 10px;
+    font-size: 14px;
+    background: white;
+}
+
+.formulario-pedido__input:focus {
+    outline: 2px solid var(--boton-iniciarSesion);
+}
+
+/* Inputs especiales */
+.formulario-pedido__input--solo-lectura {
+    background: #f1f1f1;
+    cursor: not-allowed;
+}
+
+.formulario-pedido__input--sugerencias {
+    background-image: linear-gradient(90deg, transparent 0 90%, rgba(0, 0, 0, 0.05) 90% 100%);
+}
+
+/* Fila de dos columnas */
+.formulario-pedido__fila {
+    display: flex;
+    gap: 15px;
+}
+
+.formulario-pedido__grupo--col {
+    flex: 1;
+}
+
+/* Pie del formulario */
+.formulario-pedido__pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.formulario-pedido__total {
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+.formulario-pedido__total-texto {
+    margin-right: 12px;
+    color: var(--color-letras);
+}
+
+.formulario-pedido__boton {
+    padding: 12px;
+    background: var(--boton-iniciarSesion);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.formulario-pedido__boton:hover {
+    background: #00395a;
+}
+
+.btn-regresar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: var(--boton-regresar);
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-right: 50px;
+}
+
+.btn-regresar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}

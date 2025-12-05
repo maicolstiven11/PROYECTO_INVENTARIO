@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizar Pedidos</title>
+    <link rel="stylesheet" href="/css/visualizar_pedidos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <img class="navbar__logo" src="/assets/img/LOGO.png" alt="logo_sistema">
+        </nav>
+    </header>
+    <main>
+        <h2>PEDIDOS A PROVEEDORES</h2>
+
+        <div class="tabla-contenedor">
+            <table class="tabla-pedidos">
+                <thead>
+                    <tr>
+                        <th>ID Pedido</th>
+                        <th>Proveedor</th>
+                        <th>Fecha Pedido</th>
+                        <th>Fecha Entrega</th>
+                        <th>Subtotal</th>
+                        <th>IVA</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Datos de ejemplo -->
+                    <tr>
+                        <td>001</td>
+                        <td>Bavaria</td>
+                        <td>2023-10-20</td>
+                        <td>2023-10-22</td>
+                        <td>$500,000</td>
+                        <td>$95,000</td>
+                        <td>$595,000</td>
+                    </tr>
+                    <tr>
+                        <td>002</td>
+                        <td>Coca Cola</td>
+                        <td>2023-10-21</td>
+                        <td>2023-10-23</td>
+                        <td>$300,000</td>
+                        <td>$57,000</td>
+                        <td>$357,000</td>
+                    </tr>
+                    <tr>
+                        <td>003</td>
+                        <td>Postobon</td>
+                        <td>2023-10-24</td>
+                        <td>2023-10-26</td>
+                        <td>$250,000</td>
+                        <td>$47,500</td>
+                        <td>$297,500</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <a href="/view/menu_inventario.html" class="btn-regresar">
+            <i class="fa-solid fa-arrow-left"></i> Regresar
+        </a>
+    </main>
+    <footer>
+    </footer>
+</body>
+
+</html>

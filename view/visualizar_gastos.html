@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizar Gastos</title>
+    <link rel="stylesheet" href="/css/visualizar_gastos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <img class="navbar__logo" src="/assets/img/LOGO.png" alt="logo_sistema">
+        </nav>
+    </header>
+    <main>
+        <h2>GASTOS REGISTRADOS</h2>
+
+        <div class="tabla-contenedor">
+            <table class="tabla-gastos">
+                <thead>
+                    <tr>
+                        <th>ID Gasto</th>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Fecha</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Datos de ejemplo -->
+                    <tr>
+                        <td>001</td>
+                        <td>Compra de servilletas</td>
+                        <td>50</td>
+                        <td>2023-10-25</td>
+                        <td>$15,000</td>
+                    </tr>
+                    <tr>
+                        <td>002</td>
+                        <td>Pago de luz</td>
+                        <td>1</td>
+                        <td>2023-10-25</td>
+                        <td>$120,000</td>
+                    </tr>
+                    <tr>
+                        <td>003</td>
+                        <td>Compra de vasos desechables</td>
+                        <td>100</td>
+                        <td>2023-10-26</td>
+                        <td>$25,000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <a href="/view/menu_inventario.html" class="btn-regresar">
+            <i class="fa-solid fa-arrow-left"></i> Regresar
+        </a>
+    </main>
+    <footer>
+    </footer>
+</body>
+
+</html>
