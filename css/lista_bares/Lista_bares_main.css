@@ -1,87 +1,92 @@
 body {
-    font-family: "mifuente";
-    margin: 0;
+  font-family: "mifuente";
+  margin: 0;
 
 }
 
 main {
-    margin: auto;
-    background-color: var(--color-fondo);
-    border-radius: 8px;
-    padding: 30px;
-    box-shadow: 0 0 5px rgba(0,0,0,0.2);
-    height: 57vh;
+  margin: auto;
+  background-color: var(--color-fondo);
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  height: 57vh;
 }
 
 h2 {
-    text-align: center;
-    margin-bottom: 15px;
+  text-align: center;
+  margin-bottom: 15px;
 }
 
 .lista-bares {
-    max-height: 400px;
-    overflow-y: scroll;
-    direction: rtl; /* fuerza el scroll a la izquierda */
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
-    padding-left: 100px; /* espacio para el scroll */
-    
+  max-height: 400px;
+  overflow-y: scroll;
+  direction: rtl;
+  /* fuerza el scroll a la izquierda */
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  padding-left: 100px;
+  /* espacio para el scroll */
+
 }
-::-webkit-scrollbar{
+
+::-webkit-scrollbar {
   height: 10px;
   width: 10px;
 }
 
-::-webkit-scrollbar-track{
-  background: linear-gradient(0deg,rgba(0, 0, 0, 1) 0%, rgba(217, 217, 217, 1) 50%, rgba(0, 0, 0, 1) 100%);
+::-webkit-scrollbar-track {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(217, 217, 217, 1) 50%, rgba(0, 0, 0, 1) 100%);
 
 
 }
 
-::-webkit-scrollbar-thumb{
-  background:rgba(255, 255, 255, 0.635) ;
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.635);
   border-radius: 10px;
-    border: 0.5px solid black;
+  border: 0.5px solid black;
 }
 
 
 .contenido-scroll {
-    direction: ltr; 
+  direction: ltr;
 }
 
 .bar-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px ;
-    border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
 }
 
 .bar-info {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .nombre {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .estado {
-    color: red;
-    font-size: 14px;
+  color: red;
+  font-size: 14px;
 }
-.acciones{
+
+.acciones {
   display: flex;
   margin-left: 105px;
 }
 
-.acciones img{
+.acciones img {
   align-items: center;
   justify-content: center;
   margin: 0 auto;
   height: 40px;
 }
-a{
+
+a {
   text-decoration: none;
   display: flex;
 }
@@ -107,28 +112,33 @@ a{
   transform: translateX(-50%);
   top: -35px;
   color: black;
-  padding: 2px ;
+  padding: 2px;
   border-radius: 6px;
   font-size: 14px;
-  opacity: 0;              /* oculto por defecto */
+  opacity: 0;
+  /* oculto por defecto */
   transition: opacity 0.3s ease;
-  pointer-events: none;    /* no bloquea clics */
+  pointer-events: none;
+  /* no bloquea clics */
 }
 
 .acciones a:hover h3 {
-  opacity: 1;              /* aparece al hacer hover */
+  opacity: 1;
+  /* aparece al hacer hover */
 }
 
 
 
 .acciones a:hover img {
-  transform: scale(1.05);  /* efecto zoom al pasar */
+  transform: scale(1.05);
+  /* efecto zoom al pasar */
 }
+
 .btn-regresar {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px ;
+  padding: 12px;
   background: var(--boton-regresar);
   color: white;
   text-decoration: none;
@@ -141,6 +151,42 @@ a{
 
 .btn-regresar:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
+/* Media Queries */
+@media (max-width: 768px) {
+  main {
+    width: 90%;
+    padding: 15px;
+    height: auto;
+  }
+
+  .lista-bares {
+    padding-left: 0;
+    max-height: 60vh;
+  }
+
+  .bar-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .acciones {
+    margin-left: 0;
+    margin-top: 10px;
+    justify-content: space-around;
+    width: 100%;
+    padding: 0;
+  }
+
+  .acciones img {
+    height: 30px;
+  }
+
+  .acciones a h3 {
+    display: none;
+    /* Hide tooltips on mobile usually better, or adjust pos */
+  }
+}

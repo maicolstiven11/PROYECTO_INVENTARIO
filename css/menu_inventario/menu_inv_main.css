@@ -61,6 +61,33 @@ main {
     border-color: rgba(0, 75, 118, 0.1);
 }
 
+.aside__divider {
+    height: 1px;
+    background-color: #eaeaea;
+    margin: 10px 0;
+    width: 100%;
+}
+
+.btn-salir {
+    margin-top: auto;
+    /* Push to bottom if container has height */
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.btn-salir:hover {
+    background-color: #fadbd8;
+    color: #c0392b;
+}
+
+.btn-salir .aside__icon {
+    color: #e74c3c;
+}
+
+.btn-salir:hover .aside__icon {
+    color: #c0392b;
+}
+
 .aside__icon {
     font-size: 1.4rem;
     color: #7f8c8d;
@@ -169,6 +196,66 @@ main {
     color: #32BA7C;
 }
 
+
+
+/* USER PROFILE */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border: 1px solid #e0e0e0;
+}
+
+.user-profile__img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #004B76;
+}
+
+.user-profile__icon {
+    font-size: 40px;
+    color: #95a5a6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-profile__info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-profile__name {
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.user-profile__role {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.badge-admin {
+    background-color: #d1f2eb;
+    color: #16a085;
+}
+
+.badge-worker {
+    background-color: #fadbd8;
+    color: #e74c3c;
+}
 
 @media (max-width: 900px) {
     main {

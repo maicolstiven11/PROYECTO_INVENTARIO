@@ -1,18 +1,26 @@
-main{
+main {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     gap: 70px;
+    padding: 40px 0;
+    /* Add padding top/bottom */
 }
-.contenedor__menu{
+
+.contenedor__menu {
     display: flex;
-    gap: 120px;
+    gap: 50px;
+    /* Reduced gap to fit better */
     flex-direction: row;
-
-
+    flex-wrap: wrap;
+    /* Enable wrapping */
+    justify-content: center;
+    max-width: 1000px;
+    /* Limit width */
 }
-.contenedor__menu div{
+
+.contenedor__menu div {
     display: flex;
     width: 215px;
     height: 260px;
@@ -20,25 +28,29 @@ main{
     justify-content: center;
     align-items: center;
 }
-.fondo_img{
+
+.fondo_img {
     width: 20px;
     height: 10px;
     border-radius: 100%;
     background-color: var(--fondo-menu);
     transition: all 0.5s ease;
+}
 
+.fondo_img:hover {
+    box-shadow: 0px 0px 10px black;
 }
-.fondo_img:hover{
-    box-shadow: 0px 0px 10px black ;
-}
-.contenedor__menu img{
+
+.contenedor__menu img {
     height: 120px;
-    width:120px;
+    width: 120px;
 }
-a{
+
+a {
     text-decoration: none;
 }
-.contenedor__menu p{
+
+.contenedor__menu p {
     margin-top: 15px;
     font-family: "mifuente";
     text-align: center;
@@ -48,9 +60,15 @@ a{
 }
 
 
-h1{
+h1 {
     font-family: "mifuente";
     text-align: center;
-    
+}
 
+@media (max-width: 768px) {
+    .contenedor__menu {
+        flex-direction: column;
+        gap: 40px;
+        align-items: center;
+    }
 }

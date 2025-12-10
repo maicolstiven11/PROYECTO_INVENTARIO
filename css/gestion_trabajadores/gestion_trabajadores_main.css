@@ -1,0 +1,216 @@
+/* Estilos para Gestión de Trabajadores */
+body {
+    background-color: #f0f2f5;
+    min-height: 100vh;
+}
+
+main {
+    margin: 30px auto;
+    width: 90%;
+    max-width: 1000px;
+}
+
+.gestion-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.gestion-header h2 {
+    color: #2c3e50;
+    font-size: 2rem;
+}
+
+.trabajadores-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.trabajador-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: transform 0.3s;
+    border: 1px solid transparent;
+}
+
+.trabajador-card:hover {
+    transform: translateY(-5px);
+    border-color: #3498db;
+}
+
+.trabajador-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.trabajador-avatar {
+    width: 60px;
+    height: 60px;
+    background-color: #f1f1f1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #34495e;
+}
+
+.trabajador-detalles h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #2c3e50;
+}
+
+.trabajador-detalles p {
+    margin: 5px 0 0;
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+.asignacion-status {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #555;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-label {
+    font-weight: 600;
+}
+
+.status-value {
+    color: #e67e22;
+    /* Color para "Sin asignar" por defecto, cambiará dinámicamente si se implementara JS */
+}
+
+.status-value.asignado {
+    color: #27ae60;
+}
+
+.btn-asignar {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    width: 100%;
+}
+
+.btn-asignar:hover {
+    background-color: #2980b9;
+}
+
+/* MODAL */
+.modal-asignacion {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.modal-asignacion:target {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    width: 90%;
+    max-width: 450px;
+    border-radius: 12px;
+    position: relative;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.form-group {
+    margin: 20px 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #34495e;
+}
+
+.form-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.btn-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    text-decoration: none;
+    color: #999;
+    font-size: 20px;
+}
+
+/* Boton regresar generico reusable */
+.btn-regresar-container {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.btn-regresar {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 25px;
+    background-color: #95a5a6;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+}

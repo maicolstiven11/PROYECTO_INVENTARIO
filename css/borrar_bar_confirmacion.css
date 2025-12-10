@@ -1,0 +1,5 @@
+@import url(Variables_root/Root.css);
+@import url(estilos_header.css);
+@import url(lista_bares/Lista_bares_main.css);
+@import url(borrar_bar_confirmacion/borrar_bar_main.css);
+@import url(estilos_footer.css);

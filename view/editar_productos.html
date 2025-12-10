@@ -41,7 +41,7 @@
                         <td>Bebidas</td>
                         <td>50</td>
                         <td>
-                            <a href="#" class="btn-accion btn-editar">
+                            <a href="#modal-editar" class="btn-accion btn-editar">
                                 <i class="fa-solid fa-pen-to-square"></i> Editar
                             </a>
                         </td>
@@ -54,7 +54,7 @@
                         <td>Snacks</td>
                         <td>20</td>
                         <td>
-                            <a href="#" class="btn-accion btn-editar">
+                            <a href="#modal-editar" class="btn-accion btn-editar">
                                 <i class="fa-solid fa-pen-to-square"></i> Editar
                             </a>
                         </td>
@@ -67,7 +67,7 @@
                         <td>Bebidas</td>
                         <td>30</td>
                         <td>
-                            <a href="#" class="btn-accion btn-editar">
+                            <a href="#modal-editar" class="btn-accion btn-editar">
                                 <i class="fa-solid fa-pen-to-square"></i> Editar
                             </a>
                         </td>
@@ -80,6 +80,31 @@
             <i class="fa-solid fa-arrow-left"></i> Regresar
         </a>
     </main>
+    <div id="modal-editar" class="modal-editar">
+        <div class="modal-content">
+            <a href="#" class="btn-cerrar">&times;</a>
+            <h3>Editar Producto</h3>
+            <form>
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" value="Cerveza Poker">
+                </div>
+                <div class="form-group">
+                    <label>Precio</label>
+                    <input type="text" value="$4,000">
+                </div>
+                <div class="form-group">
+                    <label>Cantidad</label>
+                    <input type="number" value="50">
+                </div>
+                <div class="modal-actions">
+                    <a href="#" class="btn-cancelar">Cancelar</a>
+                    <a href="#" class="btn-aceptar">Aceptar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <footer>
     </footer>
 </body>

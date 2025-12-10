@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmar Eliminación - Lista de Bares</title>
+  <link rel="stylesheet" href="/css/borrar_bar_confirmacion.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+  <header>
+    <nav class="navbar">
+      <img class="navbar__logo" src="/assets/img/LOGO.png" alt="logo_sistema">
+    </nav>
+  </header>
+
+  <main>
+    <h2>BARES REGISTRADOS</h2>
+
+    <section class="lista-bares">
+      <div class="contenido-scroll">
+        <div class="bar-item">
+          <div class="bar-info">
+            <span class="nombre">Fuente de soda la Jenny</span>
+            <span class="estado">(INACTIVO)</span>
+          </div>
+          <!-- Actions would be here normally, but covered by modal -->
+          <div class="acciones">
+            <a href="#" class="iniciar-invantario">
+              <h3>Iniciar-inventario</h3>
+              <img src="/assets/img/boton_iniciar_inv.png" alt="iniciar-invantario">
+            </a>
+            <a href="#" class="borrar-bar">
+              <h3>borrar-bar</h3>
+              <img src="/assets/img/icono_borrar_bar.png" alt="borrar-bar">
+            </a>
+            <a href="#" class="visualizar_bar">
+              <h3>Visualizar-bar</h3>
+              <img src="/assets/img/icono_visualizar_bar.png" alt="icono_visualizar_bar">
+            </a>
+          </div>
+        </div>
+        <!-- More items could be here -->
+        <div class="bar-item">
+          <div class="bar-info">
+            <span class="nombre">Bar El Rincón</span>
+            <span class="estado">(ACTIVO)</span>
+          </div>
+          <div class="acciones">
+            <a href="#" class="iniciar-invantario">
+              <h3>Iniciar-inventario</h3>
+              <img src="/assets/img/boton_iniciar_inv.png" alt="iniciar-invantario">
+            </a>
+            <a href="#" class="borrar-bar">
+              <h3>borrar-bar</h3>
+              <img src="/assets/img/icono_borrar_bar.png" alt="borrar-bar">
+            </a>
+            <a href="#" class="visualizar_bar">
+              <h3>Visualizar-bar</h3>
+              <img src="/assets/img/icono_visualizar_bar.png" alt="icono_visualizar_bar">
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <a href="Lista_bares.html" class="btn-regresar">
+      <i class="fa-solid fa-arrow-left"></i> Regresar
+    </a>
+  </main>
+
+  <!-- Modal de Confirmación -->
+  <div class="modal-overlay">
+    <div class="modal-content">
+      <h3>¿Seguro que quieres eliminar este bar?</h3>
+      <p style="margin-bottom: 20px;">Esta acción no se puede deshacer.</p>
+      <div class="modal-actions">
+        <a href="/view/Lista_bares.html" class="btn-confirmar">Sí, eliminar</a>
+        <a href="/view/Lista_bares.html" class="btn-cancelar">Cancelar</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+  </footer>
+</body>
+
+</html>
