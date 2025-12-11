@@ -29,13 +29,16 @@
 /* Media Queries for Provider Registered Form */
 @media (max-width: 768px) {
     .main__section__prv_regist {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
         padding: 30px 15px;
         width: 90%;
         box-sizing: border-box;
     }
 
     .main__section__rutas {
-        flex-direction: column;
         height: auto;
         gap: 20px;
         margin-bottom: 40px;
@@ -44,7 +47,7 @@
     .section__agg,
     .section__fin_regis {
         height: auto;
-        border: 1px solid #eee;
+
         border-radius: 8px;
         width: 80%;
     }
