@@ -1,37 +1,95 @@
-.main__section__prd_regist{
+
+/* 
+   SECCIÓN DE GASTO REGISTRADO
+   La tarjeta que muestra un gasto
+ */
+.main__section__prd_regist {
+    /* Organiza los elementos horizontalmente */
     display: flex;
+
+    /* Centra la tarjeta en la página */
     margin: 0 auto;
+
+    /* Espacio interno amplio - 50 pixeles */
     padding: 50px;
+
+    /* Sombra suave alrededor de la tarjeta */
     box-shadow: 0 0 10px #50505067;
+
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Espacio abajo de la tarjeta - 60 pixeles */
     margin-bottom: 60px;
 }
-.main__section__prd_regist div img{
+
+/* 
+   IMAGEN DEL GASTO
+   La foto o icono del gasto
+ */
+.main__section__prd_regist div img {
+    /* Espacio arriba de la imagen - 20 pixeles */
     margin-top: 20px;
+
+    /* Ancho de la imagen - 60 pixeles */
     width: 60px;
 }
 
-.main__section__rutas{
+/* 
+   SECCIÓN DE RUTAS/OPCIONES
+   Los botones para agregar o ver finalizados
+ */
+.main__section__rutas {
+    /* Organiza los elementos horizontalmente */
     display: flex;
 
+    /* Centra los elementos */
     justify-content: center;
     align-items: center;
+
+    /* Espacio entre los botones - 60 pixeles */
     gap: 60px;
+
+    /* Altura de la sección - 140 pixeles */
     height: 140px;
 }
-.main__section__rutas i{
+
+/* 
+   ICONOS EN LA SECCIÓN DE RUTAS
+   Las flechas u otros iconos decorativos
+ */
+.main__section__rutas i {
+    /* Tamaño grande del icono - 45 pixeles */
     font-size: 45px;
+
+    /* Color negro */
     color: var(--color-letras);
 }
 
-.section__agg, .section__fin_regis {
+/* 
+   BOTONES DE AGREGAR Y FINALIZADOS
+   Los enlaces para agregar gastos o ver finalizados
+ */
+.section__agg,
+.section__fin_regis {
+    /* Espacio interno - 10 pixeles */
     padding: 10px;
+
+    /* Altura del botón - 120 pixeles */
     height: 120px;
+
+    /* Sin subrayado del enlace */
     text-decoration: none;
+
+    /* Color negro para el texto */
     color: var(--color-letras);
 }
 
-.main__section__rutas h3{
+/*  
+   TÍTULOS EN LA SECCIÓN DE RUTAS
+   Los textos de cada opción
+ */
+.main__section__rutas h3 {
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
 }
-

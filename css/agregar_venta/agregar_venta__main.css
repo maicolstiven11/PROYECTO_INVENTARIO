@@ -1,130 +1,288 @@
-*{
+
+/* -----------------------------------------
+   ESTILOS GENERALES
+   La fuente se aplica a todos los elementos
+----------------------------------------- */
+* {
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
 }
-main{
+
+/* -----------------------------------------
+   ÁREA PRINCIPAL
+   El contenedor del formulario de venta
+----------------------------------------- */
+main {
+    /* Usa flexbox para centrar todo */
     display: flex;
+
+    /* Centra horizontal y verticalmente */
     align-items: center;
     justify-content: center;
+
+    /* Sin márgenes ni espacios extra */
     margin: 0;
     padding: 0;
-
 }
 
-
-
+/* 
+   CONTENEDOR DEL FORMULARIO DE VENTA
+   La caja blanca donde está el formulario
+ */
 .venta__contenedor {
+    /* Fondo blanco */
     background: white;
+
+    /* Espacio interno - 20 pixeles */
     padding: 20px;
+
+    /* Esquinas redondeadas */
     border-radius: 10px;
+
+    /* Ancho máximo de 500 pixeles */
     max-width: 500px;
+
+    /* Ocupa todo el ancho disponible */
     width: 100%;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+    /* Sombra suave que hace que flote */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-.lista-productos{
-    max-height: 120px;  
-    overflow-y: auto; 
+
+/* 
+   LISTA DE PRODUCTOS
+   El área que muestra los productos agregados
+ */
+.lista-productos {
+    /* Altura máxima antes de mostrar scroll */
+    max-height: 120px;
+
+    /* Si hay más contenido, se puede desplazar */
+    overflow-y: auto;
 }
+
+/* 
+   TÍTULO DEL FORMULARIO
+   El texto "Nueva Venta" o similar
+ */
 .venta__titulo {
+    /* Texto centrado */
     text-align: center;
+
+    /* Espacio abajo - 20 pixeles */
     margin-bottom: 20px;
+
+    /* Color negro */
     color: var(--color-letras);
 }
 
-
+/* 
+   GRUPO DE CAMPO DEL FORMULARIO
+   Cada conjunto de etiqueta + campo
+ */
 .formulario-venta__grupo {
+    /* Organiza etiqueta y campo verticalmente */
     display: flex;
     flex-direction: column;
+
+    /* Espacio abajo - 15 pixeles */
     margin-bottom: 15px;
 }
 
+/* 
+   ETIQUETAS DEL FORMULARIO
+   Los textos que indican qué llenar
+ */
 .formulario-venta__label {
+    /* Espacio entre etiqueta y campo - 5 pixeles */
     margin-bottom: 5px;
+
+    /* Color negro */
     color: var(--color-letras);
 }
 
+/* 
+   CAMPOS DE ENTRADA DEL FORMULARIO
+   Donde el usuario escribe la información
+ */
 .formulario-venta__input {
+    /* Espacio interno - 10 pixeles */
     padding: 10px;
+
+    /* Borde negro delgado */
     border: 1px solid var(--color-letras);
+
+    /* Esquinas redondeadas */
     border-radius: 10px;
+
+    /* Tamaño de letra - 14 pixeles */
     font-size: 14px;
+
+    /* Fondo blanco */
     background: white;
 }
 
+/* CAMPO CUANDO ESTÁ ACTIVO */
 .formulario-venta__input:focus {
+    /* Borde azul cuando se hace clic */
     outline: 2px solid var(--boton-iniciarSesion);
 }
 
-/* Inputs especiales */
+/* 
+   CAMPOS ESPECIALES
+   Estilos para campos con características específicas
+ */
 
+/* Campo de solo lectura (no se puede editar) */
 .formulario-venta__input--solo-lectura {
+    /* Fondo gris claro indica que no es editable */
     background: #f1f1f1;
+
+    /* Cursor de "no permitido" */
     cursor: not-allowed;
 }
 
+/* Campo con sugerencias automáticas */
 .formulario-venta__input--sugerencias {
-    background-image: linear-gradient(90deg, transparent 0 90%, rgba(0,0,0,0.05) 90% 100%);
+    /* Gradiente decorativo al lado derecho */
+    background-image: linear-gradient(90deg, transparent 0 90%, rgba(0, 0, 0, 0.05) 90% 100%);
 }
 
-/* Fila de dos columnas */
-
+/* 
+   FILA DE DOS COLUMNAS
+   Para poner dos campos lado a lado
+ */
 .formulario-venta__fila {
+    /* Organiza los campos horizontalmente */
     display: flex;
+
+    /* Espacio entre campos - 15 pixeles */
     gap: 15px;
 }
 
+/* Cada columna en la fila */
 .formulario-venta__grupo--col {
+    /* Cada columna ocupa el mismo espacio */
     flex: 1;
 }
 
-/* Pie del formulario */
-
+/* 
+   PIE DEL FORMULARIO
+   La sección inferior con total y botones
+ */
 .formulario-venta__pie {
+    /* Organiza elementos horizontalmente */
     display: flex;
+
+    /* Uno a cada extremo */
     justify-content: space-between;
+
+    /* Centrados verticalmente */
     align-items: center;
+
+    /* Espacio arriba - 20 pixeles */
     margin-top: 20px;
 }
 
+/* 
+   TOTAL DE LA VENTA
+   Muestra el monto total a pagar
+ */
 .formulario-venta__total {
+    /* Letra más grande - 18 pixeles */
     font-size: 18px;
+
+    /* En negrita para destacar */
     font-weight: bold;
+
+    /* Espacio a la derecha - 20 pixeles */
     margin-right: 20px;
 }
 
+/* Texto "Total:" junto al monto */
 .formulario-venta__total-texto {
+    /* Espacio a la derecha - 12 pixeles */
     margin-right: 12px;
+
+    /* Color negro */
     color: var(--color-letras);
 }
 
+/* 
+   BOTÓN DE ENVIAR/GUARDAR
+   El botón principal para guardar la venta
+ */
 .formulario-venta__boton {
-    padding: 12px ;
+    /* Espacio interno - 12 pixeles */
+    padding: 12px;
+
+    /* Color de fondo azul */
     background: var(--boton-iniciarSesion);
+
+    /* Texto en blanco */
     color: white;
+
+    /* Sin borde */
     border: none;
+
+    /* Esquinas redondeadas */
     border-radius: 10px;
+
+    /* Cursor de mano al pasar */
     cursor: pointer;
 }
 
+/* BOTÓN AL PASAR EL MOUSE */
 .formulario-venta__boton:hover {
+    /* Azul más oscuro */
     background: #00395a;
 }
+
+/* 
+   BOTÓN DE REGRESAR
+   El botón para volver a la pantalla anterior
+ */
 .btn-regresar {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px ;
-  background: var(--boton-regresar);
-  color: white;
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 8px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  margin-right: 100px;
+    /* Muestra icono y texto en línea */
+    display: inline-flex;
+    align-items: center;
+
+    /* Espacio entre icono y texto - 8 pixeles */
+    gap: 8px;
+
+    /* Espacio interno - 12 pixeles */
+    padding: 12px;
+
+    /* Color de fondo negro */
+    background: var(--boton-regresar);
+
+    /* Texto en blanco */
+    color: white;
+
+    /* Sin subrayado */
+    text-decoration: none;
+
+    /* Tamaño de letra - 16 pixeles */
+    font-size: 16px;
+
+    /* Letra en negrita */
+    font-weight: bold;
+
+    /* Esquinas redondeadas */
+    border-radius: 8px;
+
+    /* Animación suave para efectos */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    /* Espacio a la derecha - 100 pixeles */
+    margin-right: 100px;
 }
 
+/* BOTÓN REGRESAR AL PASAR EL MOUSE */
 .btn-regresar:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
+    /* Se eleva un poco hacia arriba */
+    transform: translateY(-2px);
 
+    /* Aparece una sombra */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}

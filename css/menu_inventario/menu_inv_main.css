@@ -1,290 +1,656 @@
+
+/* 
+   ESTILOS GENERALES
+   Se aplican a todos los elementos de la página
+ */
 * {
+    /* Fuente personalizada en toda la página */
     font-family: "mifuente", sans-serif;
+
+    /* Quita los márgenes por defecto */
     margin: 0;
+
+    /* Quita los espacios internos por defecto */
     padding: 0;
+
+    /* El tamaño incluye bordes y espacios internos */
     box-sizing: border-box;
 }
 
-/* LAYOUT PRINCIPAL */
+/* 
+   ÁREA PRINCIPAL (LAYOUT)
+   Organiza el contenido con barra lateral y contenido
+ */
 main {
+    /* Se ubica en la zona "main" de la página */
     grid-area: main;
+
+    /* Ocupa todo el ancho disponible */
     width: 100%;
+
+    /* Ocupa toda la altura disponible */
     height: 100%;
+
+    /* Usa flexbox para poner la barra y contenido lado a lado */
     display: flex;
+
+    /* Color de fondo gris muy claro */
     background-color: #f4f7f6;
 }
 
-/* SIDEBAR (ASIDE) */
+
 .aside {
+    /* Ancho fijo de 280 pixeles */
     width: 280px;
+
+    /* Espacio interno: 30 arriba/abajo, 20 lados */
     padding: 30px 20px;
+
+    /* Línea gris muy suave a la derecha */
     border-right: 1px solid #eaeaea;
+
+    /* Fondo blanco */
     background-color: #ffffff;
+
+    /* Sombra sutil hacia la derecha */
     box-shadow: 4px 0 15px rgba(0, 0, 0, 0.03);
+
+    /* Organiza elementos de arriba hacia abajo */
     display: flex;
     flex-direction: column;
-
 }
 
+/* 
+   TÍTULO DEL MENÚ
+   El texto que dice "Menú Principal" o similar
+ */
 .aside__title {
+    /* Texto centrado */
     text-align: center;
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 40px;
-    color: #2c3e50;
-    text-transform: uppercase;
 
+    /* Tamaño de letra mediano */
+    font-size: 1.3rem;
+
+    /* Letra en negrita fuerte */
+    font-weight: 700;
+
+    /* Espacio grande abajo - 40 pixeles */
+    margin-bottom: 40px;
+
+    /* Color azul grisáceo oscuro */
+    color: #2c3e50;
+
+    /* Todas las letras en MAYÚSCULAS */
+    text-transform: uppercase;
 }
 
+/* 
+   NAVEGACIÓN DEL MENÚ
+   Contiene todos los enlaces/opciones
+ */
 .aside__nav {
+    /* Organiza los enlaces de arriba hacia abajo */
     display: flex;
     flex-direction: column;
+
+    /* Espacio entre cada enlace - 15 pixeles */
     gap: 15px;
 }
 
+/* 
+   ENLACES DEL MENÚ
+   Cada opción clickeable del menú
+ */
 .aside__link {
+    /* Quita el subrayado de los enlaces */
     text-decoration: none;
+
+    /* Color gris para el texto */
     color: #555;
+
+    /* Organiza icono y texto en línea */
     display: flex;
     align-items: center;
+
+    /* Espacio entre icono y texto - 15 pixeles */
     gap: 15px;
+
+    /* Espacio interno del enlace */
     padding: 12px 20px;
+
+    /* Esquinas redondeadas */
     border-radius: 12px;
+
+    /* Animación suave para todos los cambios */
     transition: all 0.3s ease;
+
+    /* Tamaño de letra */
     font-size: 0.95rem;
 }
 
+/* 
+   ENLACE CUANDO EL MOUSE PASA ENCIMA
+   Efecto visual al pasar el cursor
+ */
 .aside__link:hover {
+    /* Fondo gris muy claro */
     background-color: #eef2f5;
+
+    /* El texto cambia a azul */
     color: #004B76;
+
+    /* Se mueve un poco hacia la derecha */
     transform: translateX(5px);
+
+    /* Borde con transparencia azul */
     border-color: rgba(0, 75, 118, 0.1);
 }
 
+/* 
+   LÍNEA DIVISORIA
+   Separa grupos de opciones en el menú
+ */
 .aside__divider {
+    /* Altura de 1 pixel (es una línea) */
     height: 1px;
+
+    /* Color gris claro */
     background-color: #eaeaea;
+
+    /* Espacio arriba y abajo - 10 pixeles */
     margin: 10px 0;
+
+    /* Ocupa todo el ancho */
     width: 100%;
 }
 
+/* 
+   BOTÓN DE SALIR
+   El botón rojo para cerrar sesión
+ */
 .btn-salir {
+    /* Se empuja hacia abajo del menú */
     margin-top: auto;
-    /* Push to bottom if container has height */
+
+    /* Texto en color rojo */
     color: #e74c3c;
+
+    /* Letra en negrita */
     font-weight: bold;
 }
 
+/* 
+   BOTÓN SALIR AL PASAR EL MOUSE 
+   Efecto visual al pasar el cursor
+ */
 .btn-salir:hover {
+    /* Fondo rojo muy claro */
     background-color: #fadbd8;
+
+    /* Rojo más oscuro */
     color: #c0392b;
 }
 
+/* ICONO DEL BOTÓN SALIR */
 .btn-salir .aside__icon {
+    /* Color rojo */
     color: #e74c3c;
 }
 
+/* ICONO DE SALIR AL PASAR EL MOUSE */
 .btn-salir:hover .aside__icon {
+    /* Rojo más oscuro */
     color: #c0392b;
 }
 
+/* 
+   ICONOS DEL MENÚ
+   Los iconitos junto a cada opción
+ */
 .aside__icon {
+    /* Tamaño del icono */
     font-size: 1.4rem;
+
+    /* Color gris */
     color: #7f8c8d;
+
+    /* Animación suave del color */
     transition: color 0.3s ease;
+
+    /* Ancho fijo para alinear todos */
     width: 24px;
+
+    /* Texto centrado dentro del área */
     text-align: center;
 }
 
+/* 
+   ICONOS AL PASAR EL MOUSE 
+   Efecto visual al pasar el cursor
+ */
 .aside__link:hover .aside__icon {
+    /* Cambia a azul */
     color: #004B76;
 }
 
-/* CONTENIDO PRINCIPAL */
+/* 
+   CONTENIDO PRINCIPAL
+   El área grande a la derecha donde van     */
+/* las tarjetas y el contenido de cada       */
+/* sección                                   */
+
 .content {
+    /* Ocupa todo el espacio disponible */
     flex: 1;
+
+    /* Organiza elementos verticalmente */
     display: flex;
     flex-direction: column;
+
+    /* Espacio interno - 40 pixeles */
     padding: 40px;
+
+    /* Centra horizontalmente */
     align-items: center;
+
+    /* Alinea desde arriba */
     justify-content: flex-start;
 }
 
+/* 
+   ZONA DE BIENVENIDA/TÍTULO
+   La parte superior con el título de la sección
+*/
 .content__inicio {
+    /* Texto centrado */
     text-align: center;
+
+    /* Espacio grande abajo - 50 pixeles */
     margin-bottom: 50px;
+
+    /* Ocupa todo el ancho disponible */
     width: 100%;
+
+    /* Pero máximo 800 pixeles */
     max-width: 800px;
 }
 
+/* 
+   TÍTULO PRINCIPAL DEL CONTENIDO
+   El texto grande que indica la sección actual
+*/
 .content__title {
+    /* Tamaño grande - 2.2rem */
     font-size: 2.2rem;
+
+    /* Letra muy gruesa */
     font-weight: 800;
+
+    /* Color azul grisáceo oscuro */
     color: #2c3e50;
+
+    /* Pequeño espacio abajo */
     margin-bottom: 10px;
 }
 
+/* 
+   SUBTÍTULO DEL CONTENIDO
+   Texto de ayuda debajo del título
+*/
 .content__subtitle {
+    /* Tamaño mediano */
     font-size: 1.1rem;
+
+    /* Color gris */
     color: #7f8c8d;
+
+    /* Letra normal, no gruesa */
     font-weight: 400;
 }
 
+/*  
+   LÍNEA DIVISORIA DEL CONTENIDO
+   La línea que separa el título de las tarjetas
+*/
 .content__divider {
+    /* Ancho del 45% de la pantalla */
     width: 45vw;
+
+    /* Altura de 4 pixeles */
     height: 4px;
+
+    /* Color negro */
     background: black;
+
+    /* Centrada con espacio arriba */
     margin: 20px auto 0;
+
+    /* Sin borde de línea HTML */
     border: none;
+
+    /* Esquinas redondeadas */
     border-radius: 2px;
 }
 
-/* TARJETAS (CARDS) */
+/* 
+   TARJETAS (CARDS)
+   Los recuadros clickeables que muestran    */
+/* las opciones principales del sistema      */
+
 .cards {
+    /* Organiza las tarjetas en fila */
     display: flex;
+
+    /* Las centra horizontalmente */
     justify-content: center;
+
+    /* Si no caben, saltan a nueva fila */
     flex-wrap: wrap;
+
+    /* Espacio entre tarjetas - 30 pixeles */
     gap: 30px;
+
+    /* Ocupa todo el ancho */
     width: 100%;
+
+    /* Máximo 1000 pixeles */
     max-width: 1000px;
 }
 
+/* 
+   CADA TARJETA INDIVIDUAL
+   Los cuadros blancos con icono y texto
+*/
 .card {
+    /* Fondo blanco */
     background: white;
+
+    /* Tamaño fijo: 240 de ancho x 200 de alto */
     width: 240px;
     height: 200px;
+
+    /* Espacio interno - 25 pixeles */
     padding: 25px;
+
+    /* Esquinas muy redondeadas */
     border-radius: 16px;
+
+    /* Sombra suave que hace que flote */
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+
+    /* Quita subrayado si es enlace */
     text-decoration: none;
+
+    /* Organiza icono y texto verticalmente */
     display: flex;
     flex-direction: column;
+
+    /* Centra todo dentro de la tarjeta */
     align-items: center;
     justify-content: center;
+
+    /* Espacio entre icono y texto - 15 pixeles */
     gap: 15px;
+
+    /* Animación suave para efectos */
     transition: all 0.3s ease;
+
+    /* Borde transparente (se mostrará al pasar mouse) */
     border: 1px solid transparent;
+
+    /* Para efectos de posicionamiento */
     position: relative;
+
+    /* Oculta contenido que se salga */
     overflow: hidden;
 }
 
-
+/* TARJETA AL PASAR EL MOUSE */
 .card:hover {
+    /* Se eleva un poco hacia arriba */
     transform: translateY(-8px);
+
+    /* La sombra aumenta (efecto de flotar) */
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+
+    /* Aparece un borde gris claro */
     border-color: #f0f0f0;
 }
 
-
-
+/* 
+   TÍTULO DE LA TARJETA
+   El texto que describe la opción
+*/
 .card__title {
+    /* Tamaño de letra */
     font-size: 1.05rem;
+
+    /* Letra semi-gruesa */
     font-weight: 600;
+
+    /* Color azul grisáceo */
     color: #34495e;
+
+    /* Texto centrado */
     text-align: center;
+
+    /* Sin margen extra */
     margin: 0;
 }
 
+/* 
+   ICONO DE LA TARJETA
+   El icono grande en cada tarjeta
+*/
 .card__icon {
+    /* Tamaño grande - 2.5rem */
     font-size: 2.5rem;
+
+    /* Color azul corporativo */
     color: #004B76;
+
+    /* Animación para el efecto de crecer */
     transition: transform 0.3s ease;
 }
 
+/* ICONO AL PASAR EL MOUSE */
 .card:hover .card__icon {
+    /* El icono crece un 10% */
     transform: scale(1.1);
+
+    /* Cambia a verde */
     color: #32BA7C;
 }
 
+/* 
+   PERFIL DE USUARIO
+   La sección que muestra quién está         */
+/* conectado al sistema                      */
 
-
-/* USER PROFILE */
 .user-profile {
+    /* Organiza foto e info horizontalmente */
     display: flex;
     align-items: center;
+
+    /* Espacio entre elementos - 15 pixeles */
     gap: 15px;
+
+    /* Espacio interno - 15 pixeles */
     padding: 15px;
+
+    /* Fondo gris muy claro */
     background-color: #f9f9f9;
+
+    /* Esquinas redondeadas */
     border-radius: 12px;
+
+    /* Espacio abajo - 30 pixeles */
     margin-bottom: 30px;
+
+    /* Borde gris claro */
     border: 1px solid #e0e0e0;
 }
 
+/* 
+   IMAGEN DE PERFIL
+   La foto del usuario (si tiene)
+*/
 .user-profile__img {
+    /* Tamaño: 50x50 pixeles */
     width: 50px;
     height: 50px;
+
+    /* Forma circular (redonda) */
     border-radius: 50%;
+
+    /* La imagen cubre todo el espacio sin deformarse */
     object-fit: cover;
+
+    /* Borde azul alrededor */
     border: 2px solid #004B76;
 }
 
+/* 
+   ICONO DE PERFIL
+   El icono que aparece si no hay foto
+*/
 .user-profile__icon {
+    /* Tamaño grande - 40 pixeles */
     font-size: 40px;
+
+    /* Color gris */
     color: #95a5a6;
+
+    /* Centrado */
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
+/* 
+   INFORMACIÓN DEL USUARIO
+   Contiene nombre y rol
+*/
 .user-profile__info {
+    /* Organiza nombre y rol verticalmente */
     display: flex;
     flex-direction: column;
 }
 
+/* 
+   NOMBRE DEL USUARIO
+   El nombre de quien está conectado
+*/
 .user-profile__name {
+    /* Letra en negrita */
     font-weight: 700;
+
+    /* Color azul grisáceo oscuro */
     color: #2c3e50;
+
+    /* Tamaño de letra - 1rem */
     font-size: 1rem;
+
+    /* Pequeño espacio abajo */
     margin-bottom: 4px;
 }
 
+/* 
+   ROL/CARGO DEL USUARIO
+   Etiqueta que muestra si es Admin o Trabajador
+*/
 .user-profile__role {
+    /* Tamaño de letra pequeño */
     font-size: 0.8rem;
+
+    /* Letra semi-gruesa */
     font-weight: 600;
+
+    /* Pequeño espacio interno */
     padding: 2px 8px;
+
+    /* Esquinas redondeadas */
     border-radius: 4px;
+
+    /* Se muestra como bloque en línea */
     display: inline-block;
+
+    /* Ancho ajustado al contenido */
     width: fit-content;
 }
 
+/* ETIQUETA PARA ADMINISTRADOR - Verde */
 .badge-admin {
+    /* Fondo verde muy claro */
     background-color: #d1f2eb;
+
+    /* Texto verde oscuro */
     color: #16a085;
 }
 
+/* ETIQUETA PARA TRABAJADOR - Rojo */
 .badge-worker {
+    /* Fondo rojo muy claro */
     background-color: #fadbd8;
+
+    /* Texto rojo */
     color: #e74c3c;
 }
 
+/* 
+   DISEÑO PARA TABLETAS (900px o menos) 
+   Cuando la pantalla es mediana            
+*/
 @media (max-width: 900px) {
     main {
+        /* El menú y contenido se apilan verticalmente */
         flex-direction: column;
+
+        /* Altura automática */
         height: auto;
     }
 
-
     .aside {
+        /* El menú ocupa todo el ancho */
         width: 100%;
+
+        /* Sin borde a la derecha */
         border-right: none;
+
+        /* Borde abajo en su lugar */
         border-bottom: 1px solid #eaeaea;
+
+        /* Menos espacio interno */
         padding: 20px;
+
+        /* Sombra hacia abajo */
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
     }
 
     .aside__title {
+        /* Título más pequeño */
         font-size: 1.1rem;
+
+        /* Menos espacio abajo */
         margin-bottom: 20px;
     }
 
     .aside__nav {
+        /* Los enlaces van en fila horizontal */
         flex-direction: row;
+
+        /* Pueden saltar a nueva fila si no caben */
         flex-wrap: wrap;
+
+        /* Centrados */
         justify-content: center;
+
+        /* Menos espacio entre ellos */
         gap: 10px;
     }
 
     .aside__link {
+        /* Enlaces más compactos */
         flex-direction: column;
         width: 100px;
         padding: 10px;
@@ -294,127 +660,180 @@ main {
     }
 
     .aside__link:hover {
+        /* Al pasar mouse, sube un poco en vez de moverse a la derecha */
         transform: translateY(-3px);
     }
 
     .aside__icon {
+        /* Iconos del mismo tamaño */
         font-size: 1.4rem;
         margin-bottom: 0;
     }
 
     .content {
+        /* Menos espacio interno */
         padding: 30px 20px;
     }
 }
 
+/* 
+   DISEÑO PARA CELULARES (600px o menos) 
+   Cuando la pantalla es pequeña            
+*/
 @media (max-width: 600px) {
     .aside {
+        /* Menos espacio interno */
         padding: 15px;
+
+        /* Se queda fijo arriba al hacer scroll */
         position: sticky;
         top: 0;
+
+        /* Se muestra encima de otro contenido */
         z-index: 100;
-        /* Keep it accessible at the top */
     }
 
     .aside__title {
+        /* Título más pequeño */
         font-size: 1rem;
         margin-bottom: 15px;
+
+        /* Se oculta en móvil para ahorrar espacio */
         display: none;
-        /* Hide title on mobile to save space, logo/header is enough */
     }
 
     .user-profile {
+        /* Perfil más compacto */
         padding: 8px;
         margin-bottom: 15px;
     }
 
     .user-profile__img {
+        /* Foto más pequeña */
         width: 40px;
         height: 40px;
     }
 
     .aside__nav {
+        /* Navegación horizontal con scroll */
         display: flex;
         flex-direction: row;
+
+        /* Se puede desplazar horizontalmente */
         overflow-x: auto;
+
+        /* Espacio entre opciones */
         gap: 15px;
+
+        /* Espacio para la barra de scroll */
         padding-bottom: 5px;
-        /* For scrollbar buffer */
+
+        /* Scroll suave */
         scroll-behavior: smooth;
         -webkit-overflow-scrolling: touch;
     }
 
-    /* Hide scrollbar for cleaner look */
+    /* Barra de scroll más pequeña y bonita */
     .aside__nav::-webkit-scrollbar {
         height: 4px;
     }
 
     .aside__nav::-webkit-scrollbar-thumb {
+        /* Color gris para la barra */
         background: #ccc;
         border-radius: 4px;
     }
 
     .aside__link {
+        /* No se encogen */
         flex: 0 0 auto;
-        /* Don't shrink */
+
+        /* Ancho automático pero mínimo 100px */
         width: auto;
         min-width: 100px;
+
+        /* Icono arriba, texto abajo */
         flex-direction: column;
         justify-content: center;
         text-align: center;
+
+        /* Más espacio interno */
         padding: 10px;
+
+        /* Borde y fondo para parecer botones */
         border: 1px solid #f0f0f0;
         background: #fff;
         border-radius: 10px;
+
+        /* Pequeña sombra */
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     }
 
+    /* Al tocar un enlace en móvil */
     .aside__link:hover,
     .aside__link:active {
+        /* Fondo azul */
         background-color: #004B76;
+
+        /* Texto blanco */
         color: white;
+
+        /* Sin movimiento */
         transform: none;
     }
 
+    /* Icono al tocar */
     .aside__link:hover .aside__icon,
     .aside__link:active .aside__icon {
         color: white;
     }
 
     .aside__divider {
+        /* Divisores ocultos en móvil */
         display: none;
-        /* Not needed in horizontal scroll */
     }
 
     .btn-salir {
+        /* Sin margen arriba */
         margin-top: 0;
+
+        /* Borde y fondo rojizo claro */
         border-color: #fadbd8;
         background: #fff5f5;
     }
 
     .aside__icon {
+        /* Iconos un poco más grandes */
         font-size: 1.5rem;
         margin-bottom: 5px;
     }
 
     .content {
+        /* Menos espacio interno */
         padding: 20px 15px;
     }
 
     .content__title {
+        /* Título más pequeño */
         font-size: 1.5rem;
     }
 
     .cards {
+        /* Tarjetas apiladas verticalmente */
         flex-direction: column;
         align-items: center;
         gap: 20px;
     }
 
     .card {
+        /* Tarjetas ocupan todo el ancho */
         width: 100%;
         max-width: 100%;
+
+        /* Altura automática */
         height: auto;
+
+        /* Icono a la derecha, texto a la izquierda */
         flex-direction: row;
         justify-content: space-between;
         padding: 20px;
@@ -422,14 +841,71 @@ main {
     }
 
     .card__icon {
+        /* Icono más pequeño */
         font-size: 1.8rem;
+
+        /* Aparece a la derecha */
         order: 1;
-        /* Icon on the right */
     }
 
     .card__title {
+        /* Título un poco más grande */
         font-size: 1.1rem;
         margin-bottom: 0;
         text-align: left;
     }
+}
+/* 
+   =====================================================
+   PERFIL COMO ENLACE CLICKEABLE
+   Cuando el perfil redirige a otra p�gina
+   =====================================================
+*/
+.user-profile--link {
+    /* Quita el subrayado por defecto */
+    text-decoration: none;
+    
+    /* Cursor de mano para indicar que es clickeable */
+    cursor: pointer;
+    
+    /* Transici�n suave para efectos */
+    transition: all 0.3s ease;
+}
+
+/* Efecto hover cuando el perfil es enlace */
+.user-profile--link:hover {
+    /* Fondo azul claro al pasar el mouse */
+    background-color: #e8f4fd;
+    
+    /* Borde azul */
+    border-color: #004B76;
+    
+    /* Se eleva ligeramente */
+    transform: translateY(-2px);
+    
+    /* Sombra sutil */
+    box-shadow: 0 4px 12px rgba(0, 75, 118, 0.15);
+}
+
+/* Flecha indicadora de navegaci�n */
+.user-profile__arrow {
+    /* Empuja la flecha al final (derecha) */
+    margin-left: auto;
+    
+    /* Color gris */
+    color: #95a5a6;
+    
+    /* Transici�n suave */
+    transition: all 0.3s ease;
+    
+    /* Tama�o de la flecha */
+    font-size: 0.9rem;
+}
+
+/* Flecha cambia de color al hover */
+.user-profile--link:hover .user-profile__arrow {
+    color: #004B76;
+    
+    /* Se mueve un poco a la derecha */
+    transform: translateX(3px);
 }

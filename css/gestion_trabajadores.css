@@ -1,4 +1,12 @@
+
+/* Importa los colores principales del sistema */
 @import url(Variables_root/Root.css);
+
+/* Importa los estilos del encabezado (parte de arriba) */
 @import url(estilos_header.css);
+
+/* Importa los estilos del área principal de gestión de trabajadores */
 @import url(gestion_trabajadores/gestion_trabajadores_main.css);
+
+/* Importa los estilos del pie de página (parte de abajo) */
 @import url(estilos_footer.css);

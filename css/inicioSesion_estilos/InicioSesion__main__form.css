@@ -1,71 +1,190 @@
-.main__formulario{
+/* 
+   CONTENEDOR DEL FORMULARIO
+   El área que contiene todos los campos
+ */
+.main__formulario {
+    /* Usa flexbox para organizar elementos */
     display: flex;
+
+    /* Centra los elementos horizontalmente */
     justify-content: center;
+
+    /* Centra los elementos verticalmente */
     align-items: center;
+
+    /* Los elementos se apilan de arriba hacia abajo */
     flex-direction: column;
+
+    /* Espacio arriba del formulario - 20 pixeles */
     margin-top: 20px;
+
+    /* Espacio entre los campos - 60 pixeles */
     gap: 60px;
+
+    /* Espacio grande abajo - 80 pixeles */
     margin-bottom: 80px;
 }
 
-
-.main__formulario input{
+/* 
+   CAMPOS DE TEXTO DEL FORMULARIO
+   Donde el usuario escribe sus datos
+ */
+.main__formulario input {
+    /* Ancho fijo - 240 pixeles */
     width: 240px;
+
+    /* Sin borde alrededor */
     border: none;
-    border-bottom: 1px solid #A6A6A6 ;
+
+    /* Solo una línea gris en la parte de abajo */
+    border-bottom: 1px solid #A6A6A6;
+
+    /* Espacio interno - 10 pixeles */
     padding: 10px;
+
+    /* Animación suave para cambios - 0.3 segundos */
     transition: all 0.3s ease;
+
+    /* Texto centrado dentro del campo */
     text-align: center;
 }
 
-.main__formulario input::placeholder{
+/* 
+   TEXTO DE AYUDA EN LOS CAMPOS
+   El texto gris que aparece antes de escribir
+   (placeholder = texto de ejemplo)
+ */
+.main__formulario input::placeholder {
+    /* Texto centrado */
     text-align: center;
+
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Tamaño de letra - 20 pixeles */
     font-size: 20px;
+
+    /* Color gris para el texto de ayuda */
     color: #A6A6A6;
 }
-.main__formulario input:focus{
+
+/* 
+   CAMPO DE TEXTO CUANDO ESTÁ ACTIVO
+   Cuando el usuario hace clic en él
+ */
+.main__formulario input:focus {
+    /* Texto centrado */
     text-align: center;
+
+    /* Quita el borde azul por defecto del navegador */
     outline: none;
+
+    /* La línea de abajo cambia a azul */
     border-color: var(--boton-iniciarSesion);
+
+    /* Brillo azul alrededor del campo */
     box-shadow: 0 0 5px #004B76;
 }
 
-.icono{
+/* 
+   ICONOS EN LOS CAMPOS
+   Los iconitos junto a los campos de texto
+ */
+.icono {
+    /* Color gris para los iconos */
     color: #A6A6A6;
+
+    /* Mueve el icono hacia la derecha */
     transform: translateX(160%);
 }
 
-.formulario__btnLogin{
+/* 
+   BOTÓN DE INICIAR SESIÓN
+   El botón principal para entrar al sistema
+ */
+.formulario__btnLogin {
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Espacio interno - 10 pixeles */
     padding: 10px;
+
+    /* Ancho del botón - 230 pixeles */
     width: 230px;
+
+    /* Esquinas redondeadas - muy suaves */
     border-radius: 20px;
-    background-color:var(--boton-iniciarSesion); 
-    box-shadow: 2px 2px 0 #021C2B ;
+
+    /* Color de fondo - azul oscuro */
+    background-color: var(--boton-iniciarSesion);
+
+    /* Sombra que hace que el botón se vea elevado */
+    box-shadow: 2px 2px 0 #021C2B;
+
+    /* Texto en color blanco */
     color: white;
+
+    /* Tamaño de letra - 18 pixeles */
     font-size: 18px;
+
+    /* El cursor cambia a manito al pasar encima */
     cursor: pointer;
 }
-.contenedor__btnLogin{
+
+/* 
+   CONTENEDOR DEL BOTÓN
+   Capa extra para dar más sombra al botón
+ */
+.contenedor__btnLogin {
+    /* Esquinas redondeadas */
     border-radius: 20px;
-    box-shadow: 0px  9px 6px  rgba(0, 0, 0, 0.2);
+
+    /* Sombra difuminada debajo del botón */
+    box-shadow: 0px 9px 6px rgba(0, 0, 0, 0.2);
 }
-.form__opciones{
+
+/* 
+   OPCIONES DEL FORMULARIO
+   Contenedor para "Recordar" y "Cambiar contraseña"
+ */
+.form__opciones {
+    /* Usa flexbox para organizar horizontalmente */
     display: flex;
+
+    /* Centra los elementos */
     justify-content: center;
     align-items: center;
+
+    /* Espacio entre las opciones - 60 pixeles */
     gap: 60px;
 }
 
-.recordar_Contra{
+/* 
+   OPCIÓN "RECORDAR CONTRASEÑA"
+   El checkbox con su texto
+ */
+.recordar_Contra {
+    /* Usa flexbox para alinear checkbox y texto */
     display: flex;
+
+    /* Centra verticalmente */
     justify-content: center;
+
+    /* Pequeño espacio entre checkbox y texto - 4 pixeles */
     gap: 4px;
 }
 
-.opcion__cambiarContra{
+/* 
+   ENLACE "CAMBIAR CONTRASEÑA"
+   El link para recuperar la contraseña
+ */
+.opcion__cambiarContra {
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Quita el subrayado del enlace */
     text-decoration: none;
+
+    /* Color azul para que se note que es un enlace */
     color: var(--boton-iniciarSesion);
 }

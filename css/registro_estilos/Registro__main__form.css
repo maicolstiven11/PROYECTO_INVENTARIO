@@ -1,93 +1,227 @@
 
-
-.main__formulario{
+/* 
+   CONTENEDOR DEL FORMULARIO
+   El área que contiene todos los campos
+ */
+.main__formulario {
+    /* Usa flexbox para organizar elementos */
     display: flex;
+
+    /* Centra los elementos horizontalmente */
     justify-content: center;
+
+    /* Centra los elementos verticalmente */
     align-items: center;
+
+    /* Los elementos se apilan de arriba hacia abajo */
     flex-direction: column;
+
+    /* Espacio arriba del formulario - 20 pixeles */
     margin-top: 20px;
+
+    /* Espacio entre los campos - 60 pixeles */
     gap: 60px;
+
+    /* Espacio grande abajo - 80 pixeles */
     margin-bottom: 80px;
 }
 
-.icono{
+/* 
+   ICONOS EN LOS CAMPOS
+   Los iconitos junto a los selectores
+ */
+.icono {
+    /* Color gris para los iconos */
     color: #A6A6A6;
+
+    /* Mueve el icono hacia la derecha */
     transform: translateX(160%);
-    pointer-events: none; /*hace que no interfiera y el clic pase a mostrar todo los tipos de documentos */
+
+    /* Hace que los clics pasen a través del icono */
+    /* Así no interfiere al hacer clic en el selector */
+    pointer-events: none;
 }
 
-
-.form__tiposDocumento{
+/* 
+   SELECTOR DE TIPO DE DOCUMENTO
+   El campo desplegable para elegir CC, TI, etc.
+ */
+.form__tiposDocumento {
+    /* Ancho fijo - 240 pixeles */
     width: 240px;
+
+    /* Sin borde alrededor */
     border: none;
-    border-bottom: 1px solid #A6A6A6 ;
+
+    /* Solo una línea gris en la parte de abajo */
+    border-bottom: 1px solid #A6A6A6;
+
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Centra el contenido */
     align-items: center;
     text-align: center;
+
+    /* Tamaño de letra - 20 pixeles */
     font-size: 20px;
-    color: #A6A6A6 ;
+
+    /* Color gris para el texto */
+    color: #A6A6A6;
+
+    /* Altura del selector - 36 pixeles */
     height: 36px;
-    appearance: none; /*sirve para quitar el icono predeterminado de la derecha*/ 
+
+    /* Quita la flecha predeterminada del navegador */
+    appearance: none;
+
+    /* Animación suave para cambios */
     transition: all 0.3s ease;
 }
 
-
-
+/* 
+   SELECTOR CUANDO ESTÁ ACTIVO
+   Cuando el usuario hace clic en él
+ */
 .form__tiposDocumento:focus {
+    /* Texto centrado */
     text-align: center;
+
+    /* Fuente personalizada */
     font-family: "mifuente";
+
+    /* El texto cambia a negro */
     color: #000000;
+
+    /* Fondo blanco */
     background-color: #ffffff;
-
 }
 
-.main__formulario input{
+/* 
+   CAMPOS DE TEXTO DEL FORMULARIO
+   Donde el usuario escribe sus datos
+ */
+.main__formulario input {
+    /* Ancho fijo - 240 pixeles */
     width: 240px;
+
+    /* Sin borde alrededor */
     border: none;
-    border-bottom: 1px solid #A6A6A6 ;
+
+    /* Solo una línea gris en la parte de abajo */
+    border-bottom: 1px solid #A6A6A6;
+
+    /* Espacio interno - 10 pixeles */
     padding: 10px;
+
+    /* Animación suave para cambios */
     transition: all 0.3s ease;
+
+    /* Texto centrado dentro del campo */
     text-align: center;
 }
 
-
-.main__formulario input::placeholder{
+/* 
+   TEXTO DE AYUDA EN LOS CAMPOS
+   El texto gris que aparece antes de escribir
+ */
+.main__formulario input::placeholder {
+    /* Texto centrado */
     text-align: center;
+
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Tamaño de letra - 20 pixeles */
     font-size: 20px;
+
+    /* Color gris para el texto de ayuda */
     color: #A6A6A6;
 }
 
-.main__formulario input:focus{
+/* 
+   CAMPO DE TEXTO CUANDO ESTÁ ACTIVO
+   Cuando el usuario hace clic en él
+ */
+.main__formulario input:focus {
+    /* Texto centrado */
     text-align: center;
+
+    /* Quita el borde azul por defecto del navegador */
     outline: none;
+
+    /* La línea de abajo cambia a azul */
     border-color: var(--boton-iniciarSesion);
+
+    /* Brillo azul alrededor del campo */
     box-shadow: 0 0 5px #004B76;
 }
 
-
-
-.formulario__btnRegistro{
+/* 
+   BOTÓN DE REGISTRO (TEXTO)
+   El texto dentro del botón de registro
+ */
+.formulario__btnRegistro {
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Texto en color blanco */
     color: white;
+
+    /* Tamaño de letra - 18 pixeles */
     font-size: 18px;
+
+    /* El cursor cambia a manito */
     cursor: pointer;
-    text-decoration: none;
 
+    /* Sin subrayado por si es un enlace */
+    text-decoration: none;
 }
-.estilo_difuminado{
+
+/* 
+   EFECTO DE SOMBRA DIFUMINADA
+   Para agregar sombra a elementos
+ */
+.estilo_difuminado {
+    /* Esquinas redondeadas */
     border-radius: 20px;
-    box-shadow: 0px  9px 6px  rgba(0, 0, 0, 0.2);
+
+    /* Sombra difuminada debajo */
+    box-shadow: 0px 9px 6px rgba(0, 0, 0, 0.2);
 }
-.contenedor__btnRegistro{
+
+/* 
+   CONTENEDOR DEL BOTÓN DE REGISTRO
+   El botón principal para crear la cuenta
+ */
+.contenedor__btnRegistro {
+    /* Centra el contenido */
     align-items: center;
+
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Espacio interno - 10 pixeles */
     padding: 10px;
+
+    /* Ancho del botón - 230 pixeles */
     width: 230px;
+
+    /* Esquinas muy redondeadas */
     border-radius: 20px;
-    background-color:var(--boton-continuar); 
-    box-shadow: 3px 3px 0 #021C2B ;
+
+    /* Color de fondo - azul oscuro */
+    background-color: var(--boton-continuar);
+
+    /* Sombra que hace que el botón se vea elevado */
+    box-shadow: 3px 3px 0 #021C2B;
+
+    /* Texto en color blanco */
     color: white;
+
+    /* Tamaño de letra - 18 pixeles */
     font-size: 18px;
+
+    /* El cursor cambia a manito al pasar encima */
     cursor: pointer;
 }

@@ -1,23 +1,60 @@
-main{
+
+/* 
+   ÁREA PRINCIPAL DE LA PÁGINA
+   El contenedor central donde va todo
+ */
+main {
+    /* Usa flexbox para organizar elementos */
     display: flex;
+
+    /* Se ubica en la zona "main" de la cuadrícula */
     grid-area: main;
+
+    /* Los elementos se apilan de arriba hacia abajo */
     flex-direction: column;
+
+    /* Centra el contenido verticalmente */
     justify-content: center;
+
+    /* Centra el texto */
     text-align: center;
+
+    /* Ocupa toda la altura disponible */
     height: 100%;
+
+    /* Color de fondo - blanco semitransparente */
     background-color: var(--color-fondo);
-    cursor: default; /*evita que el cursor cambien en elementos que no se necesitan */
-    user-select: none; /*sirve para que el usuario no seleccione texto pero lo use para que no se vea como si estuviera escibiendo */
-    
+
+    /* Cursor normal, no cambia al pasar */
+    cursor: default;
+
+    /* Evita selección de texto para apariencia profesional */
+    user-select: none;
 }
-.main__titulo{
+
+/* 
+   TÍTULO DE LA SECCIÓN
+   El texto que indica "Gastos Registrados"
+ */
+.main__titulo {
+    /* Posición fija respecto a la página */
     position: absolute;
+
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Tamaño de letra - 28 pixeles */
     font-size: 28px;
+
+    /* Letra en negrita */
     font-weight: bold;
+
+    /* Posición desde arriba - 140 pixeles */
     top: 140px;
+
+    /* Posición desde la izquierda - 30 pixeles */
     left: 30px;
+
+    /* Color negro para el texto */
     color: var(--color-letras);
 }
-
-

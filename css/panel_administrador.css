@@ -1,0 +1,9 @@
+/* ==================================================
+   PANEL DE ADMINISTRADOR - ARCHIVO PRINCIPAL
+   Importa los estilos de header, main y footer
+   ================================================== */
+
+@import url('/css/Variables_root/Root.css');
+@import url('/css/estilos_header.css');
+@import url('/css/panel_administrador/panel_administrador__main.css');
+@import url('/css/estilos_footer.css');

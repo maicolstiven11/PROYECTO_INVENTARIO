@@ -1,37 +1,91 @@
+
+/* 
+   ÁREA PRINCIPAL DE LA PÁGINA
+   El contenedor central donde va todo
+ */
 main {
+    /* Usa flexbox para organizar elementos */
     display: flex;
+
+    /* Se ubica en la zona "main" de la cuadrícula */
     grid-area: main;
+
+    /* Los elementos se apilan de arriba hacia abajo */
     flex-direction: column;
+
+    /* Centra el contenido verticalmente */
     justify-content: center;
+
+    /* Centra el texto */
     text-align: center;
+
+    /* Ocupa toda la altura disponible */
     height: 100%;
+
+    /* Color de fondo - blanco semitransparente */
     background-color: var(--color-fondo);
+
+    /* Cursor normal, no cambia al pasar */
     cursor: default;
+
+    /* Evita selección de texto */
     user-select: none;
+
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
 }
 
+/* 
+   TÍTULO DE LA SECCIÓN
+   El texto que indica "Proveedores Registrados"
+ */
 .main__titulo {
+    /* Posición fija respecto a la página */
     position: absolute;
+
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Tamaño de letra - 28 pixeles */
     font-size: 28px;
+
+    /* Letra en negrita */
     font-weight: bold;
+
+    /* Posición desde arriba - 140 pixeles */
     top: 140px;
+
+    /* Posición desde la izquierda - 30 pixeles */
     left: 30px;
+
+    /* Color negro para el texto */
     color: var(--color-letras);
 }
 
-/* Media Queries para Proveedor Registrado (Main) */
+/* 
+   DISEÑO PARA CELULARES (768px o menos)    
+   Cuando la pantalla es pequeña            
+ */
 @media (max-width: 768px) {
     .main__titulo {
+        /* El título deja de estar fijo */
         position: static;
+
+        /* Espacio abajo - 20 pixeles */
         margin-bottom: 20px;
+
+        /* Texto más pequeño - 24 pixeles */
         font-size: 24px;
+
+        /* Texto centrado */
         text-align: center;
     }
 
     main {
+        /* Espacio arriba - 40 pixeles */
         padding-top: 40px;
+
+        /* Alinea desde arriba en vez de centrar */
         justify-content: flex-start;
     }
 }

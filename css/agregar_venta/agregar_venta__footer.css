@@ -1,6 +1,15 @@
-footer{
+
+
+footer {
+    /* Se ubica en la zona del pie de página */
     grid-area: footer;
+
+    /* Color de fondo azul claro */
     background-color: var(--color-footer);
+
+    /* Altura del pie - 112 pixeles */
     height: 112.2px;
+
+    /* Línea negra en la parte de arriba */
     border-top: 2px solid black;
 }

@@ -1,66 +1,142 @@
+
+/* 
+   SECCIÓN DE PROVEEDOR REGISTRADO
+   La tarjeta que muestra un proveedor
+ */
 .main__section__prv_regist {
+    /* Organiza los elementos horizontalmente */
     display: flex;
+
+    /* Centra la tarjeta en la página */
     margin: 0 auto;
+
+    /* Espacio interno amplio - 50 pixeles */
     padding: 50px;
+
+    /* Sombra suave alrededor de la tarjeta */
     box-shadow: 0 0 10px #50505067;
+
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Espacio abajo de la tarjeta - 60 pixeles */
     margin-bottom: 60px;
 }
 
+/* 
+   IMAGEN DEL PROVEEDOR
+   La foto o icono del proveedor
+ */
 .main__section__prv_regist div img {
+    /* Espacio arriba de la imagen - 20 pixeles */
     margin-top: 20px;
+
+    /* Ancho de la imagen - 60 pixeles */
     width: 60px;
 }
 
+/* 
+   SECCIÓN DE RUTAS/OPCIONES
+   Los botones para agregar o ver finalizados
+ */
 .main__section__rutas {
+    /* Organiza los elementos horizontalmente */
     display: flex;
 
+    /* Centra los elementos */
     justify-content: center;
     align-items: center;
+
+    /* Espacio entre los botones - 60 pixeles */
     gap: 60px;
+
+    /* Altura de la sección - 140 pixeles */
     height: 140px;
 }
 
+/* 
+   ICONOS EN LA SECCIÓN DE RUTAS
+   Las flechas u otros iconos decorativos
+ */
 .main__section__rutas i {
+    /* Tamaño grande del icono - 45 pixeles */
     font-size: 45px;
+
+    /* Color negro */
     color: var(--color-letras);
 }
 
-/* Media Queries for Provider Registered Form */
+/* 
+   DISEÑO PARA CELULARES (768px o menos)    
+ */
 @media (max-width: 768px) {
     .main__section__prv_regist {
+        /* Sigue organizando horizontalmente */
         display: flex;
+
+        /* Centra todo */
         justify-content: center;
         align-items: center;
         text-align: center;
+
+        /* Menos espacio interno en móviles */
         padding: 30px 15px;
+
+        /* Ocupa el 90% del ancho */
         width: 90%;
+
+        /* El tamaño incluye espacios y bordes */
         box-sizing: border-box;
     }
 
     .main__section__rutas {
+        /* Altura automática en móviles */
         height: auto;
+
+        /* Menos espacio entre botones */
         gap: 20px;
+
+        /* Espacio abajo - 40 pixeles */
         margin-bottom: 40px;
     }
 
     .section__agg,
     .section__fin_regis {
+        /* Altura automática en móviles */
         height: auto;
 
+        /* Esquinas redondeadas */
         border-radius: 8px;
+
+        /* Ocupa el 80% del ancho */
         width: 80%;
     }
 }
 
+/* 
+   BOTONES DE AGREGAR Y FINALIZADOS
+   Los enlaces para agregar proveedores o ver finalizados
+ */
 .section__agg,
 .section__fin_regis {
+    /* Espacio interno - 10 pixeles */
     padding: 10px;
+
+    /* Altura del botón - 120 pixeles */
     height: 120px;
+
+    /* Sin subrayado del enlace */
     text-decoration: none;
+
+    /* Color negro para el texto */
     color: var(--color-letras);
 }
 
+/* 
+   TÍTULOS EN LA SECCIÓN DE RUTAS
+   Los textos de cada opción
+ */
 .main__section__rutas h3 {
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
 }

@@ -1,43 +1,119 @@
-main{
+
+/* 
+   ÁREA PRINCIPAL DE LA PÁGINA
+   El contenedor central donde va todo el contenido
+ */
+main {
+    /* Usa flexbox para organizar los elementos */
     display: flex;
+
+    /* Se ubica en la zona "main" de la cuadrícula */
     grid-area: main;
+
+    /* Los elementos se apilan de arriba hacia abajo */
     flex-direction: column;
+
+    /* Centra el contenido verticalmente */
     justify-content: center;
+
+    /* Centra el texto */
     text-align: center;
+
+    /* Ocupa toda la altura disponible */
     height: 100%;
+
+    /* Color de fondo - blanco semitransparente */
     background-color: var(--color-fondo);
+
+    /* Espacio entre los elementos - 10 pixeles */
     gap: 10px;
-    cursor: default; /*evita que el cursor cambien en elementos que no se necesitan */
-    user-select: none; /*sirve para que el usuario no seleccione texto pero lo use para que no se vea como si estuviera escibiendo */
 
+    /* El cursor normal (flecha) en todo el área */
+    /* Evita que cambie a manito o cursor de texto */
+    cursor: default;
+
+    /* Evita que el usuario pueda seleccionar texto */
+    /* Da una apariencia más profesional */
+    user-select: none;
 }
-main img{
+
+/* 
+   IMAGEN DEL LOGO EN LA BIENVENIDA
+   La imagen que aparece en el centro
+ */
+main img {
+    /* Centra la imagen horizontalmente */
     margin: 0 auto;
-    width: 150px;
-    height: auto;
 
+    /* Ancho fijo de 150 pixeles */
+    width: 150px;
+
+    /* Altura automática para mantener proporción */
+    height: auto;
 }
-.main__bienvenida{
+
+/* 
+   TEXTO DE BIENVENIDA
+   El texto grande que dice "Bienvenido"
+ */
+.main__bienvenida {
+    /* Usa la fuente personalizada del sistema */
     font-family: 'mifuente';
+
+    /* Tamaño grande - 55 pixeles */
     font-size: 55px;
+
+    /* Color negro para las letras */
     color: var(--color-letras);
+
+    /* Letra fina, no tan gruesa */
     font-weight: lighter;
 }
-.contenedor_titulo{
-    width:100%;
-    height: 30px;
 
+/* 
+   CONTENEDOR DEL TÍTULO
+   Un espacio para organizar el área del título
+ */
+.contenedor_titulo {
+    /* Ocupa todo el ancho */
+    width: 100%;
+
+    /* Altura fija de 30 pixeles */
+    height: 30px;
 }
-.main__sistema{
+
+/*  
+   ENLACE AL SISTEMA
+   El texto que dice "Ingrese al sistema"
+ */
+.main__sistema {
+    /* Usa la fuente personalizada */
     font-family: "mifuene";
+
+    /* Quita el subrayado típico de los enlaces */
     text-decoration: none;
     text-decoration-color: none;
+
+    /* Color negro para el texto */
     color: var(--color-letras);
+
+    /* Tamaño de letra - 19 pixeles */
     font-size: 19px;
+
+    /* Letra en negrita */
     font-weight: bold;
-    transition: font-size 0.3s ease ;
-}
-.main__sistema:hover{
-    font-size: 21px;
+
+    /* Animación suave cuando cambia el tamaño */
+    /* Dura 0.3 segundos */
+    transition: font-size 0.3s ease;
 }
 
+/*      
+   EFECTO AL PASAR EL MOUSE
+   Cuando el usuario pone el cursor encima
+ */
+.main__sistema:hover {
+    /* El texto crece un poco - a 21 pixeles */
+    /* Esto indica que es un elemento clickeable */
+    font-size: 21px;
+}

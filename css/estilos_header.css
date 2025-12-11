@@ -1,59 +1,104 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
 
+* {
+    /* Quita los márgenes (espacios externos) por defecto */
+    margin: 0;
+
+    /* Quita los espacios internos por defecto */
+    padding: 0;
+
+    /* Hace que el tamaño incluya bordes y espacios internos */
+    /* Esto facilita calcular los tamaños correctamente */
+    box-sizing: border-box;
 }
 
 @font-face {
+
     font-family: 'MiFuente';
+
+    /* Ubicación del archivo de la fuente */
     src: url("/assets/Abhaya_Libre/AbhayaLibre-Regular.ttf");
+
+    /* Estilo normal (no cursiva) */
     font-style: normal;
 }
 
+
 body {
+    /* Usa un sistema de cuadrícula para organizar */
     display: grid;
+
+    /* Define tres filas: automática, flexible, automática */
+    /* El encabezado y pie se ajustan a su contenido */
+    /* El contenido principal ocupa el espacio restante */
     grid-template-rows: auto 1fr auto;
+
+    /* Nombra las áreas de la cuadrícula */
     grid-template-areas:
         "header"
         "main"
         "footer";
+
+    /* Altura automática pero mínimo toda la pantalla */
     height: auto;
     min-height: 100vh;
+
+    /* Evita que aparezca barra de desplazamiento horizontal */
     overflow-x: hidden;
-    /* Prevenir desplazamiento horizontal en la página misma */
 }
 
 main {
+    /* Se ubica en la zona "main" de la cuadrícula */
     grid-area: main;
+
+    /* Ocupa todo el ancho disponible */
     width: 100%;
 }
 
 header {
+    /* Se ubica en la zona "header" de la cuadrícula */
     grid-area: header;
+
+    /* Usa flexbox para alinear elementos */
     display: flex;
+
+    /* Color de fondo - azul claro de Root.css */
     background-color: var(--color-header);
+
+    /* Línea negra en la parte de abajo del encabezado */
     border-bottom: 2px solid black;
+
+    /* Esquinas redondeadas en la parte inferior */
     border-bottom-left-radius: 30px;
     border-bottom-right-radius: 30px;
-    align-items: center;
-    width: 100%;
-    height: 120px;
 
+    /* Centra los elementos verticalmente */
+    align-items: center;
+
+    /* Ocupa todo el ancho */
+    width: 100%;
+
+    /* Altura fija de 120 pixeles */
+    height: 120px;
 }
 
 .navbar__logo {
+    /* Altura del logo - 80 pixeles */
     height: 80px;
 }
 
+
+/* DISEÑO PARA CELULARES Y PANTALLAS PEQUEÑAS */
+/* Se activa cuando la pantalla tiene menos  */
+/* de 768 pixeles de ancho (celulares)       */
+
 @media (max-width: 768px) {
     header {
+        /* En celulares, el encabezado es más pequeño */
         height: 80px;
-        /* Altura reducida */
     }
 
     .navbar__logo {
+        /* En celulares, el logo es más pequeño */
         height: 50px;
-        /* Logo más pequeño */
     }
 }

@@ -1,0 +1,253 @@
+/* ==================================================
+   PANEL DE ADMINISTRADOR - ESTILOS MAIN
+   ================================================== */
+
+/* Contenedor principal */
+.main-panel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    flex: 1;
+    background-color: var(--fondo-pagina, #f4f7f6);
+    font-family: "mifuente";
+}
+
+/* Tarjeta del administrador */
+.admin-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 450px;
+    width: 100%;
+    border: 1px solid #e0e0e0;
+}
+
+/* Encabezado de la tarjeta */
+.admin-card__header {
+    background-color: var(--color-primario, #004B76);
+    padding: 12px;
+    text-align: center;
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.admin-card__icono-grande {
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+}
+
+.admin-card__titulo {
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: "mifuente";
+}
+
+/* Información del admin */
+.admin-card__info {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.admin-card__avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--color-primario, #004B76);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 12px;
+}
+
+.admin-card__avatar i {
+    font-size: 2rem;
+    color: white;
+}
+
+.admin-card__datos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-card__dato {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.admin-card__dato>i {
+    font-size: 0.9rem;
+    color: var(--color-primario, #004B76);
+    width: 18px;
+    text-align: center;
+}
+
+.admin-card__campo {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.admin-card__label {
+    font-size: 0.65rem;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    font-family: "mifuente";
+}
+
+.admin-card__valor {
+    font-size: 0.85rem;
+    color: var(--color-texto-secundario, #2c3e50);
+    font-weight: 500;
+    font-family: "mifuente";
+}
+
+.admin-card__valor--badge {
+    display: inline-block;
+    background: #d1f2eb;
+    color: #16a085;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+}
+
+/* Opciones de gestión */
+.admin-card__opciones {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.admin-card__subtitulo {
+    font-size: 0.8rem;
+    color: var(--color-texto-secundario, #2c3e50);
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-family: "mifuente";
+}
+
+.admin-card__enlaces {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.admin-card__enlace {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--color-texto-secundario, #2c3e50);
+    font-size: 0.8rem;
+    border: 1px solid #e0e0e0;
+    font-family: "mifuente";
+}
+
+.admin-card__enlace:hover {
+    background: var(--color-primario, #004B76);
+    color: white;
+    border-color: var(--color-primario, #004B76);
+}
+
+.admin-card__enlace i {
+    font-size: 0.9rem;
+    width: 16px;
+    text-align: center;
+}
+
+/* Botones de acción */
+.admin-card__acciones {
+    padding: 12px 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.admin-card__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: "mifuente";
+}
+
+.admin-card__btn--regresar {
+    background: #f8f9fa;
+    color: var(--color-texto-secundario, #2c3e50);
+    border: 1px solid #e0e0e0;
+}
+
+.admin-card__btn--regresar:hover {
+    background: #e8e8e8;
+}
+
+.admin-card__btn--cerrar {
+    background: var(--color-peligro, #e74c3c);
+    color: white;
+    border: none;
+}
+
+.admin-card__btn--cerrar:hover {
+    background: #c0392b;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media screen and (max-width: 500px) {
+    .main-panel {
+        padding: 10px;
+    }
+
+    .admin-card__header {
+        padding: 10px;
+    }
+
+    .admin-card__icono-grande {
+        font-size: 1.5rem;
+    }
+
+    .admin-card__titulo {
+        font-size: 1rem;
+    }
+
+    .admin-card__info {
+        padding: 12px;
+    }
+
+    .admin-card__avatar {
+        width: 45px;
+        height: 45px;
+    }
+
+    .admin-card__avatar i {
+        font-size: 1.8rem;
+    }
+
+    .admin-card__opciones {
+        padding: 10px 12px;
+    }
+
+    .admin-card__enlaces {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-card__acciones {
+        padding: 10px 12px;
+        flex-direction: column;
+    }
+
+    .admin-card__btn {
+        width: 100%;
+    }
+}

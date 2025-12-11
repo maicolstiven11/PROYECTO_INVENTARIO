@@ -1,54 +1,135 @@
-main{
+
+/* 
+   ÁREA PRINCIPAL DE LA PÁGINA
+   El contenedor central donde va todo
+ */
+main {
+    /* Usa flexbox para organizar elementos */
     display: flex;
+
+    /* Se ubica en la zona "main" de la cuadrícula */
     grid-area: main;
+
+    /* Los elementos se apilan de arriba hacia abajo */
     flex-direction: column;
+
+    /* Centra el contenido verticalmente */
     justify-content: center;
+
+    /* Centra el texto */
     text-align: center;
+
+    /* Ocupa toda la altura disponible */
     height: 100%;
+
+    /* Color de fondo - blanco semitransparente */
     background-color: var(--color-fondo);
-    cursor: default; /*evita que el cursor cambien en elementos que no se necesitan */
-    user-select: none; /*sirve para que el usuario no seleccione texto pero lo use para que no se vea como si estuviera escibiendo */
 
+    /* Cursor normal, no cambia al pasar */
+    cursor: default;
 
+    /* Evita selección de texto para apariencia profesional */
+    user-select: none;
 }
-.main__titulo{
+
+/* 
+   TÍTULO PRINCIPAL
+   El texto que dice "Bienvenido"
+ */
+.main__titulo {
+    /* Tamaño de letra - 30 pixeles */
     font-size: 30px;
+
+    /* Espacio abajo del título - 6 pixeles */
     margin-bottom: 6px;
+
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Letra fina, ligera */
     font-weight: lighter;
-    color: var(--color-letras);
 
+    /* Color negro para el texto */
+    color: var(--color-letras);
 }
 
-.main__subtitulo{
+/* 
+   SUBTÍTULO
+   El texto debajo del título principal
+ */
+.main__subtitulo {
+    /* Fuente personalizada del sistema */
     font-family: "mifuente";
+
+    /* Tamaño de letra - 28 pixeles */
     font-size: 28px;
+
+    /* Letra en negrita */
     font-weight: bold;
+
+    /* Espacio grande abajo - 30 pixeles */
     margin-bottom: 30px;
+
+    /* Color negro para el texto */
     color: var(--color-letras);
 }
 
-.seccion__inicioResgistrar{
+/* 
+   SECCIÓN DE PESTAÑAS
+   Las opciones "Iniciar Sesión" y "Registrarse"
+ */
+.seccion__inicioResgistrar {
+    /* Usa flexbox para alinear horizontalmente */
     display: flex;
+
+    /* Centra el texto */
     text-align: center;
+
+    /* Centra los elementos horizontalmente */
     justify-content: center;
+
+    /* Centra los elementos verticalmente */
     align-items: center;
+
+    /* Espacio entre las dos opciones - 60 pixeles */
     gap: 60px;
+
+    /* Espacio grande abajo - 35 pixeles */
     margin-bottom: 35px;
 }
 
-.seccion__inicioResgistrar a{
+/* 
+   ENLACES DE LAS PESTAÑAS
+   Los textos clickeables de cada opción
+ */
+.seccion__inicioResgistrar a {
+    /* Quita el subrayado de los enlaces */
     text-decoration: none;
+
+    /* Tamaño de letra - 18 pixeles */
     font-size: 18px;
 }
 
-.inicio_sesion{
+/* 
+   PESTAÑA "INICIAR SESIÓN" ACTIVA
+   Resaltada para mostrar que está seleccionada
+ */
+.inicio_sesion {
+    /* Fuente personalizada */
     font-family: "mifuente";
+
+    /* Color azul para destacar */
     color: #004B76;
-    border-bottom: 2px solid black ;
+
+    /* Línea negra abajo para mostrar que está activa */
+    border-bottom: 2px solid black;
 }
 
-
-.registrarse{
+/*  
+   PESTAÑA "REGISTRARSE" INACTIVA
+   En gris porque no está seleccionada
+ */
+.registrarse {
+    /* Color gris para indicar que no está activa */
     color: #A6A6A6;
 }

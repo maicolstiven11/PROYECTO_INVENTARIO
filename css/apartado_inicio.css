@@ -1,4 +1,12 @@
+
+/* Importa los colores principales del sistema */
 @import url(/css/Variables_root/Root.css);
+
+/* Importa los estilos del encabezado (parte de arriba) */
 @import url(/css/estilos_header.css);
+
+/* Importa los estilos del pie de página (parte de abajo) */
 @import url(/css/estilos_footer.css);
+
+/* Importa los estilos del contenido principal de la página de inicio */
 @import url(/css/index_estilos/index_inicio__main.css);

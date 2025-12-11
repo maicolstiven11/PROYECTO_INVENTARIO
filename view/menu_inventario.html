@@ -20,14 +20,15 @@
         <aside class="aside">
             <h2 class="aside__title">Contabilidad-Sistematica</h2>
 
-            <div class="user-profile">
-                <!-- <img src="/assets/img/perfil.png" alt="Perfil" class="user-profile__img"> -->
+            <!-- Perfil de usuario - ahora es un enlace a la vista de admin -->
+            <a href="/view/panel_administrador.html" class="user-profile user-profile--link">
                 <i class="fa-solid fa-circle-user user-profile__icon"></i>
                 <div class="user-profile__info">
                     <p class="user-profile__name">Administrador</p>
                     <span class="user-profile__role badge-admin">Admin</span>
                 </div>
-            </div>
+                <i class="fa-solid fa-chevron-right user-profile__arrow"></i>
+            </a>
 
             <nav class="aside__nav">
 
@@ -51,12 +52,17 @@
                     Editar productos
                 </a>
 
+                <a href="/view/lista_proveedores.html" class="aside__link">
+                    <i class="fa-solid fa-truck-field aside__icon"></i>
+                    Editar proveedores
+                </a>
+
                 <a href="/view/visualizar_informes.html" class="aside__link">
                     <i class="fa-solid fa-file-invoice aside__icon"></i>
                     Visualizar informes
                 </a>
 
-                <div class="aside__divider"></div> <!-- Separator -->
+                <div class="aside__divider"></div>
 
                 <a href="/view/Menu_sistema.html" class="aside__link btn-salir">
                     <i class="fa-solid fa-arrow-right-from-bracket aside__icon"></i>

@@ -1,5 +1,15 @@
+
+/* Importa los colores principales del sistema */
 @import url(Variables_root/Root.css);
+
+/* Importa los estilos del encabezado (parte de arriba) */
 @import url(/css/estilos_header.css);
+
+/* Importa los estilos del pie de página (parte de abajo) */
 @import url(/css/estilos_footer.css);
+
+/* Importa los estilos del área principal de gastos */
 @import url(Gasto_registrado/RegistroGasto__main.css);
+
+/* Importa los estilos del formulario de gastos */
 @import url(Gasto_registrado/RegistroGasto__main__form.css);

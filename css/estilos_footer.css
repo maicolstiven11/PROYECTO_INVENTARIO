@@ -1,13 +1,26 @@
+
 footer {
+    /* Ubica el pie de página en la zona "footer" de la página */
     grid-area: footer;
+
+    /* Color de fondo - usa el azul claro definido en Root.css */
     background-color: var(--color-footer);
+
+    /* Altura del pie de página - 112 pixeles */
     height: 112.2px;
+
+    /* Línea negra arriba del pie de página */
     border-top: 2px solid black;
 }
 
+/* ========================================= */
+/* DISEÑO PARA CELULARES Y PANTALLAS PEQUEÑAS */
+/* Se activa cuando la pantalla tiene menos  */
+/* de 768 pixeles de ancho                   */
+/* ========================================= */
 @media (max-width: 768px) {
     footer {
+        /* En celulares, el pie es más pequeño - 60 pixeles */
         height: 60px;
-        /* Altura reducida */
     }
 }

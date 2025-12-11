@@ -1,36 +1,94 @@
-*{
+
+/* 
+   ESTILOS GENERALES
+   Se aplican a todos los elementos de la página
+*/
+* {
+    /* Quita los márgenes por defecto */
     margin: 0;
+
+    /* Quita los espacios internos por defecto */
     padding: 0;
+
+    /* El tamaño incluye bordes y espacios */
     box-sizing: border-box;
 }
 
-@font-face{
+/* 
+   FUENTE PERSONALIZADA
+   Carga la letra especial del sistema
+*/
+@font-face {
+    /* Nombre de la fuente */
     font-family: 'mifuente';
-    src: url("/assets/Abhaya_Libre/AbhayaLibre-Regular.ttf") ; 
+
+    /* Ubicación del archivo de fuente */
+    src: url("/assets/Abhaya_Libre/AbhayaLibre-Regular.ttf");
+
+    /* Estilo normal (no cursiva) */
     font-style: normal;
 }
 
-body{
+/* 
+   ESTRUCTURA DEL CUERPO
+   Organiza la página en encabezado, contenido y pie
+*/
+body {
+    /* Usa cuadrícula para organizar */
     display: grid;
+
+    /* Tres filas: auto, flexible, auto */
     grid-template-rows: auto 1fr auto;
+
+    /* Nombra las áreas */
     grid-template-areas:
         "header"
+        /* Encabezado arriba */
         "main"
+        /* Contenido en medio */
         "footer";
+    /* Pie abajo */
+
+    /* Mínimo ocupa toda la pantalla */
     min-height: 100vh;
 }
-header{
+
+/* 
+   ENCABEZADO
+   La barra superior con el logo
+*/
+header {
+    /* Se ubica en la zona del encabezado */
     grid-area: header;
+
+    /* Usa flexbox para alinear elementos */
     display: flex;
+
+    /* Color de fondo azul claro */
     background-color: var(--color-header);
+
+    /* Línea negra en la parte de abajo */
     border-bottom: 2px solid black;
+
+    /* Esquinas redondeadas abajo */
     border-bottom-left-radius: 30px;
     border-bottom-right-radius: 30px;
-    align-items: center ;
+
+    /* Centra los elementos verticalmente */
+    align-items: center;
+
+    /* Ocupa todo el ancho */
     width: 100%;
+
+    /* Altura de 120 pixeles */
     height: 120px;
 }
-.navbar__logo{
-    height: 80px;
 
+/* 
+   LOGO DEL ENCABEZADO
+   La imagen del logo
+*/
+.navbar__logo {
+    /* Altura del logo - 80 pixeles */
+    height: 80px;
 }
