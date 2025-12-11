@@ -18,56 +18,56 @@
     <main>
         <h2>GESTIÓN DE PRODUCTOS</h2>
 
-        <div class="tabla-contenedor">
-            <table class="tabla-productos">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Precio</th>
-                        <th>Marca</th>
-                        <th>Tipo</th>
-                        <th>Cantidad</th>
-                        <th>Acciones</th>
+        <div class="table-container">
+            <table class="data-table">
+                <thead class="data-table__head">
+                    <tr class="data-table__row data-table__row--head">
+                        <th class="data-table__cell data-table__cell--head">ID</th>
+                        <th class="data-table__cell data-table__cell--head">Nombre</th>
+                        <th class="data-table__cell data-table__cell--head">Precio</th>
+                        <th class="data-table__cell data-table__cell--head">Marca</th>
+                        <th class="data-table__cell data-table__cell--head">Tipo</th>
+                        <th class="data-table__cell data-table__cell--head">Cantidad</th>
+                        <th class="data-table__cell data-table__cell--head">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="data-table__body">
                     <!-- Datos de ejemplo -->
-                    <tr>
-                        <td>001</td>
-                        <td>Cerveza Poker</td>
-                        <td>$4,000</td>
-                        <td>Bavaria</td>
-                        <td>Bebidas</td>
-                        <td>50</td>
-                        <td>
-                            <a href="#modal-editar" class="btn-accion btn-editar">
+                    <tr class="data-table__row">
+                        <td class="data-table__cell" data-label="ID">001</td>
+                        <td class="data-table__cell" data-label="Nombre">Cerveza Poker</td>
+                        <td class="data-table__cell" data-label="Precio">$4,000</td>
+                        <td class="data-table__cell" data-label="Marca">Bavaria</td>
+                        <td class="data-table__cell" data-label="Tipo">Bebidas</td>
+                        <td class="data-table__cell" data-label="Cantidad">50</td>
+                        <td class="data-table__cell" data-label="Acciones">
+                            <a href="#modal-editar" class="button button--edit">
                                 <i class="fa-solid fa-pen-to-square"></i> Editar
                             </a>
                         </td>
                     </tr>
-                    <tr>
-                        <td>002</td>
-                        <td>Papas Margarita</td>
-                        <td>$3,000</td>
-                        <td>Margarita</td>
-                        <td>Snacks</td>
-                        <td>20</td>
-                        <td>
-                            <a href="#modal-editar" class="btn-accion btn-editar">
+                    <tr class="data-table__row">
+                        <td class="data-table__cell" data-label="ID">002</td>
+                        <td class="data-table__cell" data-label="Nombre">Papas Margarita</td>
+                        <td class="data-table__cell" data-label="Precio">$3,000</td>
+                        <td class="data-table__cell" data-label="Marca">Margarita</td>
+                        <td class="data-table__cell" data-label="Tipo">Snacks</td>
+                        <td class="data-table__cell" data-label="Cantidad">20</td>
+                        <td class="data-table__cell" data-label="Acciones">
+                            <a href="#modal-editar" class="button button--edit">
                                 <i class="fa-solid fa-pen-to-square"></i> Editar
                             </a>
                         </td>
                     </tr>
-                    <tr>
-                        <td>003</td>
-                        <td>Coca Cola</td>
-                        <td>$3,500</td>
-                        <td>Coca Cola</td>
-                        <td>Bebidas</td>
-                        <td>30</td>
-                        <td>
-                            <a href="#modal-editar" class="btn-accion btn-editar">
+                    <tr class="data-table__row">
+                        <td class="data-table__cell" data-label="ID">003</td>
+                        <td class="data-table__cell" data-label="Nombre">Coca Cola</td>
+                        <td class="data-table__cell" data-label="Precio">$3,500</td>
+                        <td class="data-table__cell" data-label="Marca">Coca Cola</td>
+                        <td class="data-table__cell" data-label="Tipo">Bebidas</td>
+                        <td class="data-table__cell" data-label="Cantidad">30</td>
+                        <td class="data-table__cell" data-label="Acciones">
+                            <a href="#modal-editar" class="button button--edit">
                                 <i class="fa-solid fa-pen-to-square"></i> Editar
                             </a>
                         </td>
@@ -80,26 +80,26 @@
             <i class="fa-solid fa-arrow-left"></i> Regresar
         </a>
     </main>
-    <div id="modal-editar" class="modal-editar">
-        <div class="modal-content">
-            <a href="#" class="btn-cerrar">&times;</a>
-            <h3>Editar Producto</h3>
-            <form>
+    <div id="modal-editar" class="modal">
+        <div class="modal__content">
+            <a href="#" class="modal__close">&times;</a>
+            <h3 class="modal__title">Editar Producto</h3>
+            <form class="modal__form">
                 <div class="form-group">
-                    <label>Nombre del Producto</label>
-                    <input type="text" value="Cerveza Poker">
+                    <label class="form-group__label">Nombre del Producto</label>
+                    <input class="form-group__input" type="text" value="Cerveza Poker">
                 </div>
                 <div class="form-group">
-                    <label>Precio</label>
-                    <input type="text" value="$4,000">
+                    <label class="form-group__label">Precio</label>
+                    <input class="form-group__input" type="text" value="$4,000">
                 </div>
                 <div class="form-group">
-                    <label>Cantidad</label>
-                    <input type="number" value="50">
+                    <label class="form-group__label">Cantidad</label>
+                    <input class="form-group__input" type="number" value="50">
                 </div>
-                <div class="modal-actions">
-                    <a href="#" class="btn-cancelar">Cancelar</a>
-                    <a href="#" class="btn-aceptar">Aceptar</a>
+                <div class="modal__actions">
+                    <a href="#" class="button button--cancel">Cancelar</a>
+                    <a href="#" class="button button--accept">Aceptar</a>
                 </div>
             </form>
         </div>

@@ -19,13 +19,13 @@ h2 {
     color: #333;
 }
 
-.bar-detalle-container {
+.contenedor-detalle-bar {
     display: flex;
     justify-content: center;
     margin-bottom: 30px;
 }
 
-.bar-card {
+.tarjeta-bar {
     background-color: white;
     padding: 30px;
     border-radius: 12px;
@@ -34,7 +34,7 @@ h2 {
     max-width: 500px;
 }
 
-.bar-card h3 {
+.tarjeta-bar h3 {
     margin-top: 0;
     color: #2c3e50;
     border-bottom: 2px solid #eee;
@@ -42,7 +42,7 @@ h2 {
     margin-bottom: 20px;
 }
 
-.bar-card p {
+.tarjeta-bar p {
     margin: 10px 0;
     font-size: 16px;
     color: #555;
@@ -94,18 +94,33 @@ h2 {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Media Queries */
+/* Consultas de Medios */
 @media (max-width: 600px) {
     main {
-        padding: 15px;
+        padding: 20px 15px;
         width: 90%;
+        margin-top: 10px;
     }
 
-    .bar-card {
+    .tarjeta-bar {
         padding: 20px;
+        box-shadow: none;
+        /* Simplificar en móvil */
+        border: 1px solid #eee;
     }
 
     h3 {
         font-size: 20px;
+    }
+
+    .acciones-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .btn-ir-menu {
+        width: 100%;
+        box-sizing: border-box;
     }
 }

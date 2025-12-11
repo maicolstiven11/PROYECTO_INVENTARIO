@@ -20,44 +20,37 @@ h2 {
     font-size: 2rem;
 }
 
-.tabla-contenedor {
+.table-container {
     overflow-x: auto;
     margin-bottom: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.tabla-pedidos {
+.data-table {
     width: 100%;
     border-collapse: collapse;
     background: white;
     min-width: 800px;
 }
 
-.tabla-pedidos thead {
-    background-color: var(--color-header);
+.data-table__head {
+    background-color: var(--color-encabezado-tabla);
     color: white;
 }
 
-.tabla-pedidos th,
-.tabla-pedidos td {
+.data-table__cell {
     padding: 15px;
     text-align: left;
     border-bottom: 1px solid #eee;
+    color: #333;
 }
 
-.tabla-pedidos th {
+.data-table__head .data-table__cell {
     font-weight: bold;
     text-transform: uppercase;
     font-size: 0.9rem;
-}
-
-.tabla-pedidos tr:hover {
-    background-color: #f9f9f9;
-}
-
-.tabla-pedidos td {
-    color: #333;
+    color: white;
 }
 
 .btn-regresar {
@@ -96,4 +89,67 @@ h2 {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 768px) {
+    main {
+        padding: 15px;
+        width: 95%;
+    }
+
+    .table-container {
+        box-shadow: none;
+        overflow-x: visible;
+    }
+
+    .data-table {
+        min-width: 100%;
+    }
+
+    .data-table,
+    .data-table__body,
+    .data-table__row,
+    .data-table__cell {
+        display: block;
+        width: 100%;
+    }
+
+    .data-table__head {
+        display: none;
+    }
+
+    .data-table__row {
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .data-table__cell {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+        font-size: 0.95rem;
+    }
+
+    .data-table__cell:last-child {
+        border-bottom: none;
+    }
+
+    .data-table__cell::before {
+        content: attr(data-label);
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        color: #555;
+        text-align: left;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
 }

@@ -2,6 +2,7 @@
 body {
     background-color: #f0f2f5;
     min-height: 100vh;
+    font-family: "mifuente";
 }
 
 main {
@@ -213,4 +214,29 @@ main {
     text-decoration: none;
     border-radius: 8px;
     font-weight: bold;
+}
+
+/* Media Queries para Gestion Trabajadores */
+@media (max-width: 600px) {
+    .trabajadores-list {
+        grid-template-columns: 1fr;
+        /* Force single column */
+    }
+
+    .modal-content {
+        padding: 20px;
+        width: 85%;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-actions .btn-regresar,
+    .modal-actions .btn-asignar {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
 }

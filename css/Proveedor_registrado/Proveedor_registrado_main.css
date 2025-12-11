@@ -1,0 +1,37 @@
+main {
+    display: flex;
+    grid-area: main;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    background-color: var(--color-fondo);
+    cursor: default;
+    user-select: none;
+    font-family: "mifuente";
+}
+
+.main__titulo {
+    position: absolute;
+    font-family: "mifuente";
+    font-size: 28px;
+    font-weight: bold;
+    top: 140px;
+    left: 30px;
+    color: var(--color-letras);
+}
+
+/* Media Queries para Proveedor Registrado (Main) */
+@media (max-width: 768px) {
+    .main__titulo {
+        position: static;
+        margin-bottom: 20px;
+        font-size: 24px;
+        text-align: center;
+    }
+
+    main {
+        padding-top: 40px;
+        justify-content: flex-start;
+    }
+}

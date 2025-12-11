@@ -1,37 +1,51 @@
 /* Estilos para el modal de confirmación */
-.modal-overlay {
+* {
+    font-family: "mifuente";
+}
+
+.fondo-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    /* Fondo oscuro semitransparente */
+    background-color: rgba(0, 0, 0, 0.6);
+    /* Fondo semitransparente estandar */
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
 }
 
-.modal-content {
+.contenido-modal {
     background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
     text-align: center;
-    max-width: 400px;
+    max-width: 350px;
+    /* Mas pequeño */
     width: 90%;
-    animation: fadeIn 0.3s ease-in-out;
+    animation: aparecer 0.3s ease-in-out;
+    border-top: 5px solid #e74c3c;
+    /* Detalle de color de alerta */
 }
 
-.modal-content h3 {
+.contenido-modal h3 {
     margin-top: 0;
     color: #333;
-    font-size: 20px;
-    margin-bottom: 20px;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    text-shadow: none;
 }
 
-.modal-actions {
+.contenido-modal p {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+}
+
+.acciones-modal {
     display: flex;
     justify-content: center;
     gap: 15px;
@@ -40,10 +54,12 @@
 .btn-confirmar,
 .btn-cancelar {
     padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 6px;
     text-decoration: none;
     font-weight: bold;
-    transition: background-color 0.3s, transform 0.2s;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    box-shadow: none;
 }
 
 .btn-confirmar {
@@ -53,20 +69,22 @@
 
 .btn-confirmar:hover {
     background-color: #c0392b;
-    transform: scale(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
 }
 
 .btn-cancelar {
-    background-color: #95a5a6;
-    color: white;
+    background-color: #ecf0f1;
+    color: #7f8c8d;
 }
 
 .btn-cancelar:hover {
-    background-color: #7f8c8d;
-    transform: scale(1.05);
+    background-color: #bdc3c7;
+    color: #2c3e50;
+    transform: translateY(-2px);
 }
 
-@keyframes fadeIn {
+@keyframes aparecer {
     from {
         opacity: 0;
         transform: translateY(-20px);
@@ -80,12 +98,12 @@
 
 /* Media Queries para Modal */
 @media (max-width: 600px) {
-    .modal-content {
+    .contenido-modal {
         padding: 20px;
         width: 85%;
     }
 
-    .modal-content h3 {
+    .contenido-modal h3 {
         font-size: 18px;
     }
 
@@ -93,5 +111,19 @@
     .btn-cancelar {
         padding: 8px 16px;
         font-size: 14px;
+    }
+}
+
+@media (max-width: 400px) {
+    .acciones-modal {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-confirmar,
+    .btn-cancelar {
+        width: 100%;
+        box-sizing: border-box;
+        /* Asegurar que el relleno no rompa el ancho */
     }
 }

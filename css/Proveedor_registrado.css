@@ -1,0 +1,5 @@
+@import url(Variables_root/Root.css);
+@import url(/css/estilos_header.css);
+@import url(/css/estilos_footer.css);
+@import url(Proveedor_registrado/Proveedor_registrado_main.css);
+@import url(Proveedor_registrado/Proveedor_registrado_main__form.css);

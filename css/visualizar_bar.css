@@ -1,4 +1,4 @@
-@import url(../Variables_root/Root.css);
-@import url(../estilos_header.css);
+@import url(variables_root/Root.css);
+@import url(estilos_header.css);
 @import url(visualizar_bar/visualizar_bar_main.css);
-@import url(../estilos_footer.css);
+@import url(estilos_footer.css);

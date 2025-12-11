@@ -89,13 +89,7 @@ h2 {
     color: #007bff;
 }
 
-.card-pedidos {
-    border-left: 5px solid #ffc107;
-}
 
-.card-pedidos .card-informe__valor {
-    color: #ffc107;
-}
 
 
 /* Seccion de Graficos / Barras */
