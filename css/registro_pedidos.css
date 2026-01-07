@@ -1,5 +1,5 @@
-@import url(Variables_root/Root.css);
-@import url(estilos_header.css);
-@import url(estilos_footer.css);
-@import url(Registro_pedidos/RegistroPedidos__main.css);
-@import url(Registro_pedidos/RegistroPedidos__main__form.css);
+@import url("Variables_root/Root.css");
+@import url("estilos_header.css");
+@import url("estilos_footer.css");
+@import url("Registro_pedidos/RegistroPedidos__main.css");
+@import url("Registro_pedidos/RegistroPedidos__main__form.css");

@@ -1,11 +1,11 @@
 /* Importa los colores principales del sistema */
-@import url(variables_root/Root.css);
+@import url("Variables_root/Root.css");
 
 /* Importa el encabezado específico de ventas */
-@import url(agregar_venta/agregar_venta__header.css);
+@import url("agregar_venta/agregar_venta__header.css");
 
 /* Importa los estilos del contenido de ventas */
-@import url(agregar_venta/agregar_venta__main.css);
+@import url("agregar_venta/agregar_venta__main.css");
 
 /* Importa el pie de página específico de ventas */
-@import url(agregar_venta/agregar_venta__footer.css);
+@import url("agregar_venta/agregar_venta__footer.css");

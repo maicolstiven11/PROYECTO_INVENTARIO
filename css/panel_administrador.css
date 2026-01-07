@@ -3,7 +3,7 @@
    Importa los estilos de header, main y footer
    ================================================== */
 
-@import url(Variables_root/Root.css);
-@import url(estilos_header.css);
-@import url(panel_administrador/panel_administrador__main.css);
-@import url(estilos_footer.css);
+@import url("Variables_root/Root.css");
+@import url("estilos_header.css");
+@import url("panel_administrador/panel_administrador__main.css");
+@import url("estilos_footer.css");

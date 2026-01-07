@@ -1,15 +1,14 @@
-
 /* Importa los colores principales del sistema */
-@import url(Variables_root/Root.css);
+@import url("Variables_root/Root.css");
 
 /* Importa los estilos del encabezado (parte de arriba) */
-@import url(estilos_header.css);
+@import url("estilos_header.css");
 
 /* Importa los estilos de la lista de bares (si aplica) */
-@import url(lista_bares/Lista_bares_main.css);
+@import url("lista_bares/Lista_bares_main.css");
 
 /* Importa los estilos de la barra de confirmación de borrado */
-@import url(borrar_bar_confirmacion/borrar_bar_main.css);
+@import url("borrar_bar_confirmacion/borrar_bar_main.css");
 
 /* Importa los estilos del pie de página (parte de abajo) */
-@import url(estilos_footer.css);
+@import url("estilos_footer.css");

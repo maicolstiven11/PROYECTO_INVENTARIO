@@ -1,14 +1,14 @@
 /* Importa los colores principales del sistema */
-@import url(Variables_root/Root.css);
+@import url("Variables_root/Root.css");
 
 /* Importa los estilos del encabezado (parte de arriba) */
-@import url(estilos_header.css);
+@import url("estilos_header.css");
 
 /* Importa los estilos del pie de página (parte de abajo) */
-@import url(estilos_footer.css);
+@import url("estilos_footer.css");
 
 /* Importa los estilos del área principal de pedidos finalizados */
-@import url(Regis_pedidos_finaliz/Registro_pedidos_fin__main.css);
+@import url("Regis_pedidos_finaliz/Registro_pedidos_fin__main.css");
 
 /* Importa los estilos del formulario de pedidos finalizados */
-@import url(Regis_pedidos_finaliz/Registro_pedidos_fin__main__form.css);
+@import url("Regis_pedidos_finaliz/Registro_pedidos_fin__main__form.css");
