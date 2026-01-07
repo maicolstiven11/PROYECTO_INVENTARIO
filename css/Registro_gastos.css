@@ -8,7 +8,7 @@
 @import url("estilos_footer.css");
 
 /* Importa los estilos del área principal de registro de gastos */
-@import url("Registro_gastos_estilos/RegistroGastos__main.css");
+@import url("registro_gastos_estilos/RegistroGastos__main.css");
 
 /* Importa los estilos del formulario de registro de gastos */
-@import url("Registro_gastos_estilos/RegistroGastos__main__form.css");
+@import url("registro_gastos_estilos/RegistroGastos__main__form.css");
