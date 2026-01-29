@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro 2</title>
+  <link rel="stylesheet" href="../css/inicio_inv.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+  <header>
+    <nav class="navbar">
+      <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h1 class="main__titulo">Inicializacion de inventario: </h1>
+      <!-- Aquí pondremos el nombre del bar con JS -->
+      <h2 id="nombreBarTitulo" class="main__subtitulo"></h2>
+
+      <form class="main__formulario" action="../InventarioServlet" method="GET">
+        <!-- Inputs ocultos necesarios para el Servlet -->
+        <input type="hidden" name="action" value="iniciar">
+        <input type="hidden" id="idNegocioInput" name="idNegocio" value="">
+
+        <a href="Lista_bares.jsp" class="btn-regresar">
+          <i class="fa-solid fa-arrow-left"></i>
+        </a>
+
+        <div class="campo">
+          <label for="fecha" class="formulario__nombre"></label>
+          <input id="fecha" class="form__input_name" type="date" name="fecha" required>
+        </div>
+
+        <div class="form__iconTiposDoc">
+          <i class="fas fa-angle-down icono"></i>
+          <select name="tipo" class="form__tiposControl" required>
+            <option disabled selected value="">Seleccione tipo de control</option>
+            <option value="semanal">Semanal</option>
+            <option value="mensual">Mensual</option>
+          </select>
+        </div>
+
+        <div class="estilo_difuminado">
+          <button class="contenedor__btnRegistro">Finalizar</button>
+        </div>
+
+      </form>
+    </section>
+  </main>
+
+  <footer></footer>
+
+  <script>
+    // Script para autocompletar datos desde la URL
+    window.onload = function () {
+      // 1. Obtener parámetros de la URL
+      const params = new URLSearchParams(window.location.search);
+      const idNegocio = params.get('idNegocio');
+      const nombreBar = params.get('nombreBar');
+
+      // 2. Poner el nombre del bar en el título (si existe)
+      if (nombreBar) {
+        document.getElementById('nombreBarTitulo').textContent = nombreBar;
+      }
+
+      // 3. Poner el ID en el input oculto
+      if (idNegocio) {
+        document.getElementById('idNegocioInput').value = idNegocio;
+      }
+
+      // 4. Poner la fecha de hoy por defecto
+      document.getElementById('fecha').valueAsDate = new Date();
+    };
+  </script>
+
+</body>
+
+</html>

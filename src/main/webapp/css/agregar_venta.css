@@ -1,0 +1,63 @@
+/* Importa los colores principales del sistema */
+@import url("Variables_root/Root.css");
+
+/* Importa el encabezado específico de ventas */
+@import url("agregar_venta/agregar_venta__header.css");
+
+/* Importa los estilos del contenido de ventas */
+@import url("agregar_venta/agregar_venta__main.css");
+
+/* Importa el pie de página específico de ventas */
+@import url("agregar_venta/agregar_venta__footer.css");
+
+/* Estilos de tabla carrito (Movidos desde JSP) */
+.tabla-carrito {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+.tabla-carrito th,
+.tabla-carrito td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.tabla-carrito th {
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.btn-eliminar {
+    color: #e74c3c;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.mensaje-error {
+    color: white;
+    background-color: #e74c3c;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* Ajustes para Select2 */
+.select2-container .select2-selection--single {
+    height: 48px;
+    /* Altura similar al input original */
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 48px;
+    padding-left: 20px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 46px;
+}

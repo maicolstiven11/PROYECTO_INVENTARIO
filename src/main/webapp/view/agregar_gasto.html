@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Gasto</title>
+    <link rel="stylesheet" href="../css/agg_gasto.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+    <header>
+        <nav class="navbar">
+            <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
+        </nav>
+    </header>
+    <main>
+
+        <div class="gasto">
+            <div class="gasto__contenedor">
+
+                <h1 class="gasto__titulo">Registrar Gasto Diario</h1>
+
+                <form class="formulario-gasto" action="../GastoServlet" method="POST">
+
+                    <!-- DESCRIPCION -->
+                    <div class="formulario-gasto__grupo">
+                        <label for="descripcion" class="formulario-gasto__label">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" class="formulario-gasto__input"
+                            placeholder="Detalles del gasto..." rows="3" required></textarea>
+                    </div>
+
+                    <!-- FECHA -->
+                    <div class="formulario-gasto__grupo">
+                        <label for="fecha" class="formulario-gasto__label">Fecha</label>
+                        <input id="fecha" name="fecha" type="date" class="formulario-gasto__input" required>
+                    </div>
+
+                    <!-- CANTIDAD Y SUBTOTAL -->
+                    <div class="formulario-gasto__fila">
+                        <div class="formulario-gasto__grupo formulario-gasto__grupo--col">
+                            <label for="cantidad" class="formulario-gasto__label">Cantidad</label>
+                            <input id="cantidad" name="cantidad" type="number" class="formulario-gasto__input"
+                                placeholder="Ej: 1" min="1" required>
+                        </div>
+                        <div class="formulario-gasto__grupo formulario-gasto__grupo--col">
+                            <label for="subtotal" class="formulario-gasto__label">Subtotal</label>
+                            <input id="subtotal" name="subtotal" type="number" class="formulario-gasto__input"
+                                placeholder="Ej: 50000" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="formulario-gasto__pie">
+                        <a href="menu_inventario.html" class="btn-regresar">
+                            <i class="fa-solid fa-arrow-left"></i> Regresar
+                        </a>
+
+                        <button type="submit" class="formulario-gasto__boton">
+                            Registrar Gasto
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </main>
+    <footer>
+    </footer>
+    <script>
+        document.getElementById("fecha").valueAsDate = new Date();
+    </script>
+</body>
+
+</html>

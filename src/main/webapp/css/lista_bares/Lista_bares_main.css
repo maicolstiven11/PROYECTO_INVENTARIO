@@ -1,0 +1,192 @@
+body {
+  font-family: "mifuente";
+  margin: 0;
+}
+
+
+
+main {
+  margin: auto;
+  background-color: var(--color-fondo);
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  height: auto;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.lista-bares {
+  max-height: 350px;
+  overflow-y: scroll;
+  direction: rtl;
+  /* fuerza el scroll a la izquierda */
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  padding-left: 100px;
+  /* espacio para el scroll */
+
+}
+
+::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(217, 217, 217, 1) 50%, rgba(0, 0, 0, 1) 100%);
+
+
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.635);
+  border-radius: 10px;
+  border: 0.5px solid black;
+}
+
+
+.contenido-scroll {
+  direction: ltr;
+}
+
+.elemento-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.info-bar {
+  display: flex;
+  flex-direction: column;
+}
+
+.nombre {
+  font-weight: bold;
+}
+
+.estado {
+  color: red;
+  font-size: 14px;
+}
+
+.acciones {
+  display: flex;
+  margin-left: 105px;
+}
+
+.acciones img {
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  height: 40px;
+}
+
+a {
+  text-decoration: none;
+  display: flex;
+}
+
+.acciones {
+  display: flex;
+  gap: 20px;
+  padding: 23px;
+}
+
+.acciones a {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  color: #333;
+}
+
+.acciones a h3 {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  top: -35px;
+  color: black;
+  padding: 2px;
+  border-radius: 6px;
+  font-size: 14px;
+  opacity: 0;
+  /* oculto por defecto */
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  /* no bloquea clics */
+}
+
+.acciones a:hover h3 {
+  opacity: 1;
+  /* aparece al hacer hover */
+}
+
+
+
+.acciones a:hover img {
+  transform: scale(1.05);
+  /* efecto zoom al pasar */
+}
+
+.btn-regresar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--boton-regresar);
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 10px;
+}
+
+.btn-regresar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  main {
+    width: 90%;
+    padding: 15px;
+    height: auto;
+  }
+
+  .lista-bares {
+    padding-left: 0;
+    max-height: 60vh;
+  }
+
+  .elemento-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .acciones {
+    margin-left: 0;
+    margin-top: 10px;
+    justify-content: space-around;
+    width: 100%;
+    padding: 0;
+    flex-wrap: wrap;
+    /* Asegurar que las acciones se ajusten en pantallas pequeñas */
+  }
+
+  .acciones img {
+    height: 30px;
+  }
+
+
+}

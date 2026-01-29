@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro 2</title>
+    <link rel="stylesheet" href="../css/registro2.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
+        </nav>
+
+    </header>
+    <main>
+        <h1 class="main__titulo">Inicio sesion</h1>
+        <h2 class="main__subtitulo">Contabilidad-Sistematica</h2>
+        <section class="seccion__inicioResgistrar">
+            <a href="Inicio_sesion.html" class="inicio_sesion">Iniciar sesion</a>
+            <a href="#" class="registrarse">Registrarse</a>
+        </section>
+
+        <form class="main__formulario" action="../RegistroServlet" method="POST">
+            <!-- CAMPOS OCULTOS PARA RECIBIR DATOS DE LA PÁGINA ANTERIOR -->
+            <input type="hidden" id="hiddenNombre" name="nombre">
+            <input type="hidden" id="hiddenRol" name="rol">
+
+            <div>
+                <label for="telefono" class="Formulario__telefono"></label>
+                <input id="text" class="form__input_telefono" name="telefono1" required placeholder="Telefono 1*">
+            </div>
+
+            <div>
+                <label for="telefono" class="Formulario__telefono"></label>
+                <input id="text" class="form__input_telefono" name="telefono2" placeholder="Telefono 2">
+            </div>
+
+            <div class="campo">
+                <label for="email" class="formulario__email__icon"></label>
+                <input id="email" class="form__input_email" type="email" name="email1" required placeholder="Correo 1*">
+            </div>
+
+            <div class="campo">
+                <label for="email" class="formulario__email__icon"></label>
+                <input id="email" class="form__input_email" type="email" name="email2" placeholder="Correo 2">
+            </div>
+
+            <div class="campo">
+                <label for="password" class="formulario__password__icon"></label>
+                <input id="password" class="form__input_password" name="password" type="password" required
+                    placeholder="Contraseña">
+            </div>
+
+            <div class="estilo_difuminado">
+                <button class="contenedor__btnRegistro">Finalizar</button>
+            </div>
+
+        </form>
+
+
+
+    </main>
+
+    <!-- SCRIPT PARA RECUPERAR DATOS DE LA URL (Nombre y Rol vengo de la pág anterior) -->
+    <script>
+        // Al cargar la página...
+        window.onload = function () {
+            // 1. Buscamos los parámetros en la URL (ej: ?rol=Trabajador&nombre=Juan)
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // 2. Extraemos los valores
+            const rol = urlParams.get('rol');
+            const nombre = urlParams.get('nombre');
+
+            // 3. Los metemos en los campos ocultos para que se envíen al Servlet
+            if (rol) document.getElementById('hiddenRol').value = rol;
+            if (nombre) document.getElementById('hiddenNombre').value = nombre;
+
+            // Validación rápida para no dejar entrar si faltan datos
+            if (!rol || !nombre) {
+                alert("Faltan datos de la página anterior. Redirigiendo...");
+                window.location.href = "registroUser.html";
+            }
+        };
+    </script>
+    <footer>
+
+    </footer>
+
+</body>
+
+</html>

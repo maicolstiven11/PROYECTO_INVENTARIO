@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de los datos de proveedores</title>
+    <link rel="stylesheet" href="../css/Registro_gastos.css">
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
+        </nav>
+    </header>
+    <main>
+        <h1 class="main__titulo">Contabilidad-Sistematica</h1>
+        <h2 class="main__subtitulo">Registre los datos </h2>
+        <h2 class="main__subtitulo">de: </h2>
+        <h3 class="main__nameBar">proveedores</h3>
+        <section class="main__contenedorForm">
+            <form class="main__formulario" action="../ProveedorServlet" method="POST">
+                <div class="campo">
+                    <label for="name" class="formulario__nombre"></label>
+                    <input id="name" class="form__input_name" type="text" name="nombre_proveedor" required
+                        placeholder="Nombre del proveedor">
+                </div>
+                <div class="campo">
+                    <label for="contacto"></label>
+                    <input type="text" id="contacto" name="contacto" placeholder="contacto" required>
+                </div>
+
+                <div class="campo">
+                    <label for="telefono"></label>
+                    <input type="text" id="telefono" name="telefono" placeholder="telefono" required>
+                </div>
+                <div class="campo">
+                    <label for="correo"></label>
+                    <input type="email" id="correo" name="correo" placeholder="correo" required>
+                </div>
+                <button class="contenedor__btnfinalizar">Finalizar</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+
+    </footer>
+</body>
+
+</html>
