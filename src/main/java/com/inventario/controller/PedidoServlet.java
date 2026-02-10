@@ -108,7 +108,7 @@ public class PedidoServlet extends HttpServlet {
             boolean exito = pedidoDAO.registrarPedido(pedido, detalles);
             
             if (exito) {
-                response.sendRedirect("PedidoServlet?action=nuevo&msj=exito");
+                response.sendRedirect("view/pedido_finalizado.html");
             } else {
                 response.sendRedirect("PedidoServlet?action=nuevo&msj=error");
             }

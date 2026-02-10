@@ -1,4 +1,5 @@
 @import url("Variables_root/Root.css");
 @import url("estilos_header.css");
 @import url("estilos_footer.css");
-@import url("pedido_finalizado/pedido_finalizado_main.css");
+@import url("gasto_finalizado/gasto_finalizado_main.css");
+/* Reutilizamos los estilos de gasto finalizado ya que la estructura es idéntica */
