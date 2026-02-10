@@ -1,0 +1,209 @@
+/* ====================================
+   ESTILOS PARA FORMULARIO EDITAR PRODUCTO
+   Usa las variables definidas en Root.css
+   ==================================== */
+
+/* RESET Y BASE */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    overflow-x: hidden;
+    font-family: "mifuente", sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--fondo-pagina);
+}
+
+main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.form-container {
+    width: 100%;
+    max-width: 550px;
+    background: white;
+    padding: 25px 30px;
+    border-radius: var(--radio-mediano);
+    box-shadow: var(--sombra-tarjeta);
+}
+
+/* TÍTULO */
+.form-title {
+    text-align: center;
+    color: var(--color-texto-secundario);
+    margin-bottom: 20px;
+    font-size: var(--fuente-subtitulo);
+}
+
+.form-title i {
+    margin-right: 10px;
+    color: var(--color-primario);
+}
+
+/* GRID DE CAMPOS - 2 COLUMNAS */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 15px;
+}
+
+/* GRUPOS DE CAMPOS */
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--color-texto-secundario);
+    font-size: var(--fuente-pequeña);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid var(--color-borde-suave);
+    border-radius: var(--radio-pequeño);
+    font-size: var(--fuente-normal);
+    font-family: "mifuente", sans-serif;
+    transition: border-color var(--transicion-suave), box-shadow var(--transicion-suave);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--color-primario);
+    box-shadow: var(--sombra-focus);
+}
+
+.form-group select {
+    cursor: pointer;
+    background-color: white;
+}
+
+/* CONTENEDOR DE BOTONES */
+.btn-container {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    grid-column: 1 / -1;
+}
+
+/* BOTONES */
+.btn {
+    flex: 1;
+    padding: 12px 18px;
+    border: none;
+    border-radius: var(--radio-pequeño);
+    font-size: var(--fuente-normal);
+    font-weight: 600;
+    font-family: "mifuente", sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: transform var(--transicion-suave), box-shadow var(--transicion-suave);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-tarjeta);
+}
+
+.btn-guardar {
+    background-color: var(--boton-finalizado);
+    color: white;
+}
+
+.btn-guardar:hover {
+    background-color: var(--color-exito);
+}
+
+.btn-cancelar {
+    background-color: var(--boton-regresar);
+    color: white;
+}
+
+.btn-cancelar:hover {
+    opacity: 0.8;
+}
+
+/* RESPONSIVE - TABLET */
+@media (max-width: 768px) {
+    .form-container {
+        padding: 20px;
+        margin: 15px;
+    }
+
+    .form-title {
+        font-size: 1.25rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .form-group.full-width {
+        grid-column: 1;
+    }
+}
+
+/* RESPONSIVE - MÓVIL */
+@media (max-width: 480px) {
+    main {
+        padding: 10px;
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+
+    .form-container {
+        padding: 15px;
+        margin: 0;
+        border-radius: var(--radio-pequeño);
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    .form-title {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+
+    .btn-container {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 14px;
+    }
+}

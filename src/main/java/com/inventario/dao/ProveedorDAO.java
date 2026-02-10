@@ -72,4 +72,32 @@ public class ProveedorDAO {
         }
         return registrado;
     }
+    // 3. ELIMINAR PROVEEDOR
+    public boolean eliminarProveedor(int id) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        boolean eliminado = false;
+        
+        try {
+            con = Conexion.getConexion();
+            // Intentar eliminar. Si hay pedidos asociados, saltará excepción por FK (lo cual es seguro)
+            String sql = "DELETE FROM DATOS_PROVEEDOR WHERE id_proveedor = ?";
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, id);
+            
+            int filas = ps.executeUpdate();
+            if (filas > 0) {
+                eliminado = true;
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar proveedor: " + e.getMessage());
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return eliminado;
+    }
 }

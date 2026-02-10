@@ -10,7 +10,7 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Visualizar Ventas</title>
                 <!-- Usamos estilos similares a otras listas, o creamos uno nuevo -->
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/menu_inventario.css">
+                <link rel="stylesheet" href="../css/menu_inventario.css">
                 <!-- Si hubiera un CSS específico para tablas, lo importaríamos aquí -->
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
                 <style>
@@ -69,14 +69,13 @@
             <body>
                 <header>
                     <nav class="navbar">
-                        <img class="navbar__logo" src="${pageContext.request.contextPath}/assets/img/LOGO.png"
-                            alt="logo_sistema">
+                        <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
                     </nav>
                 </header>
 
                 <main>
                     <div class="contenedor-tabla">
-                        <a href="${pageContext.request.contextPath}/view/menu_inventario.html" class="btn-regresar-fix">
+                        <a href="../view/menu_inventario.jsp" class="btn-regresar-fix">
                             <i class="fa-solid fa-arrow-left"></i> Regresar al Menú
                         </a>
 
@@ -114,7 +113,7 @@
                                                 </td>
                                                 <td>
                                                     <!-- Botón Ver Detalle -->
-                                                    <a href="${pageContext.request.contextPath}/VentaServlet?action=ver_detalle&id_venta=${v.idVenta}"
+                                                    <a href="../VentaServlet?action=ver_detalle&id_venta=${v.idVenta}"
                                                         style="color:#3498db; text-decoration: none; font-size: 1.2em;"
                                                         title="Ver Productos">
                                                         <i class="fa-solid fa-eye"></i>

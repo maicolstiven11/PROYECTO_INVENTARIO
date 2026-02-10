@@ -1,0 +1,11 @@
+/* ==================================
+   EDITAR PRODUCTO FORM - ESTILOS
+   ================================== */
+
+/* Importar estilos comunes */
+@import url("Variables_root/Root.css");
+@import url("estilos_header.css");
+@import url("estilos_footer.css");
+
+/* Importar estilos específicos del formulario */
+@import url("editar_producto_form/editar_producto_form_main.css");

@@ -34,40 +34,30 @@
 
                     <nav class="aside__nav">
 
-                        <!-- VENTAS -->
-                        <c:if test="${usuarioLogueado.tienePermiso('VER_HISTORIAL_VENTAS')}">
-                            <a href="../VentaServlet?action=listar" class="aside__link">
-                                <i class="fa-solid fa-bottle-water aside__icon"></i>
-                                Visualizar ventas
-                            </a>
-                        </c:if>
+                        <!-- VENTAS - Visible para TODOS -->
+                        <a href="../VentaServlet?action=listar" class="aside__link">
+                            <i class="fa-solid fa-bottle-water aside__icon"></i>
+                            Visualizar ventas
+                        </a>
 
-                        <!-- GASTOS -->
-                        <c:if test="${usuarioLogueado.tienePermiso('VER_GASTOS')}">
-                            <a href="../GastoServlet?action=listar" class="aside__link">
-                                <i class="fa-solid fa-sack-dollar aside__icon"></i>
-                                Visualizar gastos
-                            </a>
-                        </c:if>
+                        <!-- GASTOS - Visible para TODOS -->
+                        <a href="../GastoServlet?action=listar" class="aside__link">
+                            <i class="fa-solid fa-sack-dollar aside__icon"></i>
+                            Visualizar gastos
+                        </a>
 
-                        <!-- EDITAR PRODUCTOS (Solo Admin/Permiso) -->
-                        <c:if test="${usuarioLogueado.tienePermiso('EDITAR_PRODUCTO')}">
+                        <!-- OPCIONES SOLO PARA ADMINISTRADOR -->
+                        <c:if test="${usuarioLogueado.idRol == 1}">
                             <a href="../ProductoServlet" class="aside__link">
                                 <i class="fa-solid fa-pen-to-square aside__icon"></i>
                                 Editar productos
                             </a>
-                        </c:if>
 
-                        <!-- PROVEEDORES (Solo Admin/Permiso) -->
-                        <c:if test="${usuarioLogueado.tienePermiso('GESTIONAR_PROVEEDORES')}">
                             <a href="../ProveedorServlet" class="aside__link">
                                 <i class="fa-solid fa-truck-field aside__icon"></i>
                                 Editar proveedores
                             </a>
-                        </c:if>
 
-                        <!-- INFORMES (Solo Admin/Permiso) -->
-                        <c:if test="${usuarioLogueado.tienePermiso('VER_INFORMES')}">
                             <a href="visualizar_informes.html" class="aside__link">
                                 <i class="fa-solid fa-file-invoice aside__icon"></i>
                                 Visualizar informes
@@ -94,23 +84,22 @@
 
                     <div class="cards">
 
-                        <c:if test="${usuarioLogueado.tienePermiso('REGISTRAR_GASTO')}">
-                            <a href="agregar_gasto.html" class="card">
-                                <p class="card__title">Agregar gasto</p>
-                                <i class="fa-solid fa-plus card__icon"></i>
-                            </a>
-                        </c:if>
+                        <!-- AGREGAR GASTO - Visible para TODOS -->
+                        <a href="agregar_gasto.html" class="card">
+                            <p class="card__title">Agregar gasto</p>
+                            <i class="fa-solid fa-plus card__icon"></i>
+                        </a>
 
-                        <c:if test="${usuarioLogueado.tienePermiso('HACER_PEDIDOS_PROVEEDOR')}">
-                            <a href="agregar_pedido.html" class="card">
+                        <!-- AGREGAR VENTA - Visible para TODOS -->
+                        <a href="../VentaServlet" class="card">
+                            <p class="card__title">Agregar venta</p>
+                            <i class="fa-solid fa-plus card__icon"></i>
+                        </a>
+
+                        <!-- PEDIDOS PROVEEDOR - Solo ADMINISTRADOR -->
+                        <c:if test="${usuarioLogueado.idRol == 1}">
+                            <a href="../PedidoServlet?action=nuevo" class="card">
                                 <p class="card__title">Agregar pedido de proveedor</p>
-                                <i class="fa-solid fa-plus card__icon"></i>
-                            </a>
-                        </c:if>
-
-                        <c:if test="${usuarioLogueado.tienePermiso('REALIZAR_VENTA')}">
-                            <a href="../VentaServlet" class="card">
-                                <p class="card__title">Agregar venta</p>
                                 <i class="fa-solid fa-plus card__icon"></i>
                             </a>
                         </c:if>

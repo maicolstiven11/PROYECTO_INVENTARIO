@@ -23,6 +23,9 @@
 
 
 body {
+    /* Usa la fuente personalizada del proyecto */
+    font-family: 'MiFuente', sans-serif;
+
     /* Usa un sistema de cuadrícula para organizar */
     display: grid;
 
@@ -40,6 +43,9 @@ body {
     /* Altura automática pero mínimo toda la pantalla */
     height: auto;
     min-height: 100vh;
+
+    /* Fondo de página - usa variable de Root.css */
+    background-color: var(--fondo-pagina);
 
     /* Evita que aparezca barra de desplazamiento horizontal */
     overflow-x: hidden;

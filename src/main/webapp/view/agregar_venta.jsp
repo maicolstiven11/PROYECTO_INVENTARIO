@@ -10,7 +10,7 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Registrar Venta</title>
                 <!-- Reutilizamos estilos existentes -->
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/agregar_venta.css">
+                <link rel="stylesheet" href="../css/agregar_venta.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
                 <!-- Select2 CSS -->
                 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
@@ -21,8 +21,7 @@
 
                 <header>
                     <nav class="navbar">
-                        <img class="navbar__logo" src="${pageContext.request.contextPath}/assets/img/LOGO.png"
-                            alt="logo_sistema">
+                        <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
                     </nav>
                 </header>
                 <main>
@@ -44,8 +43,7 @@
                             </c:if>
 
                             <!-- FORMULARIO PARA AGREGAR PRODUCTO -->
-                            <form class="formulario-venta" action="${pageContext.request.contextPath}/VentaServlet"
-                                method="POST">
+                            <form class="formulario-venta" action="../VentaServlet" method="POST">
                                 <input type="hidden" name="action" value="agregar">
 
                                 <!-- PRODUCTO -->
@@ -120,7 +118,7 @@
                                                                 pattern="#,##0" />
                                                         </td>
                                                         <td>
-                                                            <a href="${pageContext.request.contextPath}/VentaServlet?action=quitar&index=${status.index}"
+                                                            <a href="../VentaServlet?action=quitar&index=${status.index}"
                                                                 class="btn-eliminar">
                                                                 <i class="fa-solid fa-trash"></i>
                                                             </a>
@@ -135,8 +133,7 @@
 
                             <!-- TOTALES Y FINALIZAR -->
                             <div class="formulario-venta__pie">
-                                <a href="${pageContext.request.contextPath}/view/menu_inventario.html"
-                                    class="btn-regresar">
+                                <a href="../view/menu_inventario.jsp" class="btn-regresar">
                                     <i class="fa-solid fa-arrow-left"></i> Regresar
                                 </a>
 
@@ -149,8 +146,7 @@
                                     </span>
                                 </div>
 
-                                <a href="${pageContext.request.contextPath}/VentaServlet?action=finalizar"
-                                    class="formulario-venta__boton"
+                                <a href="../VentaServlet?action=finalizar" class="formulario-venta__boton"
                                     style="text-decoration: none; text-align: center; background-color: #2ecc71;">
                                     Finalizar Venta
                                 </a>

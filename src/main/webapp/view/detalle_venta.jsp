@@ -10,7 +10,7 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Detalle de Venta #${idVenta}</title>
                 <!-- Reutilizamos estilos -->
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/menu_inventario.css">
+                <link rel="stylesheet" href="../css/menu_inventario.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
                 <style>
                     .contenedor-detalle {
@@ -77,8 +77,7 @@
             <body>
                 <header>
                     <nav class="navbar">
-                        <img class="navbar__logo" src="${pageContext.request.contextPath}/assets/img/LOGO.png"
-                            alt="logo_sistema">
+                        <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
                     </nav>
                 </header>
 
@@ -124,7 +123,7 @@
                         </table>
 
                         <div style="text-align: center;">
-                            <a href="${pageContext.request.contextPath}/VentaServlet?action=listar" class="btn-volver">
+                            <a href="../VentaServlet?action=listar" class="btn-volver">
                                 <i class="fa-solid fa-arrow-left"></i> Volver al Historial
                             </a>
                         </div>

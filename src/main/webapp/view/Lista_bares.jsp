@@ -78,7 +78,7 @@
                     </div>
                 </section>
 
-                <a href="view/Menu_sistema.html" class="btn-regresar">
+                <a href="view/Menu_sistema.jsp" class="btn-regresar">
                     <i class="fa-solid fa-arrow-left"></i> Regresar
                 </a>
             </main>

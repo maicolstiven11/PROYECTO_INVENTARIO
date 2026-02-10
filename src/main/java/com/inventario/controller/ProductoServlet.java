@@ -17,20 +17,26 @@ public class ProductoServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        // VERIFICAR SI ES UNA ACTUALIZACIÓN
+        String action = request.getParameter("action");
+        if ("actualizar".equals(action)) {
+            procesarActualizacion(request, response);
+            return;
+        }
+        
+        // --- LÓGICA PARA REGISTRAR NUEVO PRODUCTO ---
         // 1. RECIBIR DATOS DEL FORMULARIO
-        // Nota: Los nombres aquí deben coincidir con los name="" del HTML
         String nombre = request.getParameter("nombre");
         String marca = request.getParameter("marca");
         String tipo = request.getParameter("tipo");
-        String imagen = request.getParameter("imagen"); // Por ahora solo guardamos el nombre del archivo
+        String imagen = request.getParameter("imagen");
         String cantidadMedida = request.getParameter("cantidad_medida");
         
-        // Conversión de tipos (String a Double/Date)
         double precio = 0.0;
         try {
             precio = Double.parseDouble(request.getParameter("precio"));
         } catch (NumberFormatException e) {
-            precio = 0.0; // Valor por defecto si falla
+            precio = 0.0;
         }
         
         Date fechaVencimiento = null;
@@ -43,7 +49,6 @@ public class ProductoServlet extends HttpServlet {
             fechaVencimiento = null;
         }
 
-        // 2. CREAR OBJETO PRODUCTO
         Producto p = new Producto();
         p.setNombre(nombre);
         p.setMarca(marca);
@@ -53,10 +58,8 @@ public class ProductoServlet extends HttpServlet {
         p.setFechaVencimiento(fechaVencimiento);
         p.setCantidadMedida(cantidadMedida);
 
-        // 3. LLAMAR AL DAO
         ProductoDAO dao = new ProductoDAO();
         
-        // Modificación para capturar error:
         try {
             boolean exito = dao.registrarProducto(p);
             if (exito) {
@@ -65,7 +68,6 @@ public class ProductoServlet extends HttpServlet {
                 response.sendRedirect("view/Registro_produc.html?error=NoSeGuardoEnBD");
             }
         } catch (Exception e) {
-             // Enviamos el error a la URL para que el usuario lo vea
              response.sendRedirect("view/Registro_produc.html?error=" + e.getMessage().replace(" ", "_"));
         }
     }
@@ -88,11 +90,81 @@ public class ProductoServlet extends HttpServlet {
                 e.printStackTrace();
                 response.sendRedirect("ProductoServlet?error=ErrorEliminar");
             }
+        } else if (action != null && action.equals("editar")) {
+            // CARGAR DATOS DEL PRODUCTO PARA EDITAR
+            try {
+                int id = Integer.parseInt(request.getParameter("id"));
+                Producto p = dao.obtenerProducto(id);
+                
+                if (p != null) {
+                    request.setAttribute("productoEditar", p);
+                    request.getRequestDispatcher("view/formulario_editar_producto.jsp").forward(request, response);
+                } else {
+                    response.sendRedirect("ProductoServlet?error=ProductoNoEncontrado");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.sendRedirect("ProductoServlet?error=ErrorCargarEdicion");
+            }
         } else {
             // Lógica por defecto: LISTAR
             java.util.List<Producto> lista = dao.listarProductos();
             request.setAttribute("listaProductos", lista);
             request.getRequestDispatcher("view/editar_productos.jsp").forward(request, response);
+        }
+    }
+    
+    // MÉTODO PARA PROCESAR LA ACTUALIZACIÓN (POST)
+    private void procesarActualizacion(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        try {
+            int idProducto = Integer.parseInt(request.getParameter("id_producto"));
+            String nombre = request.getParameter("nombre");
+            String marca = request.getParameter("marca");
+            String tipo = request.getParameter("tipo");
+            String imagen = request.getParameter("imagen");
+            String cantidadMedida = request.getParameter("cantidad_medida");
+            
+            double precio = 0.0;
+            try {
+                precio = Double.parseDouble(request.getParameter("precio"));
+            } catch (NumberFormatException e) {
+                precio = 0.0;
+            }
+            
+            java.sql.Date fechaVencimiento = null;
+            try {
+                String fechaStr = request.getParameter("fecha_vencimiento");
+                if (fechaStr != null && !fechaStr.isEmpty()) {
+                    fechaVencimiento = java.sql.Date.valueOf(fechaStr);
+                }
+            } catch (IllegalArgumentException e) {
+                fechaVencimiento = null;
+            }
+            
+            Producto p = new Producto();
+            p.setIdProducto(idProducto);
+            p.setNombre(nombre);
+            p.setMarca(marca);
+            p.setPrecioUnitario(precio);
+            p.setTipo(tipo);
+            p.setImagen(imagen);
+            p.setFechaVencimiento(fechaVencimiento);
+            p.setCantidadMedida(cantidadMedida);
+            
+            ProductoDAO dao = new ProductoDAO();
+            boolean exito = dao.actualizarProducto(p);
+            
+            if (exito) {
+                response.sendRedirect("ProductoServlet?msg=ProductoActualizado");
+            } else {
+                response.sendRedirect("ProductoServlet?error=ErrorActualizar");
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("ProductoServlet?error=" + e.getMessage());
         }
     }
 }

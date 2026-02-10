@@ -19,6 +19,13 @@ public class ProveedorServlet extends HttpServlet {
             throws ServletException, IOException {
         
         ProveedorDAO dao = new ProveedorDAO();
+        String action = request.getParameter("action");
+        
+        if (action != null && action.equalsIgnoreCase("eliminar")) {
+            int id = Integer.parseInt(request.getParameter("id"));
+            dao.eliminarProveedor(id);
+        }
+        
         List<Proveedor> lista = dao.listarProveedores();
         
         request.setAttribute("listaProveedores", lista);

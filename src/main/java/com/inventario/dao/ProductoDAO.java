@@ -96,7 +96,7 @@ public class ProductoDAO {
         return registrado;
     }
 
-    // 3. MÉTODO PARA ELIMINAR UN PRODUCTO
+    // 3. MÉTODO PARA ELIMINAR UN PRODUCTO (CON ELIMINACIÓN EN CASCADA)
     public boolean eliminarProducto(int id) {
         Connection con = null;
         PreparedStatement ps = null;
@@ -104,21 +104,48 @@ public class ProductoDAO {
         
         try {
             con = Conexion.getConexion();
-            String sql = "DELETE FROM PRODUCTO WHERE id_producto = ?";
-            ps = con.prepareStatement(sql);
+            con.setAutoCommit(false); // Iniciar transacción
+            
+            // PASO 1: Eliminar de DETALLE_VENTA (si el producto fue vendido)
+            String sqlDetalleVenta = "DELETE FROM DETALLE_VENTA WHERE id_producto = ?";
+            ps = con.prepareStatement(sqlDetalleVenta);
+            ps.setInt(1, id);
+            ps.executeUpdate();
+            ps.close();
+            
+            // PASO 2: Eliminar de INVENTARIO_DETALLE (si fue parte de un inventario)
+            String sqlDetalleInv = "DELETE FROM INVENTARIO_DETALLE WHERE id_producto = ?";
+            ps = con.prepareStatement(sqlDetalleInv);
+            ps.setInt(1, id);
+            ps.executeUpdate();
+            ps.close();
+            
+            // PASO 3: Finalmente, eliminar el PRODUCTO
+            String sqlProducto = "DELETE FROM PRODUCTO WHERE id_producto = ?";
+            ps = con.prepareStatement(sqlProducto);
             ps.setInt(1, id);
             
             int filas = ps.executeUpdate();
             if (filas > 0) {
                 eliminado = true;
             }
+            
+            con.commit(); // Confirmar todos los cambios
+            System.out.println("Producto ID " + id + " eliminado correctamente con sus dependencias.");
+            
         } catch (SQLException e) {
             System.err.println("Error al eliminar producto: " + e.getMessage());
             e.printStackTrace();
+            try {
+                if (con != null) con.rollback(); // Deshacer si algo falla
+            } catch (SQLException ex) { ex.printStackTrace(); }
         } finally {
             try {
                 if (ps != null) ps.close();
-                if (con != null) con.close();
+                if (con != null) {
+                    con.setAutoCommit(true);
+                    con.close();
+                }
             } catch (SQLException e) { e.printStackTrace(); }
         }
         return eliminado;
@@ -158,5 +185,51 @@ public class ProductoDAO {
             } catch (SQLException e) { e.printStackTrace(); }
         }
         return p;
+    }
+    
+    // 5. MÉTODO PARA ACTUALIZAR UN PRODUCTO
+    public boolean actualizarProducto(Producto p) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        boolean actualizado = false;
+        
+        try {
+            con = Conexion.getConexion();
+            String sql = "UPDATE PRODUCTO SET nombre = ?, marca = ?, precio_unitario = ?, " +
+                         "tipo = ?, imagen = ?, fecha_vencimiento = ?, cantidad_medida = ? " +
+                         "WHERE id_producto = ?";
+            
+            ps = con.prepareStatement(sql);
+            ps.setString(1, p.getNombre());
+            ps.setString(2, p.getMarca());
+            ps.setDouble(3, p.getPrecioUnitario());
+            ps.setString(4, p.getTipo());
+            ps.setString(5, p.getImagen());
+            
+            if (p.getFechaVencimiento() != null) {
+                ps.setDate(6, p.getFechaVencimiento());
+            } else {
+                ps.setNull(6, java.sql.Types.DATE);
+            }
+            
+            ps.setString(7, p.getCantidadMedida());
+            ps.setInt(8, p.getIdProducto());
+            
+            int filas = ps.executeUpdate();
+            if (filas > 0) {
+                actualizado = true;
+                System.out.println("Producto ID " + p.getIdProducto() + " actualizado correctamente.");
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar producto: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return actualizado;
     }
 }

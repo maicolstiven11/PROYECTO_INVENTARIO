@@ -7,15 +7,14 @@
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Inventario Detalle - Stock Inicial</title>
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/inv_detalle.css">
+            <link rel="stylesheet" href="../css/inv_detalle.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
         </head>
 
         <body>
             <header>
                 <nav class="navbar">
-                    <img class="navbar__logo" src="${pageContext.request.contextPath}/assets/img/LOGO.png"
-                        alt="logo_sistema">
+                    <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
                 </nav>
             </header>
             <main class="inventario">
@@ -24,7 +23,7 @@
                     <p class="inventario__instruccion">Registre el stock de productos iniciales</p>
                 </section>
 
-                <form action="${pageContext.request.contextPath}/InventarioServlet" method="POST">
+                <form action="../InventarioServlet" method="POST">
                     <input type="hidden" name="action" value="guardar_stock">
 
 
@@ -49,13 +48,13 @@
                                             <td class="inventario__celda">
                                                 <c:choose>
                                                     <c:when test="${not empty p.imagen}">
-                                                        <img src="${pageContext.request.contextPath}/assets/img/${p.imagen}"
-                                                            alt="${p.nombre}" class="inventario__imagen"
-                                                            onerror="this.src='${pageContext.request.contextPath}/assets/img/default.png'">
+                                                        <img src="../assets/img/${p.imagen}" alt="${p.nombre}"
+                                                            class="inventario__imagen"
+                                                            onerror="this.src='../assets/img/default.png'">
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <img src="${pageContext.request.contextPath}/assets/img/default.png"
-                                                            alt="Sin Imagen" class="inventario__imagen">
+                                                        <img src="../assets/img/default.png" alt="Sin Imagen"
+                                                            class="inventario__imagen">
                                                     </c:otherwise>
                                                 </c:choose>
                                             </td>

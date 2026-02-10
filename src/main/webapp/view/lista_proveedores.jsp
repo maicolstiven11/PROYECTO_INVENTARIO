@@ -43,6 +43,12 @@
                                         <a href="#modal-editar" class="button button--edit">
                                             <i class="fa-solid fa-pen-to-square"></i> Editar
                                         </a>
+                                        <a href="../ProveedorServlet?action=eliminar&id=${prv.idProveedor}"
+                                            class="button button--delete"
+                                            onclick="return confirm('¿Estás seguro de que deseas eliminar este proveedor?');"
+                                            style="background-color: #e74c3c; color: white; margin-left: 5px;">
+                                            <i class="fa-solid fa-trash"></i> Eliminar
+                                        </a>
                                     </td>
                                 </tr>
                             </c:forEach>
@@ -56,12 +62,12 @@
                     </table>
                 </div>
 
-                <a href="menu_inventario.html" class="btn-regresar">
+                <a href="../view/menu_inventario.jsp" class="btn-regresar">
                     <i class="fa-solid fa-arrow-left"></i> Regresar
                 </a>
 
                 <!-- Botón flotante para agregar (Opcional, si quisieras agregarlo aquí) -->
-                <a href="Registro_datos_prv.html" class="btn-floating" title="Agregar Proveedor"
+                <a href="../view/Registro_datos_prv.html" class="btn-floating" title="Agregar Proveedor"
                     style="position:fixed; bottom:20px; right:20px; background:#e74c3c; color:white; width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; text-decoration:none; box-shadow: 2px 2px 5px rgba(0,0,0,0.3);">
                     <i class="fa-solid fa-plus"></i>
                 </a>

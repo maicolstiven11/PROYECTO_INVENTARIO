@@ -1,11 +1,171 @@
-/* Importa los colores principales del sistema */
+/* ====================================
+   ESTILOS PARA FORMULARIO DE PEDIDOS
+   ==================================== */
+
 @import url("Variables_root/Root.css");
-
-/* Importa los estilos del encabezado (parte de arriba) */
 @import url("estilos_header.css");
-
-/* Importa los estilos del contenido para agregar pedido */
-@import url("agg_pedido/agg_pedido_main.css");
-
-/* Importa los estilos del pie de página (parte de abajo) */
 @import url("estilos_footer.css");
+
+/* Main Container Styles */
+main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    background-color: var(--fondo-pagina);
+}
+
+.form-container {
+    width: 100%;
+    max-width: 650px;
+    background: white;
+    padding: 30px 40px;
+    border-radius: var(--radio-mediano);
+    box-shadow: var(--sombra-tarjeta);
+}
+
+.form-title {
+    text-align: center;
+    color: var(--color-primario);
+    margin-bottom: 25px;
+    font-size: var(--fuente-titulo);
+    font-family: 'MiFuente', sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.form-title i {
+    margin-right: 10px;
+}
+
+/* Form Grid System */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--color-texto-secundario);
+    font-family: 'MiFuente', sans-serif;
+    font-size: var(--fuente-pequeña);
+}
+
+.form-group input,
+.form-group select {
+    padding: 12px;
+    border: 2px solid var(--color-borde-suave);
+    border-radius: var(--radio-pequeño);
+    font-size: var(--fuente-normal);
+    font-family: 'MiFuente', sans-serif;
+    transition: all var(--transicion-suave);
+    width: 100%;
+    background-color: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--color-primario);
+    box-shadow: var(--sombra-focus);
+}
+
+/* Select custom styling wrapper */
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper select {
+    appearance: none;
+    cursor: pointer;
+}
+
+.icono-select {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-primario);
+    pointer-events: none;
+}
+
+/* Readonly Inputs */
+.input-readonly {
+    background-color: var(--fondo-deshabilitado) !important;
+    color: var(--color-texto-secundario);
+    border-color: #ddd;
+    cursor: not-allowed;
+    font-weight: bold;
+}
+
+.input-readonly.highlight {
+    background-color: #e8f6f3 !important;
+    /* Verde muy claro */
+    color: var(--color-exito);
+    border-color: var(--color-exito);
+    font-size: 1.1em;
+}
+
+/* Buttons */
+.btn-container {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: var(--radio-pequeño);
+    font-size: var(--fuente-normal);
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-family: 'MiFuente', sans-serif;
+    transition: transform 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.btn-guardar {
+    background-color: var(--boton-finalizado);
+    color: white;
+}
+
+.btn-cancelar {
+    background-color: var(--boton-regresar);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-container {
+        padding: 20px;
+    }
+}

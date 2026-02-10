@@ -31,9 +31,8 @@
                         </div>
                     </a>
 
-                    <!-- OPCIONES SOLO SI TIENE PERMISO (Base de Datos) -->
-                    <!-- Asumimos que en la tabla PERMISO existe uno llamado 'AGREGAR_NEGOCIO' -->
-                    <c:if test="${usuarioLogueado.tienePermiso('AGREGAR_NEGOCIO')}">
+                    <!-- OPCIONES SOLO PARA ADMINISTRADOR (Rol 1) -->
+                    <c:if test="${usuarioLogueado.idRol == 1}">
                         <a href="registroBar.html">
                             <div class="contenedor__aggBar">
                                 <div class="fondo_img">
@@ -42,9 +41,7 @@
                                 <p>AGREGAR BAR</p>
                             </div>
                         </a>
-                    </c:if>
 
-                    <c:if test="${usuarioLogueado.tienePermiso('GESTIONAR_TRABAJADORES')}">
                         <a href="gestion_trabajadores.html">
                             <div class="contenedor__aggBar">
                                 <div class="fondo_img">

@@ -52,7 +52,8 @@
                                     <td class="data-table__cell" data-label="Medida">${p.cantidadMedida}</td>
                                     <td class="data-table__cell" data-label="Acciones">
                                         <!-- Botón Editar -->
-                                        <a href="#" class="button button--edit" title="Editar">
+                                        <a href="../ProductoServlet?action=editar&id=${p.idProducto}"
+                                            class="button button--edit" title="Editar">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
                                         <!-- Botón Eliminar -->
@@ -75,7 +76,7 @@
                     </table>
                 </div>
 
-                <a href="/view/Menu_sistema.html" class="btn-regresar">
+                <a href="/view/Menu_sistema.jsp" class="btn-regresar">
                     <i class="fa-solid fa-arrow-left"></i> Regresar al Menú
                 </a>
 
