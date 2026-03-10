@@ -153,3 +153,16 @@ h2 {
         flex-shrink: 0;
     }
 }
+
+/* Estilos específicos para pedidos */
+.total-col {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.mensaje-vacio {
+    text-align: center;
+    padding: 40px;
+    color: #7f8c8d;
+    font-style: italic;
+}

@@ -8,8 +8,8 @@ public class PedidoProveedor {
     private Date fechaPedido;
     private Date fechaEntrega;
     private double totalPedido;
-    private double ivaPedido;
-    private double subtotal;
+    private double subtotal;    // RESTAURADO: de subtotalPedido a subtotal
+    private double ivaPedido;   // RESTAURADO
     private int idInventario;
     private int idProveedor;
     
@@ -22,18 +22,17 @@ public class PedidoProveedor {
     public PedidoProveedor() {
     }
 
-    public PedidoProveedor(int idPedidoBase, Date fechaPedido, Date fechaEntrega, double totalPedido, double ivaPedido, double subtotal, int idInventario, int idProveedor) {
+    public PedidoProveedor(int idPedidoBase, Date fechaPedido, Date fechaEntrega, double totalPedido, double subtotal, double ivaPedido, int idInventario, int idProveedor) {
         this.idPedidoBase = idPedidoBase;
         this.fechaPedido = fechaPedido;
         this.fechaEntrega = fechaEntrega;
         this.totalPedido = totalPedido;
-        this.ivaPedido = ivaPedido;
         this.subtotal = subtotal;
+        this.ivaPedido = ivaPedido;
         this.idInventario = idInventario;
         this.idProveedor = idProveedor;
     }
 
-    // Getters y Setters
     public int getIdPedidoBase() {
         return idPedidoBase;
     }
@@ -66,20 +65,20 @@ public class PedidoProveedor {
         this.totalPedido = totalPedido;
     }
 
-    public double getIvaPedido() {
-        return ivaPedido;
-    }
-
-    public void setIvaPedido(double ivaPedido) {
-        this.ivaPedido = ivaPedido;
-    }
-
     public double getSubtotal() {
         return subtotal;
     }
 
     public void setSubtotal(double subtotal) {
         this.subtotal = subtotal;
+    }
+
+    public double getIvaPedido() {
+        return ivaPedido;
+    }
+
+    public void setIvaPedido(double ivaPedido) {
+        this.ivaPedido = ivaPedido;
     }
 
     public int getIdInventario() {

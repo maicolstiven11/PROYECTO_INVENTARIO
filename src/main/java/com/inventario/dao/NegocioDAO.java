@@ -149,7 +149,26 @@ public class NegocioDAO {
             ps.executeUpdate();
             ps.close();
             
-            // 3. Eliminar GASTO_DIARIO (depende de INVENTARIO)
+            // 3. Eliminar DETALLE_PEDIDOS (depende de PEDIDOS_PROVEEDOR que depende de INVENTARIO)
+            String sql3_1 = "DELETE dp FROM DETALLE_PEDIDOS dp " +
+                            "INNER JOIN PEDIDOS_PROVEEDOR pp ON dp.id_pedido_base = pp.id_pedido_base " +
+                            "INNER JOIN INVENTARIO i ON pp.id_inventario = i.id_inventario " +
+                            "WHERE i.id_negocio = ?";
+            ps = con.prepareStatement(sql3_1);
+            ps.setInt(1, idNegocio);
+            ps.executeUpdate();
+            ps.close();
+            
+            // 4. Eliminar PEDIDOS_PROVEEDOR (depende de INVENTARIO)
+            String sql3_2 = "DELETE pp FROM PEDIDOS_PROVEEDOR pp " +
+                            "INNER JOIN INVENTARIO i ON pp.id_inventario = i.id_inventario " +
+                            "WHERE i.id_negocio = ?";
+            ps = con.prepareStatement(sql3_2);
+            ps.setInt(1, idNegocio);
+            ps.executeUpdate();
+            ps.close();
+            
+            // 5. Eliminar GASTO_DIARIO (depende de INVENTARIO)
             String sql3 = "DELETE g FROM GASTO_DIARIO g " +
                          "INNER JOIN INVENTARIO i ON g.id_inventario = i.id_inventario " +
                          "WHERE i.id_negocio = ?";
@@ -158,7 +177,7 @@ public class NegocioDAO {
             ps.executeUpdate();
             ps.close();
             
-            // 4. Eliminar DETALLE_INVENTARIO (nombre correcto: INVENTARIO_DETALLE)
+            // 6. Eliminar DETALLE_INVENTARIO (nombre correcto: INVENTARIO_DETALLE)
             String sql4 = "DELETE di FROM INVENTARIO_DETALLE di " +
                          "INNER JOIN INVENTARIO i ON di.id_inventario = i.id_inventario " +
                          "WHERE i.id_negocio = ?";
@@ -167,21 +186,21 @@ public class NegocioDAO {
             ps.executeUpdate();
             ps.close();
             
-            // 5. Eliminar INVENTARIO
+            // 7. Eliminar INVENTARIO
             String sql5 = "DELETE FROM INVENTARIO WHERE id_negocio = ?";
             ps = con.prepareStatement(sql5);
             ps.setInt(1, idNegocio);
             ps.executeUpdate();
             ps.close();
             
-            // 6. Eliminar vínculo USUARIO_NEGOCIO
+            // 8. Eliminar vínculo USUARIO_NEGOCIO
             String sql6 = "DELETE FROM USUARIO_NEGOCIO WHERE id_negocio = ?";
             ps = con.prepareStatement(sql6);
             ps.setInt(1, idNegocio);
             ps.executeUpdate();
             ps.close();
             
-            // 7. Finalmente, eliminar el NEGOCIO
+            // 9. Finalmente, eliminar el NEGOCIO
             String sql7 = "DELETE FROM NEGOCIO WHERE id_negocio = ?";
             ps = con.prepareStatement(sql7);
             ps.setInt(1, idNegocio);

@@ -20,101 +20,142 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+/**
+ * CONTROLADOR: Servlet encargado de gestionar los Pedidos a Proveedores.
+ * 
+ * Implementa: RF-25 (Registrar Pedido a Proveedor)
+ * Cumple: RNF-02 (Protección SQL Injection - delega en DAO con PreparedStatement)
+ *         RNF-03 (Gestión de Sesiones - obtiene idInventarioActual de la sesión)
+ *         RNF-08 (Mensajes de Error - redirige con parámetros de error descriptivos)
+ *         RNF-13 (Arquitectura MVC - Capa Controlador)
+ */
 @WebServlet(name = "PedidoServlet", urlPatterns = {"/PedidoServlet"})
 public class PedidoServlet extends HttpServlet {
 
+    /**
+     * RF-25: Método doGet - Carga los datos necesarios para el formulario de nuevo pedido.
+     * Carga la lista de proveedores (RF-23) y productos (RF-10) para los selects del formulario.
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         String action = request.getParameter("action");
         
-        if (action == null || action.equals("nuevo")) {
-            nuevoPedido(request, response);
+        if ("listar".equals(action)) {
+            // Listar pedidos del negocio actual
+            HttpSession session = request.getSession();
+            Integer idNegocio = (Integer) session.getAttribute("idNegocioActual");
+            
+            if (idNegocio != null) {
+                PedidoDAO pedidoDAO = new PedidoDAO();
+                List<PedidoProveedor> listaPedidos = pedidoDAO.listarPedidos(idNegocio);
+                request.setAttribute("listaPedidos", listaPedidos);
+                request.getRequestDispatcher("view/visualizar_pedidos.jsp").forward(request, response);
+            } else {
+                response.sendRedirect("index.jsp");
+            }
+        } else if (action == null || action.equals("nuevo")) {
+            nuevoPedido(request, response);  // RF-25: Preparar formulario de nuevo pedido
         }
     }
 
+    /**
+     * RF-25: Carga listas de proveedores y productos del inventario para los dropdowns.
+     * CAMBIADO: Ahora carga los items de inventario_detalle (productos con stock) en vez de todos los productos.
+     */
     private void nuevoPedido(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        // Cargar listas para los selects del formulario
         ProveedorDAO proveedorDAO = new ProveedorDAO();
-        ProductoDAO productoDAO = new ProductoDAO();
+        com.inventario.dao.DetalleInventarioDAO detalleDAO = new com.inventario.dao.DetalleInventarioDAO();
+        
+        HttpSession session = request.getSession();
+        Integer idInventario = (Integer) session.getAttribute("idInventarioActual");
         
         List<Proveedor> proveedores = proveedorDAO.listarProveedores();
-        // Nota: Asumimos que listarProductos existe. Si no, habría que usar listarProductosPorNegocio o similar.
-        // Por ahora listamos todos. Idealmente filtrar por negocio en sesión.
-        // Ajuste temporal: Usar un DAO genérico de Productos si no tenemos filtro por negocio implementado aún en listar.
-        List<Producto> productos = productoDAO.listarProductos(); 
+        List<com.inventario.model.DetalleInventario> detalles = new ArrayList<>();
+        
+        if (idInventario != null) {
+            detalles = detalleDAO.listarDetalles(idInventario);
+        }
         
         request.setAttribute("listaProveedores", proveedores);
-        request.setAttribute("listaProductos", productos);
+        request.setAttribute("listaDetalles", detalles);
+        request.setAttribute("idInventarioActual", idInventario);
         
         request.getRequestDispatcher("view/agregar_pedido.jsp").forward(request, response);
     }
 
+    /**
+     * RF-25: Método doPost - Procesa y registra un nuevo pedido a proveedor.
+     * Recibe los datos del formulario agregar_pedido.jsp, calcula total y precio unitario,
+     * y guarda el pedido en la BD mediante transacción atómica.
+     * RF-25 Restricción 1: Debe existir un inventario activo en sesión.
+     * RF-25 Restricción 4: Operación transaccional (PEDIDOS_PROVEEDOR + DETALLE_PEDIDOS).
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         try {
-            // Recoger datos del formulario
+            // =====================================================================
+            // RF-25 PASO 1: Recoger datos del formulario HTML
+            // =====================================================================
             int idProveedor = Integer.parseInt(request.getParameter("id_proveedor"));
-            int idProducto = Integer.parseInt(request.getParameter("id_producto"));
+            int idInvDetalle = Integer.parseInt(request.getParameter("id_inv_detalle")); // CAMBIADO: ahora recibe id_inv_detalle
             
             String fechaPedidoStr = request.getParameter("fecha_pedido");
             String fechaEntregaStr = request.getParameter("fecha_entrega");
             
             int cantidad = Integer.parseInt(request.getParameter("cantidad"));
             double subtotal = Double.parseDouble(request.getParameter("subtotal"));
-            double iva = Double.parseDouble(request.getParameter("iva"));
+            double iva = Double.parseDouble(request.getParameter("iva")); // RESTAURADO
             
-            // Cálculos
+            // RESTAURADO: total = subtotal + IVA
             double total = subtotal + iva;
             double precioUnitario = total / cantidad;
             
-            // Obtener usuario e inventario de la sesión
             HttpSession session = request.getSession();
             Integer idInventario = (Integer) session.getAttribute("idInventarioActual");
             
             if (idInventario == null) {
-                // Si no hay inventario en sesión, redirigir con error
                 response.sendRedirect("NegocioServlet?error=SinInventarioActivo");
                 return;
             } 
             
-            // Crear Objeto Pedido
+            // Crear Pedido
             PedidoProveedor pedido = new PedidoProveedor();
             pedido.setIdProveedor(idProveedor);
             pedido.setFechaPedido(Date.valueOf(fechaPedidoStr));
             pedido.setFechaEntrega(Date.valueOf(fechaEntregaStr));
-            pedido.setSubtotal(subtotal);
-            pedido.setIvaPedido(iva);
+            pedido.setSubtotal(subtotal);   // RESTAURADO
+            pedido.setIvaPedido(iva);      // RESTAURADO
             pedido.setTotalPedido(total);
             pedido.setIdInventario(idInventario);
             
-            // Crear Detalle (En este requerimiento parece que registra de a un producto por pedido según el formulario descrito,
-            // o si fuera carrito sería una lista. El usuario dijo "selecciona el producto", singular. 
-            // Asumiremos un pedido = un producto por simplicidad o lista de 1 elemento).
+            // Crear Detalle con id_inv_detalle (MANTIENE lógica de stock)
             DetallePedido detalle = new DetallePedido();
-            detalle.setIdProducto(idProducto);
+            detalle.setIdInvDetalle(idInvDetalle); 
             detalle.setCantidadPedida(cantidad);
             detalle.setPrecioUnitarioReal(precioUnitario);
             
             List<DetallePedido> detalles = new ArrayList<>();
             detalles.add(detalle);
             
-            // Guardar en BD
+            // Guardar en BD (transacción + stock automático)
             PedidoDAO pedidoDAO = new PedidoDAO();
             boolean exito = pedidoDAO.registrarPedido(pedido, detalles);
             
             if (exito) {
-                response.sendRedirect("view/pedido_finalizado.html");
+                response.sendRedirect("view/pedido_finalizado.html");  // RF-25: Redirigir a confirmación
             } else {
+                // RNF-08: Redirigir con error
                 response.sendRedirect("PedidoServlet?action=nuevo&msj=error");
             }
             
         } catch (Exception e) {
             e.printStackTrace();
+            // RNF-08: Redirigir con error descriptivo
             response.sendRedirect("PedidoServlet?action=nuevo&msj=error_datos");
         }
     }

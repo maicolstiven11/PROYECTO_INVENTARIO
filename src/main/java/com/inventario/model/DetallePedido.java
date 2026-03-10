@@ -3,7 +3,7 @@ package com.inventario.model;
 public class DetallePedido {
     private int idPedidoRegistro;
     private int idPedidoBase;
-    private int idProducto;
+    private int idInvDetalle;   // CAMBIADO: antes era idProducto, ahora referencia a inventario_detalle
     private int cantidadPedida;
     private double precioUnitarioReal;
 
@@ -14,10 +14,10 @@ public class DetallePedido {
     public DetallePedido() {
     }
 
-    public DetallePedido(int idPedidoRegistro, int idPedidoBase, int idProducto, int cantidadPedida, double precioUnitarioReal) {
+    public DetallePedido(int idPedidoRegistro, int idPedidoBase, int idInvDetalle, int cantidadPedida, double precioUnitarioReal) {
         this.idPedidoRegistro = idPedidoRegistro;
         this.idPedidoBase = idPedidoBase;
-        this.idProducto = idProducto;
+        this.idInvDetalle = idInvDetalle;
         this.cantidadPedida = cantidadPedida;
         this.precioUnitarioReal = precioUnitarioReal;
     }
@@ -39,12 +39,13 @@ public class DetallePedido {
         this.idPedidoBase = idPedidoBase;
     }
 
-    public int getIdProducto() {
-        return idProducto;
+    // CAMBIADO: getter/setter de idInvDetalle (antes era idProducto)
+    public int getIdInvDetalle() {
+        return idInvDetalle;
     }
 
-    public void setIdProducto(int idProducto) {
-        this.idProducto = idProducto;
+    public void setIdInvDetalle(int idInvDetalle) {
+        this.idInvDetalle = idInvDetalle;
     }
 
     public int getCantidadPedida() {

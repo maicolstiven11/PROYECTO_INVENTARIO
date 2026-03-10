@@ -3,7 +3,7 @@ package com.inventario.model;
 public class DetalleVenta {
     private int idDetalleVenta;
     private int idVenta;
-    private int idProducto;
+    private int idInvDetalle;   // CAMBIADO: antes era idProducto, ahora referencia a inventario_detalle
     private int cantidad;
     private double precioUnitario;
     private double subtotal;
@@ -27,12 +27,13 @@ public class DetalleVenta {
         this.idVenta = idVenta;
     }
 
-    public int getIdProducto() {
-        return idProducto;
+    // CAMBIADO: getter/setter de idInvDetalle (antes era idProducto)
+    public int getIdInvDetalle() {
+        return idInvDetalle;
     }
 
-    public void setIdProducto(int idProducto) {
-        this.idProducto = idProducto;
+    public void setIdInvDetalle(int idInvDetalle) {
+        this.idInvDetalle = idInvDetalle;
     }
 
     public int getCantidad() {
@@ -59,8 +60,9 @@ public class DetalleVenta {
         this.subtotal = subtotal;
     }
 
-    // Campo auxiliar para vista (No en BD)
+    // Campos auxiliares para vista (No en BD)
     private String nombreProducto;
+    private int idProducto; // auxiliar para el carrito (para buscar en inventario_detalle)
 
     public String getNombreProducto() {
         return nombreProducto;
@@ -68,5 +70,13 @@ public class DetalleVenta {
 
     public void setNombreProducto(String nombreProducto) {
         this.nombreProducto = nombreProducto;
+    }
+
+    public int getIdProducto() {
+        return idProducto;
+    }
+
+    public void setIdProducto(int idProducto) {
+        this.idProducto = idProducto;
     }
 }

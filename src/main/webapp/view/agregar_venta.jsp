@@ -42,6 +42,21 @@
                                 </div>
                             </c:if>
 
+                            <c:if test="${not empty sessionScope.error_stock}">
+                                <div class="mensaje-error"
+                                    style="background-color: #fff3cd; color: #856404; border-color: #ffeeba; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    <div>
+                                        <strong>${sessionScope.error_stock}</strong><br>
+                                        ¿Deseas pedir más a un proveedor?
+                                        <a href="../PedidoServlet?action=nuevo"
+                                            style="color: #0056b3; font-weight: bold; text-decoration: underline;">Registrar
+                                            Pedido</a>
+                                    </div>
+                                </div>
+                                <c:remove var="error_stock" scope="session" />
+                            </c:if>
+
                             <!-- FORMULARIO PARA AGREGAR PRODUCTO -->
                             <form class="formulario-venta" action="../VentaServlet" method="POST">
                                 <input type="hidden" name="action" value="agregar">

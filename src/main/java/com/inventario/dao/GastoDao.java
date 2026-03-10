@@ -1,4 +1,3 @@
-
 package com.inventario.dao;
 
 import com.inventario.model.Gasto;
@@ -7,9 +6,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
 
 public class GastoDao {
+    /**
+     * Registra un nuevo gasto.
+     * RESTAURADO: Vuelve a usar id_inventario.
+     */
     public boolean registrarGasto(Gasto g) throws SQLException{
         Connection con = null;
         PreparedStatement ps = null;
@@ -17,18 +19,15 @@ public class GastoDao {
         
         try{
             con = Conexion.getConexion();
-            String sql = "INSERT INTO GASTO_DIARIO ( id_inventario, cantidad, fecha, subtotal, descripcion) VALUES (?,?,?,?,?)";
+            // RESTAURADO: id_inventario (en vez de id_negocio) y quitado direccion
+            String sql = "INSERT INTO GASTO_DIARIO (id_inventario, cantidad, fecha, subtotal, descripcion) VALUES (?,?,?,?,?)";
             
             ps = con.prepareStatement(sql);
             
             ps.setInt(1, g.getId_inventario());
-            
             ps.setInt(2, g.getCantidad());
-            
             ps.setDate(3, g.getFecha());
-            
             ps.setDouble(4, g.getSubtotal());
-            
             ps.setString(5, g.getDescripcion());
             
             if(ps.executeUpdate()>0){
@@ -46,10 +45,13 @@ public class GastoDao {
             }
         }
     
-        // 10. REPORTE FINAL
-        return registrado; // Devolvemos 'true' o 'false' a quien nos llamó (el Servlet).
+        return registrado;
     }
-    //listar gastos por negocio
+
+    /**
+     * Listar gastos por negocio.
+     * RESTAURADO: JOIN con INVENTARIO para filtrar por negocio.
+     */
     public java.util.List<Gasto> listarGastos(int idNegocio) {
         java.util.List<Gasto> lista = new java.util.ArrayList<>();
         Connection con = null;
@@ -58,8 +60,8 @@ public class GastoDao {
         
         try {
             con = Conexion.getConexion();
-            // Unimos Gasto con INVENTARIO para filtrar por el negocio
-            String sql = "SELECT g.* FROM Gasto_diario g " +
+            // RESTAURADO: JOIN con INVENTARIO necesario para filtrar por id_negocio
+            String sql = "SELECT g.* FROM GASTO_DIARIO g " +
                          "INNER JOIN INVENTARIO i ON g.id_inventario = i.id_inventario " +
                          "WHERE i.id_negocio = ? " +
                          "ORDER BY g.fecha DESC";

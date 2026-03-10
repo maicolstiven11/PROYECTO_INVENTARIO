@@ -5,7 +5,7 @@ import java.sql.Date;
 public class Inventario {
     private int idInventario;
     private int idNegocio;
-    private Date fechaInicio;
+    private Date fechaInicio; // RESTAURADO
     private String tipoControl;
     private String estado;
 

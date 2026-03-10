@@ -13,10 +13,7 @@ public class InventarioDAO {
      /**
      * Inicia un nuevo inventario para un negocio.
      * También cambia el estado del negocio a 'ACTIVO'.
-     * @param idNegocio ID del negocio
-     * @param tipoControl Tipo de control (ej: "semanal", "mensual")
-     * @param fechaInicio Fecha de inicio seleccionada
-     * @return ID del inventario generado, o -1 si falla
+     * RESTAURADO: Se vuelve a guardar fecha_inicio
      */
     public int iniciarInventario(int idNegocio, String tipoControl, Date fechaInicio) {
         Connection con = null;
@@ -29,15 +26,14 @@ public class InventarioDAO {
             con = Conexion.getConexion();
             con.setAutoCommit(false); // TRANSACCIÓN
             
-            // 1. INSERTAR EN INVENTARIO
-            String sqlInventario = "INSERT INTO INVENTARIO (id_negocio, fecha_inicio, tipo_control, estado) " +
+            // 1. INSERTAR EN INVENTARIO (con fecha_inicio RESTAURADA)
+            String sqlInventario = "INSERT INTO INVENTARIO (id_negocio, tipo_control, estado, fecha_inicio) " +
                                    "VALUES (?, ?, ?, ?)";
             psInventario = con.prepareStatement(sqlInventario, PreparedStatement.RETURN_GENERATED_KEYS);
             psInventario.setInt(1, idNegocio);
-            // Usar la fecha pasada como parámetro o la actual si es null
-            psInventario.setDate(2, fechaInicio != null ? fechaInicio : new Date(System.currentTimeMillis()));
-            psInventario.setString(3, tipoControl != null ? tipoControl : "semanal");
-            psInventario.setString(4, "activo");
+            psInventario.setString(2, tipoControl != null ? tipoControl : "mensual");
+            psInventario.setString(3, "activo");
+            psInventario.setDate(4, fechaInicio);
             
             int filas = psInventario.executeUpdate();
             if (filas > 0) {
@@ -78,6 +74,7 @@ public class InventarioDAO {
     
     /**
      * Obtiene el inventario activo de un negocio (si existe)
+     * RESTAURADO: Lee fecha_inicio
      */
     public Inventario obtenerInventarioActivo(int idNegocio) {
         Inventario inv = null;
@@ -96,7 +93,7 @@ public class InventarioDAO {
                 inv = new Inventario();
                 inv.setIdInventario(rs.getInt("id_inventario"));
                 inv.setIdNegocio(rs.getInt("id_negocio"));
-                inv.setFechaInicio(rs.getDate("fecha_inicio"));
+                inv.setFechaInicio(rs.getDate("fecha_inicio")); // RESTAURADO
                 inv.setTipoControl(rs.getString("tipo_control"));
                 inv.setEstado(rs.getString("estado"));
             }
@@ -110,5 +107,89 @@ public class InventarioDAO {
             } catch (SQLException e) { e.printStackTrace(); }
         }
         return inv;
+    }
+
+    /**
+     * Lista todos los inventarios de un negocio (activos y finalizados).
+     */
+    public java.util.List<Inventario> listarInventariosPorNegocio(int idNegocio) {
+        java.util.List<Inventario> lista = new java.util.ArrayList<>();
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        
+        try {
+            con = Conexion.getConexion();
+            String sql = "SELECT * FROM INVENTARIO WHERE id_negocio = ? ORDER BY fecha_inicio DESC";
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idNegocio);
+            rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                Inventario inv = new Inventario();
+                inv.setIdInventario(rs.getInt("id_inventario"));
+                inv.setIdNegocio(rs.getInt("id_negocio"));
+                inv.setFechaInicio(rs.getDate("fecha_inicio"));
+                inv.setTipoControl(rs.getString("tipo_control"));
+                inv.setEstado(rs.getString("estado"));
+                lista.add(inv);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al listar inventarios: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return lista;
+    }
+
+    /**
+     * Finaliza un inventario activo y cambia el estado del negocio a 'inactivo'.
+     */
+    public boolean finalizarInventario(int idInventario) {
+        Connection con = null;
+        PreparedStatement psEnv = null;
+        PreparedStatement psNeg = null;
+        boolean finalizado = false;
+        
+        try {
+            con = Conexion.getConexion();
+            con.setAutoCommit(false);
+            
+            // 1. Finalizar inventario
+            String sqlInv = "UPDATE INVENTARIO SET estado = 'finalizado', fecha_fin = CURDATE() WHERE id_inventario = ?";
+            psEnv = con.prepareStatement(sqlInv);
+            psEnv.setInt(1, idInventario);
+            int f1 = psEnv.executeUpdate();
+            
+            // 2. Cambiar estado del negocio a 'inactivo'
+            String sqlNeg = "UPDATE NEGOCIO SET estado = 'inactivo' WHERE id_negocio = " +
+                            "(SELECT id_negocio FROM INVENTARIO WHERE id_inventario = ?)";
+            psNeg = con.prepareStatement(sqlNeg);
+            psNeg.setInt(1, idInventario);
+            int f2 = psNeg.executeUpdate();
+            
+            if (f1 > 0 && f2 > 0) {
+                con.commit();
+                finalizado = true;
+            } else {
+                con.rollback();
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error al finalizar inventario: " + e.getMessage());
+            try { if (con != null) con.rollback(); } catch (SQLException ex) {}
+        } finally {
+            try {
+                if (con != null) con.setAutoCommit(true);
+                if (psEnv != null) psEnv.close();
+                if (psNeg != null) psNeg.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return finalizado;
     }
 }

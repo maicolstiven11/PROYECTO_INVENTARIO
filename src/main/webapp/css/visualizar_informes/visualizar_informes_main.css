@@ -14,9 +14,16 @@ main {
 
 h2 {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 10px;
     color: var(--color-letras);
     font-size: 2rem;
+}
+
+.subtitulo-negocio {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #666;
+    font-size: 1.1rem;
 }
 
 /* Dashboard Grid */
@@ -89,6 +96,18 @@ h2 {
     color: #007bff;
 }
 
+.card-pedidos {
+    border-left: 5px solid #fd7e14;
+}
+
+.card-pedidos .card-informe__valor {
+    color: #fd7e14;
+}
+
+.ganancia-negativa {
+    color: #dc3545 !important;
+}
+
 
 
 
@@ -138,12 +157,14 @@ h2 {
 
 .barra-ventas {
     background-color: #28a745;
-    width: 75%;
 }
 
 .barra-gastos {
     background-color: #dc3545;
-    width: 40%;
+}
+
+.barra-pedidos {
+    background-color: #fd7e14;
 }
 
 

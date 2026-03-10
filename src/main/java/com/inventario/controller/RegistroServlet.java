@@ -10,42 +10,77 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+/**
+ * CONTROLADOR: Servlet encargado del proceso de Registro de Usuarios.
+ * 
+ * Implementa: RF-01 (Registrar Usuario)
+ * Cumple: RNF-02 (Protección SQL Injection - delega en DAO con PreparedStatement)
+ *         RNF-03 (Gestión de Sesiones - crea sesión automáticamente tras registro exitoso)
+ *         RNF-08 (Mensajes de Error - redirige con ?error=fallo_registro si falla)
+ *         RNF-13 (Arquitectura MVC - Capa Controlador)
+ * 
+ * Recibe los datos del formulario registroUser2.html (nombre, rol, teléfono, email, password)
+ * y delega al DAO para insertar en las tablas USUARIO, CORREO_USUARIO y TELEFONO_USUARIO.
+ */
 @WebServlet(name = "RegistroServlet", urlPatterns = {"/RegistroServlet"})
+// RF-01: La URL "/RegistroServlet" es a donde apunta el form de registroUser2.html (action="../RegistroServlet")
 public class RegistroServlet extends HttpServlet {
 
+    /**
+     * RF-01: Método doPost - Se ejecuta cuando el usuario envía el formulario de registro (method="POST").
+     * Recibe TODOS los datos juntos: los de la página 1 (nombre, rol) vienen como campos ocultos (hidden),
+     * y los de la página 2 (teléfono, email, password) vienen de los inputs visibles.
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        // 1. RECIBIR TODOS LOS DATOS
-        String nombre = request.getParameter("nombre");
-        String rol = request.getParameter("rol");
-        String telefono1 = request.getParameter("telefono1");
-        String email1 = request.getParameter("email1");
-        String password = request.getParameter("password");
+        // =====================================================================
+        // RF-01 PASO 1: RECIBIR TODOS LOS DATOS DEL FORMULARIO HTML
+        // Cada getParameter busca un input con ese name="" en el HTML.
+        // RF-30: Los campos obligatorios tienen "required" en el HTML (validación cliente).
+        // =====================================================================
+        String nombre = request.getParameter("nombre");       // RF-01: Nombre del usuario (viene como campo hidden desde pág 1)
+        String rol = request.getParameter("rol");             // RF-01: Rol seleccionado: "ADMIN" o "TRABAJADOR" (viene como campo hidden desde pág 1)
+        String telefono1 = request.getParameter("telefono1"); // RF-01: Teléfono (campo opcional según RF-01)
+        String email1 = request.getParameter("email1");       // RF-01, RF-31, RF-32: Correo electrónico (obligatorio, único)
+        String password = request.getParameter("password");   // RF-01: Contraseña (obligatoria, mín 6 caracteres según RF-01)
         
-        // 2. PREPARAR EL OBJETO USUARIO
-        Usuario nuevoUsuario = new Usuario();
-        nuevoUsuario.setNombre(nombre);
-        nuevoUsuario.setPassword(password);
+        // =====================================================================
+        // RF-01 PASO 2: CREAR EL OBJETO MODELO (Usuario)
+        // Creamos una instancia vacía de la clase Usuario y la llenamos con los datos recibidos.
+        // RNF-13: Usamos el Modelo como transportador de datos entre capas.
+        // =====================================================================
+        Usuario nuevoUsuario = new Usuario();        // RF-01: Crea un objeto Usuario vacío (constructor sin parámetros)
+        nuevoUsuario.setNombre(nombre);              // RF-01: Asigna el nombre al objeto
+        nuevoUsuario.setPassword(password);          // RF-01: Asigna la contraseña al objeto. RNF-01: PENDIENTE - Debería cifrarse antes de guardar.
         
-        // 3. LLAMAR AL DAO PARA GUARDAR (Ahora devuelve el ID)
-        UsuarioDAO dao = new UsuarioDAO();
-        int idGenerado = dao.registrarUsuario(nuevoUsuario, email1, telefono1, rol);
+        // =====================================================================
+        // RF-01 PASO 3: LLAMAR AL DAO PARA GUARDAR EN LA BASE DE DATOS
+        // El DAO maneja la transacción completa: inserta en 3 tablas (USUARIO, CORREO, TELEFONO).
+        // RNF-02: El DAO usa PreparedStatement (protección contra SQL Injection).
+        // RNF-13: El Servlet NO hace consultas SQL directamente.
+        // =====================================================================
+        UsuarioDAO dao = new UsuarioDAO();                                        // Crea un objeto DAO para acceder a la BD
+        int idGenerado = dao.registrarUsuario(nuevoUsuario, email1, telefono1, rol); // RF-01: Inserta usuario en BD. Retorna ID generado o -1 si falló.
         
-        // 4. VERIFICAR SI SE REGISTRÓ EXITOSAMENTE
+        // =====================================================================
+        // RF-01 PASO 4: VERIFICAR RESULTADO Y RESPONDER
+        // =====================================================================
         if (idGenerado > 0) {
-            // El DAO ya actualizó el objeto nuevoUsuario con el ID y rol
+            // RF-01: REGISTRO EXITOSO - La BD generó un ID para el nuevo usuario
+            // El DAO ya actualizó el objeto nuevoUsuario con su ID y rol internamente
             
-            // GUARDAR EN SESIÓN (igual que el Login)
+            // RNF-03: Crear sesión HTTP automáticamente (el usuario queda logueado después de registrarse)
             HttpSession session = request.getSession();
-            session.setAttribute("usuarioLogueado", nuevoUsuario);
+            session.setAttribute("usuarioLogueado", nuevoUsuario);  // RF-01: Guarda al nuevo usuario en sesión
             System.out.println("Servlet: Usuario registrado y guardado en sesión con ID: " + idGenerado);
             
-            // Redirigir a Bienvenida (que lleva a registrar bar)
+            // RF-01: Redirigir a la página de Bienvenida (donde puede registrar su primer bar)
             response.sendRedirect("view/Bienvenida.jsp");
         } else {
-            // Falló -> De vuelta al registro con error
+            // RF-01: REGISTRO FALLIDO - Algo salió mal en la BD (correo duplicado, error de conexión, etc.)
+            // RNF-08: Redirigir de vuelta al formulario de registro con parámetro de error
             response.sendRedirect("view/registroUser.html?error=fallo_registro");
         }
     }

@@ -21,6 +21,24 @@
             <main>
                 <h2>MIS BARES REGISTRADOS</h2>
 
+                <c:if test="${param.status == 'InventarioCerradoExito'}">
+                    <div
+                        style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 8px; 
+                                text-align: center; margin: 10px auto; width: 80%; font-weight: bold; border: 1px solid #c3e6cb;">
+                        <i class="fa-solid fa-circle-check"></i>
+                        ¡Inventario cerrado con éxito! El negocio ahora está inactivo. Puede crear un nuevo inventario
+                        cuando lo desee.
+                    </div>
+                </c:if>
+
+                <c:if test="${not empty param.error}">
+                    <div
+                        style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; 
+                                text-align: center; margin: 10px auto; width: 80%; font-weight: bold; border: 1px solid #f5c6cb;">
+                        <i class="fa-solid fa-circle-xmark"></i> Error: ${param.error}
+                    </div>
+                </c:if>
+
                 <section class="lista-bares">
                     <div class="contenido-scroll">
 
@@ -56,10 +74,9 @@
                                         <img src="../assets/img/icono_borrar_bar.png" alt="borrar-bar">
                                     </a>
 
-                                    <a href="view/visualizar_bar.html?idNegocio=${bar.idNegocio}"
-                                        class="visualizar_bar">
-                                        <h3>Visualizar-bar</h3>
-                                        <img src="assets/img/icono_visualizar_bar.png" alt="icono_visualizar_bar">
+                                    <a href="../InformeServlet?idNegocio=${bar.idNegocio}" class="visualizar_bar">
+                                        <h3>Informes de bar</h3>
+                                        <img src="../assets/img/icono_visualizar_bar.png" alt="icono_informes">
                                     </a>
                                 </div>
                             </div>

@@ -21,15 +21,17 @@
                 <h1>Contabilidad-Sistematica</h1>
                 <section class="contenedor__menu">
 
-                    <!-- OPCIÓN PARA TODOS: VER MIS BARES -->
-                    <a href="../NegocioServlet">
-                        <div class="contenedor__aggBar">
-                            <div class="fondo_img">
-                                <img src="../assets/img/view_bares.png" alt="bares_logo">
+                    <!-- OPCIÓN SOLO PARA ADMIN: VER MIS BARES -->
+                    <c:if test="${usuarioLogueado.idRol == 1}">
+                        <a href="../NegocioServlet">
+                            <div class="contenedor__aggBar">
+                                <div class="fondo_img">
+                                    <img src="../assets/img/view_bares.png" alt="bares_logo">
+                                </div>
+                                <p>VER MIS BARES</p>
                             </div>
-                            <p>VER MIS BARES</p>
-                        </div>
-                    </a>
+                        </a>
+                    </c:if>
 
                     <!-- OPCIONES SOLO PARA ADMINISTRADOR (Rol 1) -->
                     <c:if test="${usuarioLogueado.idRol == 1}">
@@ -42,7 +44,7 @@
                             </div>
                         </a>
 
-                        <a href="gestion_trabajadores.html">
+                        <a href="../TrabajadorServlet?action=listar">
                             <div class="contenedor__aggBar">
                                 <div class="fondo_img">
                                     <i class="fa-solid fa-users-gear"></i>
@@ -50,6 +52,28 @@
                                 <p>GESTIÓN TRABAJADORES</p>
                             </div>
                         </a>
+                    </c:if>
+
+                    <!-- OPCIONES SOLO PARA TRABAJADOR (Rol 2) -->
+                    <c:if test="${usuarioLogueado.idRol == 2}">
+                        <c:if test="${not empty sessionScope.idNegocioActual}">
+                            <a href="../InventarioServlet?action=entrar&idNegocio=${sessionScope.idNegocioActual}">
+                                <div class="contenedor__aggBar">
+                                    <div class="fondo_img">
+                                        <i class="fa-solid fa-cash-register"></i>
+                                    </div>
+                                    <p>IR A MI BAR</p>
+                                </div>
+                            </a>
+                        </c:if>
+                        <c:if test="${empty sessionScope.idNegocioActual}">
+                            <div class="contenedor__aggBar" style="opacity: 0.5;">
+                                <div class="fondo_img">
+                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                </div>
+                                <p>SIN BAR ASIGNADO</p>
+                            </div>
+                        </c:if>
                     </c:if>
 
                     <!-- OPCIÓN PARA TODOS: MI PERFIL -->
@@ -62,19 +86,28 @@
                         </div>
                     </a>
 
-                    <!-- OPCIÓN PARA TODOS: PRODUCTOS?? (Tal vez restringir si es necesario) -->
-                    <!-- Dejamos visible por ahora -->
-                    <a href="../ProductoServlet">
-                        <div class="contenedor__aggBar">
-                            <div class="fondo_img">
-                                <i class="fa-solid fa-boxes-stacked"></i>
+                    <!-- OPCIÓN SOLO PARA ADMIN: PRODUCTOS -->
+                    <c:if test="${usuarioLogueado.idRol == 1}">
+                        <a href="../ProductoServlet">
+                            <div class="contenedor__aggBar">
+                                <div class="fondo_img">
+                                    <i class="fa-solid fa-boxes-stacked"></i>
+                                </div>
+                                <p>PRODUCTOS DE VENTA</p>
                             </div>
-                            <p>PRODUCTOS DE VENTA</p>
-                        </div>
-                    </a>
-
+                        </a>
+                    </c:if>
 
                 </section>
+
+                <!-- BOTÓN CERRAR SESIÓN -->
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="../LoginServlet?action=logout" style="display: inline-block; background-color: #e74c3c; color: white; padding: 12px 30px; 
+                              text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px;"
+                        onclick="return confirm('¿Estás seguro de cerrar sesión?');">
+                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                    </a>
+                </div>
 
             </main>
             <footer>

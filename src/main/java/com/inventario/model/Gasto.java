@@ -1,11 +1,10 @@
-
 package com.inventario.model;
 
 import java.sql.Date;
 
 public class Gasto {
     private int id_gastos;
-    private int id_inventario;
+    private int id_inventario;   // RESTAURADO: de id_negocio a id_inventario
     private int cantidad;
     private Date fecha;
     private Double subtotal;

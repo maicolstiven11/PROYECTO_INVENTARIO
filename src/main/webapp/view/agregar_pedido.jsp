@@ -41,14 +41,14 @@
                             </div>
                         </div>
 
-                        <!-- Producto -->
+                        <!-- Producto (selecciona el producto, y busca el id_inv_detalle) -->
                         <div class="form-group">
-                            <label for="id_producto">Producto:</label>
+                            <label for="id_inv_detalle">Producto del Inventario:</label>
                             <div class="select-wrapper">
-                                <select name="id_producto" id="id_producto" required>
+                                <select name="id_inv_detalle" id="id_inv_detalle" required>
                                     <option value="" disabled selected>Seleccione un producto</option>
-                                    <c:forEach var="prod" items="${listaProductos}">
-                                        <option value="${prod.idProducto}">${prod.nombre} - ${prod.marca}</option>
+                                    <c:forEach var="item" items="${listaDetalles}">
+                                        <option value="${item.idDetalle}">${item.nombreProducto}</option>
                                     </c:forEach>
                                 </select>
                                 <i class="fa-solid fa-chevron-down icono-select"></i>

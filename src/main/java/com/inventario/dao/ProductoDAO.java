@@ -106,21 +106,30 @@ public class ProductoDAO {
             con = Conexion.getConexion();
             con.setAutoCommit(false); // Iniciar transacción
             
-            // PASO 1: Eliminar de DETALLE_VENTA (si el producto fue vendido)
-            String sqlDetalleVenta = "DELETE FROM DETALLE_VENTA WHERE id_producto = ?";
+            // PASO 1: Eliminar de DETALLE_VENTA (usando el nuevo campo id_inv_detalle)
+            String sqlDetalleVenta = "DELETE FROM DETALLE_VENTA WHERE id_inv_detalle IN " +
+                                     "(SELECT id_detalle FROM INVENTARIO_DETALLE WHERE id_producto = ?)";
             ps = con.prepareStatement(sqlDetalleVenta);
             ps.setInt(1, id);
             ps.executeUpdate();
             ps.close();
             
-            // PASO 2: Eliminar de INVENTARIO_DETALLE (si fue parte de un inventario)
+            // PASO 2: Eliminar de DETALLE_PEDIDOS (nuevo campo id_inv_detalle)
+            String sqlDetallePedidos = "DELETE FROM DETALLE_PEDIDOS WHERE id_inv_detalle IN " +
+                                       "(SELECT id_detalle FROM INVENTARIO_DETALLE WHERE id_producto = ?)";
+            ps = con.prepareStatement(sqlDetallePedidos);
+            ps.setInt(1, id);
+            ps.executeUpdate();
+            ps.close();
+            
+            // PASO 3: Eliminar de INVENTARIO_DETALLE
             String sqlDetalleInv = "DELETE FROM INVENTARIO_DETALLE WHERE id_producto = ?";
             ps = con.prepareStatement(sqlDetalleInv);
             ps.setInt(1, id);
             ps.executeUpdate();
             ps.close();
             
-            // PASO 3: Finalmente, eliminar el PRODUCTO
+            // PASO 4: Finalmente, eliminar el PRODUCTO
             String sqlProducto = "DELETE FROM PRODUCTO WHERE id_producto = ?";
             ps = con.prepareStatement(sqlProducto);
             ps.setInt(1, id);
@@ -131,7 +140,7 @@ public class ProductoDAO {
             }
             
             con.commit(); // Confirmar todos los cambios
-            System.out.println("Producto ID " + id + " eliminado correctamente con sus dependencias.");
+            System.out.println("Producto ID " + id + " y sus dependencias (ventas, pedidos, inventario) eliminados correctamente.");
             
         } catch (SQLException e) {
             System.err.println("Error al eliminar producto: " + e.getMessage());

@@ -46,6 +46,12 @@
                             Visualizar gastos
                         </a>
 
+                        <!-- PEDIDOS A PROVEEDORES - Visible para TODOS -->
+                        <a href="../PedidoServlet?action=listar" class="aside__link">
+                            <i class="fa-solid fa-truck-fast aside__icon"></i>
+                            Visualizar pedidos
+                        </a>
+
                         <!-- OPCIONES SOLO PARA ADMINISTRADOR -->
                         <c:if test="${usuarioLogueado.idRol == 1}">
                             <a href="../ProductoServlet" class="aside__link">
@@ -58,7 +64,7 @@
                                 Editar proveedores
                             </a>
 
-                            <a href="visualizar_informes.html" class="aside__link">
+                            <a href="../InformeServlet" class="aside__link">
                                 <i class="fa-solid fa-file-invoice aside__icon"></i>
                                 Visualizar informes
                             </a>
@@ -101,6 +107,13 @@
                             <a href="../PedidoServlet?action=nuevo" class="card">
                                 <p class="card__title">Agregar pedido de proveedor</p>
                                 <i class="fa-solid fa-plus card__icon"></i>
+                            </a>
+
+                            <!-- BOTÓN DE CIERRE DE INVENTARIO -->
+                            <a href="../InventarioServlet?action=cargar_cierre" class="card card--cierre"
+                                style="background-color: #ff9800; color: white;">
+                                <p class="card__title">Cerrar Inventario (Semana/Mes)</p>
+                                <i class="fa-solid fa-lock card__icon"></i>
                             </a>
                         </c:if>
 
