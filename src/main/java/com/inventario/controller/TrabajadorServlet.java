@@ -62,12 +62,76 @@ public class TrabajadorServlet extends HttpServlet {
                 int idNegocio = Integer.parseInt(request.getParameter("id_negocio"));
 
                 UsuarioDAO dao = new UsuarioDAO();
+
+                // Validar que el bar no tenga ya un trabajador asignado
+                if (dao.negocioTieneTrabajador(idNegocio)) {
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=bar_ocupado");
+                    return; // Detener la ejecución
+                }
+
                 boolean exito = dao.asignarNegocio(idUsuario, idNegocio);
 
                 if (exito) {
                     response.sendRedirect("TrabajadorServlet?action=listar&msg=asignado");
                 } else {
                     response.sendRedirect("TrabajadorServlet?action=listar&error=fallo_asignar");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.sendRedirect("TrabajadorServlet?action=listar&error=datos_invalidos");
+            }
+        } else if ("desasignar".equals(action)) {
+            try {
+                int idUsuario = Integer.parseInt(request.getParameter("id_usuario"));
+                UsuarioDAO dao = new UsuarioDAO();
+                boolean exito = dao.desasignarNegocio(idUsuario);
+
+                if (exito) {
+                    response.sendRedirect("TrabajadorServlet?action=listar&msg=desasignado");
+                } else {
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=fallo_desasignar");
+                }
+            } catch (Exception e) {
+                response.sendRedirect("TrabajadorServlet?action=listar&error=datos_invalidos");
+            }
+        } else if ("eliminar".equals(action)) {
+            try {
+                int idUsuario = Integer.parseInt(request.getParameter("id_usuario"));
+                UsuarioDAO dao = new UsuarioDAO();
+                boolean exito = dao.eliminarTrabajador(idUsuario);
+
+                if (exito) {
+                    response.sendRedirect("TrabajadorServlet?action=listar&msg=eliminado");
+                } else {
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=fallo_eliminar");
+                }
+            } catch (Exception e) {
+                response.sendRedirect("TrabajadorServlet?action=listar&error=datos_invalidos");
+            }
+        } else if ("resetPassword".equals(action)) {
+            // RF-05: Solo admin puede resetear contraseña de trabajadores
+            try {
+                int idUsuario = Integer.parseInt(request.getParameter("id_usuario"));
+                String nuevaPassword = request.getParameter("nueva_password");
+                String confirmarPassword = request.getParameter("confirmar_password");
+
+                // Validar que coincidan
+                if (nuevaPassword == null || nuevaPassword.length() < 6) {
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=password_corta");
+                    return;
+                }
+                if (!nuevaPassword.equals(confirmarPassword)) {
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=password_no_coincide");
+                    return;
+                }
+
+                UsuarioDAO dao = new UsuarioDAO();
+                boolean exito = dao.actualizarPassword(idUsuario, nuevaPassword);
+
+                if (exito) {
+                    response.sendRedirect("TrabajadorServlet?action=listar&msg=password_reseteada");
+                } else {
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=fallo_reset");
                 }
             } catch (Exception e) {
                 e.printStackTrace();

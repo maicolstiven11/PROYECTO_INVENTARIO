@@ -1,6 +1,7 @@
 package com.inventario.dao;
 
 import com.inventario.util.Conexion;
+import com.inventario.util.Cifrado;
 import com.inventario.model.Usuario;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -55,7 +56,7 @@ public class UsuarioDAO {
             // RF-02 PASO 3: Asignar valores a los parámetros (?)
             // RNF-02: setString escapa automáticamente caracteres peligrosos (', ", etc.)
             ps.setString(1, email);    // El primer ? se reemplaza con el email recibido
-            ps.setString(2, password); // El segundo ? se reemplaza con la contraseña recibida
+            ps.setString(2, Cifrado.sha256(password)); // El segundo ? se reemplaza con la contraseña CIFRADA
 
             // RF-02 PASO 4: Ejecutar la consulta SELECT en la BD
             rs = ps.executeQuery();    // Ejecuta y guarda el resultado (tabla de filas encontradas)
@@ -176,7 +177,7 @@ public class UsuarioDAO {
             ps = con.prepareStatement(sqlUsuario, PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setInt(1, idRol);                       // Columna id_rol = el ID del rol encontrado
             ps.setString(2, usuario.getNombre());      // Columna nombre = nombre del objeto Usuario
-            ps.setString(3, usuario.getPassword());    // Columna password = contraseña del objeto. RNF-01: PENDIENTE cifrado BCrypt
+            ps.setString(3, Cifrado.sha256(usuario.getPassword()));    // RNF-01: Contraseña CIFRADA con SHA-256
             
             int filasAfectadas = ps.executeUpdate();   // Ejecuta el INSERT. Retorna cuántas filas se insertaron.
             
@@ -421,5 +422,337 @@ public class UsuarioDAO {
             } catch (SQLException e) { e.printStackTrace(); }
         }
         return negocio;
+    }
+
+    /**
+     * Verifica si un negocio ya tiene un trabajador (rol = 2) asignado.
+     * Retorna true si ya existe un trabajador para ese negocio.
+     */
+    public boolean negocioTieneTrabajador(int idNegocio) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        boolean tiene = false;
+
+        try {
+            con = Conexion.getConexion();
+            String sql = "SELECT COUNT(*) FROM USUARIO_NEGOCIO un " +
+                         "INNER JOIN USUARIO u ON un.id_usuario = u.id_usuario " +
+                         "WHERE un.id_negocio = ? AND u.id_rol = 2";
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idNegocio);
+            rs = ps.executeQuery();
+
+            if (rs.next() && rs.getInt(1) > 0) {
+                tiene = true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al verificar trabajador en negocio: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return tiene;
+    }
+
+    /**
+     * Elimina el vínculo entre un trabajador y cualquier negocio que tuviera asignado.
+     */
+    public boolean desasignarNegocio(int idUsuario) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        boolean exito = false;
+        try {
+            con = Conexion.getConexion();
+            String sql = "DELETE FROM USUARIO_NEGOCIO WHERE id_usuario = ?";
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idUsuario);
+            if (ps.executeUpdate() > 0) {
+                exito = true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al desasignar negocio: " + e.getMessage());
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return exito;
+    }
+
+    /**
+     * Elimina completamente un usuario trabajador y todos sus datos relacionados (correo, teléfono, asignación).
+     */
+    public boolean eliminarTrabajador(int idUsuario) {
+        Connection con = null;
+        PreparedStatement psCor = null, psTel = null, psAsig = null, psUsu = null;
+        boolean exito = false;
+        try {
+            con = Conexion.getConexion();
+            con.setAutoCommit(false); // Iniciar transacción
+
+            // 1. Eliminar de CORREO_USUARIO
+            psCor = con.prepareStatement("DELETE FROM CORREO_USUARIO WHERE id_usuario = ?");
+            psCor.setInt(1, idUsuario);
+            psCor.executeUpdate();
+
+            // 2. Eliminar de TELEFONO_USUARIO
+            psTel = con.prepareStatement("DELETE FROM TELEFONO_USUARIO WHERE id_usuario = ?");
+            psTel.setInt(1, idUsuario);
+            psTel.executeUpdate();
+
+            // 3. Eliminar de USUARIO_NEGOCIO
+            psAsig = con.prepareStatement("DELETE FROM USUARIO_NEGOCIO WHERE id_usuario = ?");
+            psAsig.setInt(1, idUsuario);
+            psAsig.executeUpdate();
+
+            // 4. Eliminar el propio USUARIO
+            psUsu = con.prepareStatement("DELETE FROM USUARIO WHERE id_usuario = ?");
+            psUsu.setInt(1, idUsuario);
+            int rows = psUsu.executeUpdate();
+
+            if (rows > 0) {
+                con.commit();
+                exito = true;
+            } else {
+                con.rollback();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar trabajador: " + e.getMessage());
+            try { if (con != null) con.rollback(); } catch (SQLException ex) {}
+        } finally {
+            try {
+                if (con != null) con.setAutoCommit(true);
+                if (psCor != null) psCor.close();
+                if (psTel != null) psTel.close();
+                if (psAsig != null) psAsig.close();
+                if (psUsu != null) psUsu.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return exito;
+    }
+
+    // =====================================================================
+    // MÉTODOS PARA GESTIONAR CORREOS Y TELÉFONOS ADICIONALES (PERFIL)
+    // Usados por: PerfilServlet.java
+    // Tablas: CORREO_USUARIO, TELEFONO_USUARIO
+    // =====================================================================
+
+    /**
+     * Listar todos los correos electrónicos de un usuario.
+     * QUIÉN LO LLAMA: PerfilServlet.doGet() → Para mostrar los correos en perfil_admin.jsp
+     * QUÉ HACE: SELECT correo_electronico FROM CORREO_USUARIO WHERE id_usuario = ?
+     */
+    public java.util.List<String> listarCorreos(int idUsuario) {
+        java.util.List<String> correos = new java.util.ArrayList<>();
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            con = Conexion.getConexion();
+            String sql = "SELECT correo_electronico FROM CORREO_USUARIO WHERE id_usuario = ?";
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idUsuario);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                correos.add(rs.getString("correo_electronico"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al listar correos: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return correos;
+    }
+
+    /**
+     * Listar todos los teléfonos de un usuario.
+     * QUIÉN LO LLAMA: PerfilServlet.doGet() → Para mostrar los teléfonos en perfil_admin.jsp
+     * QUÉ HACE: SELECT numero_telefono FROM TELEFONO_USUARIO WHERE id_usuario = ?
+     */
+    public java.util.List<String> listarTelefonos(int idUsuario) {
+        java.util.List<String> telefonos = new java.util.ArrayList<>();
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            con = Conexion.getConexion();
+            String sql = "SELECT numero_telefono FROM TELEFONO_USUARIO WHERE id_usuario = ?";
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idUsuario);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                telefonos.add(rs.getString("numero_telefono"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al listar teléfonos: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return telefonos;
+    }
+
+    /**
+     * Agregar un correo electrónico adicional a un usuario.
+     * QUIÉN LO LLAMA: PerfilServlet.doPost(action=agregarCorreo)
+     * QUÉ HACE: INSERT INTO CORREO_USUARIO (id_usuario, correo_electronico) VALUES (?, ?)
+     * VALIDACIÓN: Verifica que el correo no esté ya registrado para este usuario
+     */
+    public boolean agregarCorreo(int idUsuario, String correo) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        boolean agregado = false;
+        try {
+            con = Conexion.getConexion();
+            // Primero verificar que no exista ya este correo para este usuario
+            String sqlCheck = "SELECT COUNT(*) FROM CORREO_USUARIO WHERE id_usuario = ? AND correo_electronico = ?";
+            ps = con.prepareStatement(sqlCheck);
+            ps.setInt(1, idUsuario);
+            ps.setString(2, correo);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                System.out.println("El correo ya existe para este usuario.");
+                rs.close();
+                ps.close();
+                return false; // Ya existe
+            }
+            rs.close();
+            ps.close();
+
+            // Insertar el nuevo correo
+            String sql = "INSERT INTO CORREO_USUARIO (id_usuario, correo_electronico) VALUES (?, ?)";
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idUsuario);
+            ps.setString(2, correo);
+            if (ps.executeUpdate() > 0) {
+                agregado = true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al agregar correo: " + e.getMessage());
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return agregado;
+    }
+
+    /**
+     * Agregar un teléfono adicional a un usuario.
+     * QUIÉN LO LLAMA: PerfilServlet.doPost(action=agregarTelefono)
+     * QUÉ HACE: INSERT INTO TELEFONO_USUARIO (id_usuario, numero_telefono) VALUES (?, ?)
+     * VALIDACIÓN: Verifica que el teléfono no esté ya registrado para este usuario
+     */
+    public boolean agregarTelefono(int idUsuario, String telefono) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        boolean agregado = false;
+        try {
+            con = Conexion.getConexion();
+            // Primero verificar que no exista ya este teléfono para este usuario
+            String sqlCheck = "SELECT COUNT(*) FROM TELEFONO_USUARIO WHERE id_usuario = ? AND numero_telefono = ?";
+            ps = con.prepareStatement(sqlCheck);
+            ps.setInt(1, idUsuario);
+            ps.setString(2, telefono);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                System.out.println("El teléfono ya existe para este usuario.");
+                rs.close();
+                ps.close();
+                return false; // Ya existe
+            }
+            rs.close();
+            ps.close();
+
+            // Insertar el nuevo teléfono
+            String sql = "INSERT INTO TELEFONO_USUARIO (id_usuario, numero_telefono) VALUES (?, ?)";
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idUsuario);
+            ps.setString(2, telefono);
+            if (ps.executeUpdate() > 0) {
+                agregado = true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al agregar teléfono: " + e.getMessage());
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return agregado;
+    }
+
+    /**
+     * RF-05: Actualiza la contraseña de un usuario por su ID.
+     * Solo el Administrador puede ejecutar esta acción (controlado desde TrabajadorServlet).
+     */
+    public boolean actualizarPassword(int idUsuario, String nuevaPassword) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        boolean actualizado = false;
+        try {
+            con = Conexion.getConexion();
+            String sql = "UPDATE USUARIO SET password = ? WHERE id_usuario = ?";
+            ps = con.prepareStatement(sql);
+            ps.setString(1, Cifrado.sha256(nuevaPassword)); // RNF-01: Cifrar la nueva contraseña
+            ps.setInt(2, idUsuario);
+            if (ps.executeUpdate() > 0) {
+                actualizado = true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar contraseña: " + e.getMessage());
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return actualizado;
+    }
+
+    /**
+     * Verifica si un correo electrónico ya existe en la base de datos.
+     * @param correo El correo a verificar.
+     * @return true si existe, false si no.
+     */
+    public boolean existeCorreo(String correo) {
+        boolean existe = false;
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            con = Conexion.getConexion();
+            String sql = "SELECT COUNT(*) FROM CORREO_USUARIO WHERE correo_electronico = ?";
+            ps = con.prepareStatement(sql);
+            ps.setString(1, correo);
+            rs = ps.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                existe = true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al verificar correo: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return existe;
     }
 }

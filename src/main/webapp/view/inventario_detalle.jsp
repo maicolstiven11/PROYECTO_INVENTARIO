@@ -64,7 +64,8 @@
                                                 <input type="hidden" name="id_producto" value="${p.idProducto}">
                                                 <!-- Input de cantidad -->
                                                 <input type="number" name="cantidad"
-                                                    class="inventario__entrada-cantidad" placeholder="0" min="0">
+                                                    class="inventario__entrada-cantidad" placeholder="0" min="0"
+                                                    max="100000">
                                             </td>
                                         </tr>
                                     </c:forEach>

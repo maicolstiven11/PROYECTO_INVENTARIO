@@ -9,6 +9,7 @@
             <title>Registrar Pedido a Proveedor</title>
             <link rel="stylesheet" href="css/agg_pedido.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         </head>
 
         <body>
@@ -28,30 +29,29 @@
                         <input type="hidden" name="action" value="guardar">
 
                         <!-- Proveedor -->
-                        <div class="form-group">
+                        <div class="form-group" style="padding-bottom: 5px;">
                             <label for="id_proveedor">Proveedor:</label>
-                            <div class="select-wrapper">
-                                <select name="id_proveedor" id="id_proveedor" required>
+                            <div class="select-wrapper select2-wrapper">
+                                <select name="id_proveedor" id="id_proveedor" required style="width: 100%;">
                                     <option value="" disabled selected>Seleccione un proveedor</option>
                                     <c:forEach var="prov" items="${listaProveedores}">
                                         <option value="${prov.idProveedor}">${prov.nombreProveedor}</option>
                                     </c:forEach>
                                 </select>
-                                <i class="fa-solid fa-chevron-down icono-select"></i>
                             </div>
                         </div>
 
-                        <!-- Producto (selecciona el producto, y busca el id_inv_detalle) -->
-                        <div class="form-group">
-                            <label for="id_inv_detalle">Producto del Inventario:</label>
-                            <div class="select-wrapper">
-                                <select name="id_inv_detalle" id="id_inv_detalle" required>
+                        <!-- Producto (Carga todos los productos de la BD) -->
+                        <div class="form-group" style="padding-bottom: 5px;">
+                            <label for="id_producto">Producto:</label>
+                            <div class="select-wrapper select2-wrapper">
+                                <select name="id_producto" id="id_producto" required style="width: 100%;">
                                     <option value="" disabled selected>Seleccione un producto</option>
-                                    <c:forEach var="item" items="${listaDetalles}">
-                                        <option value="${item.idDetalle}">${item.nombreProducto}</option>
+                                    <c:forEach var="item" items="${listaProductos}">
+                                        <option value="${item.idProducto}">${item.nombre} - $${item.precioUnitario}
+                                            (${item.marca})</option>
                                     </c:forEach>
                                 </select>
-                                <i class="fa-solid fa-chevron-down icono-select"></i>
                             </div>
                         </div>
 
@@ -143,6 +143,27 @@
                 subtotalInput.addEventListener('input', calcularValores);
                 ivaInput.addEventListener('input', calcularValores);
             </script>
+            <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+            <script>
+                $(document).ready(function () {
+                    $('#id_proveedor').select2({
+                        placeholder: 'Buscar proveedor...',
+                        allowClear: true,
+                        language: { noResults: function () { return "No se encontraron proveedores activos"; } }
+                    });
+                    $('#id_producto').select2({
+                        placeholder: 'Buscar producto...',
+                        allowClear: true,
+                        language: { noResults: function () { return "No se encontraron productos"; } }
+                    });
+
+                    // Asegurar que validaciones base no choquen con Select2
+                    $('#id_proveedor').on('change', function () { $(this).valid(); });
+                    $('#id_producto').on('change', function () { $(this).valid(); });
+                });
+            </script>
+            <script src="js/validaciones.js"></script>
         </body>
 
         </html>

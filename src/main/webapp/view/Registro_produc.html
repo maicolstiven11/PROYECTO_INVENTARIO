@@ -19,21 +19,47 @@
     <main>
 
         <h2 class="main__subtitulo">Registre los productos</h2>
+
+        <!-- Contenedor para mensajes de error intuitivos -->
+        <div id="mensajeError"
+            style="display: none; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 5px; text-align: center; margin: 15px auto; width: 80%; border: 1px solid #f5c6cb; font-family: sans-serif; font-size: 14px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> <strong id="errorTexto">Error al registrar
+                producto.</strong>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('error')) {
+                    const error = urlParams.get('error');
+                    const divError = document.getElementById('mensajeError');
+                    const spanTexto = document.getElementById('errorTexto');
+                    divError.style.display = 'block';
+                    if (error === 'producto_duplicado') {
+                        spanTexto.textContent = 'Este nombre de producto ya está registrado en el inventario.';
+                    } else {
+                        spanTexto.textContent = 'No se pudo guardar el producto. Verifica los datos.';
+                    }
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            });
+        </script>
+
         <section class="main__contenedorForm">
-            <form class="main__formulario" action="../ProductoServlet" method="POST">
+            <form class="main__formulario" action="../ProductoServlet" method="POST" enctype="multipart/form-data">
                 <div class="campo">
                     <label for="name" class="formulario__nombre"></label>
                     <input id="name" class="form__input_name" name="nombre" type="text" required
-                        placeholder="Nombre del producto">
+                        placeholder="Nombre del producto" maxlength="100">
                 </div>
                 <div class="campo">
                     <label for="precio_producto"></label>
                     <input type="number" step="0.01" id="precio_producto" name="precio"
-                        placeholder="Precio del producto" required>
+                        placeholder="Precio del producto" required min="0" max="999999999">
                 </div>
                 <div class="campo">
                     <label for="precio_producto"></label>
-                    <input type="text" id="marca_producto" name="marca" placeholder="marca" required>
+                    <input type="text" id="marca_producto" name="marca" placeholder="marca" required maxlength="50">
                 </div>
                 <div class="form__iconTiposDoc">
 
@@ -52,7 +78,7 @@
                 <div class="campo">
                     <label for="cantidad_medida"></label>
                     <input type="text" id="cantidad_medida" name="cantidad_medida" placeholder="cantidad de medida"
-                        required>
+                        required maxlength="50">
                 </div>
                 <div class="campo_img">
                     <label for="imagen" class="boton_img">Imagen del producto</label>
@@ -67,6 +93,22 @@
     <footer>
 
     </footer>
+    <script src="../js/validaciones.js?v=20240311"></script>
+    <script>
+        document.getElementById('imagen').addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var preview = document.getElementById('preview');
+                    preview.innerHTML = '<img src="' + e.target.result + '" style="max-width: 150px; border-radius: 8px; margin-top: 10px;" alt="Previsualización">';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('preview').innerHTML = '';
+            }
+        });
+    </script>
 </body>
 
 </html>

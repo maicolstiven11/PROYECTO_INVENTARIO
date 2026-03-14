@@ -100,4 +100,37 @@ public class ProveedorDAO {
         }
         return eliminado;
     }
+
+    /**
+     * Verifica si un proveedor ya existe por nombre o correo.
+     * @param nombre Nombre del proveedor.
+     * @param correo Correo del proveedor.
+     * @return true si existe, false si no.
+     */
+    public boolean existeProveedor(String nombre, String correo) {
+        boolean existe = false;
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            con = Conexion.getConexion();
+            String sql = "SELECT COUNT(*) FROM DATOS_PROVEEDOR WHERE nombre_proveedor = ? OR correo = ?";
+            ps = con.prepareStatement(sql);
+            ps.setString(1, nombre);
+            ps.setString(2, correo);
+            rs = ps.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                existe = true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al verificar proveedor: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return existe;
+    }
 }

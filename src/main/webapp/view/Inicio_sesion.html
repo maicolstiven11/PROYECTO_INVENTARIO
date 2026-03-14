@@ -22,20 +22,28 @@
         <h2 class="main__subtitulo">Contabilidad-Sistematica</h2>
         <section class="seccion__inicioResgistrar">
             <a href="#" class="inicio_sesion">Iniciar sesion</a>
-            <a href="registroUser.html" class="registrarse">Registrarse</a>
+            <a href="/view/registroUser.html" class="registrarse">Registrarse</a>
         </section>
+
+        <!-- Contenedor para el mensaje de error -->
+        <div id="mensajeError"
+            style="display: none; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 5px; text-align: center; margin: 15px auto; width: 80%; border: 1px solid #f5c6cb; font-family: sans-serif; font-size: 14px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> <strong>Credenciales incorrectas.</strong> El correo o la
+            contraseña no son válidos.
+        </div>
 
         <form class="main__formulario" action="../LoginServlet" method="POST">
             <div class="campo">
                 <label for="email" class="formulario__email__icon"></label>
                 <i class="fas fa-envelope icono"></i>
-                <input class="form__input_email" type="email" name="email" required placeholder="Email">
+                <input class="form__input_email" type="email" name="email" required placeholder="Email" maxlength="150">
             </div>
 
             <div class="campo">
                 <label for="password" class="formulario__password__icon"></label>
                 <i class="fas fa-lock icono"></i>
-                <input class="form__input_email" type="password" name="password" required placeholder="Contraseña">
+                <input class="form__input_email" type="password" name="password" required placeholder="Contraseña"
+                    minlength="6" maxlength="50">
             </div>
 
             <div class="contenedor__btnLogin">
@@ -45,11 +53,8 @@
         </form>
 
         <div class="form__opciones">
-            <div class="recordar_Contra">
-                <label class="opcion__recordarContra"></label>
-                <input type="checkbox" name="remember"> <span>Recordar contraseña</span>
-            </div>
-            <a href="#" class="opcion__cambiarContra">Cambiar contraseña</a>
+            <span class="opcion__cambiarContra" style="cursor: default; font-size: 13px; color: #888;">¿Olvidaste tu
+                contraseña? Contacta al administrador</span>
         </div>
 
 
@@ -59,6 +64,18 @@
 
     </footer>
 
+    <!-- Script para detectar parámetros de error en la URL -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('error') && urlParams.get('error') === '1') {
+                document.getElementById('mensajeError').style.display = 'block';
+                // Limpiar la URL para que si recarga no siga saliendo el error
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script>
+    <script src="../js/validaciones.js"></script>
 </body>
 
 </html>

@@ -29,7 +29,7 @@
                     <div class="formulario-gasto__grupo">
                         <label for="descripcion" class="formulario-gasto__label">Descripción</label>
                         <textarea id="descripcion" name="descripcion" class="formulario-gasto__input"
-                            placeholder="Detalles del gasto..." rows="3" required></textarea>
+                            placeholder="Detalles del gasto..." rows="3" maxlength="255" required></textarea>
                     </div>
 
                     <!-- FECHA -->
@@ -43,12 +43,12 @@
                         <div class="formulario-gasto__grupo formulario-gasto__grupo--col">
                             <label for="cantidad" class="formulario-gasto__label">Cantidad</label>
                             <input id="cantidad" name="cantidad" type="number" class="formulario-gasto__input"
-                                placeholder="Ej: 1" min="1" required>
+                                placeholder="Ej: 1" min="1" max="10000" required>
                         </div>
                         <div class="formulario-gasto__grupo formulario-gasto__grupo--col">
                             <label for="subtotal" class="formulario-gasto__label">Subtotal</label>
                             <input id="subtotal" name="subtotal" type="number" class="formulario-gasto__input"
-                                placeholder="Ej: 50000" min="0" required>
+                                placeholder="Ej: 50000" min="0" max="999999999" required>
                         </div>
                     </div>
 
@@ -71,6 +71,7 @@
     <script>
         document.getElementById("fecha").valueAsDate = new Date();
     </script>
+    <script src="../js/validaciones.js"></script>
 </body>
 
 </html>

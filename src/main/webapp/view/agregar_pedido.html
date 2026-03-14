@@ -30,7 +30,7 @@
                         <label for="proveedor" class="formulario-pedido__label">Proveedor</label>
                         <input id="proveedor" name="id_proveedor" type="text" list="lista-proveedores"
                             class="formulario-pedido__input formulario-pedido__input--sugerencias"
-                            placeholder="Buscar proveedor..." required>
+                            placeholder="Buscar proveedor..." maxlength="100" required>
                         <datalist id="lista-proveedores">
                             <option value="Bavaria"></option>
                             <option value="Coca Cola"></option>
@@ -43,7 +43,7 @@
                         <label for="inventario" class="formulario-pedido__label">Producto / Inventario</label>
                         <input id="inventario" name="id_inventario" type="text" list="lista-inventario"
                             class="formulario-pedido__input formulario-pedido__input--sugerencias"
-                            placeholder="Buscar producto en inventario..." required>
+                            placeholder="Buscar producto en inventario..." maxlength="100" required>
                         <datalist id="lista-inventario">
                             <option value="Cerveza Poker"></option>
                             <option value="Cerveza Aguila"></option>
@@ -72,12 +72,12 @@
                         <div class="formulario-pedido__grupo formulario-pedido__grupo--col">
                             <label for="cantidad" class="formulario-pedido__label">Cantidad</label>
                             <input id="cantidad" name="cantidad" type="number" class="formulario-pedido__input"
-                                placeholder="Ej: 10" min="1">
+                                placeholder="Ej: 10" min="1" max="100000">
                         </div>
                         <div class="formulario-pedido__grupo formulario-pedido__grupo--col">
                             <label for="precio_unidad" class="formulario-pedido__label">Precio Unidad</label>
                             <input id="precio_unidad" name="precio_unidad" type="number"
-                                class="formulario-pedido__input" placeholder="Ej: 2000" min="0">
+                                class="formulario-pedido__input" placeholder="Ej: 2000" min="0" max="999999999">
                         </div>
                     </div>
 

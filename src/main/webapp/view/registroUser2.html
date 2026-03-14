@@ -25,6 +25,31 @@
             <a href="#" class="registrarse">Registrarse</a>
         </section>
 
+        <!-- Contenedor para mensajes de error intuitivos -->
+        <div id="mensajeError"
+            style="display: none; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 5px; text-align: center; margin: 15px auto; width: 80%; border: 1px solid #f5c6cb; font-family: sans-serif; font-size: 14px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> <strong id="errorTexto">Error en el registro.</strong>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('error')) {
+                    const error = urlParams.get('error');
+                    const divError = document.getElementById('mensajeError');
+                    const spanTexto = document.getElementById('errorTexto');
+
+                    divError.style.display = 'block';
+
+                    if (error === 'correo_duplicado') {
+                        spanTexto.textContent = '¡Atención! Ya existe un usuario registrado con este correo electrónico.';
+                    } else if (error === 'fallo_registro') {
+                        spanTexto.textContent = 'Lo sentimos, hubo un error al procesar tu registro. Intenta de nuevo.';
+                    }
+                }
+            });
+        </script>
+
         <form class="main__formulario" action="../RegistroServlet" method="POST">
             <!-- CAMPOS OCULTOS PARA RECIBIR DATOS DE LA PÁGINA ANTERIOR -->
             <input type="hidden" id="hiddenNombre" name="nombre">
@@ -32,28 +57,21 @@
 
             <div>
                 <label for="telefono" class="Formulario__telefono"></label>
-                <input id="text" class="form__input_telefono" name="telefono1" required placeholder="Telefono 1*">
-            </div>
-
-            <div>
-                <label for="telefono" class="Formulario__telefono"></label>
-                <input id="text" class="form__input_telefono" name="telefono2" placeholder="Telefono 2">
+                <input id="text" class="form__input_telefono" name="telefono1" required placeholder="Teléfono*"
+                    minlength="7" maxlength="15" pattern="[0-9]+" title="Solo se permiten números"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             </div>
 
             <div class="campo">
                 <label for="email" class="formulario__email__icon"></label>
-                <input id="email" class="form__input_email" type="email" name="email1" required placeholder="Correo 1*">
-            </div>
-
-            <div class="campo">
-                <label for="email" class="formulario__email__icon"></label>
-                <input id="email" class="form__input_email" type="email" name="email2" placeholder="Correo 2">
+                <input id="email" class="form__input_email" type="email" name="email1" required
+                    placeholder="Correo Electrónico*" maxlength="150">
             </div>
 
             <div class="campo">
                 <label for="password" class="formulario__password__icon"></label>
                 <input id="password" class="form__input_password" name="password" type="password" required
-                    placeholder="Contraseña">
+                    placeholder="Contraseña" minlength="6" maxlength="50">
             </div>
 
             <div class="estilo_difuminado">
@@ -92,6 +110,7 @@
 
     </footer>
 
+    <script src="../js/validaciones.js"></script>
 </body>
 
 </html>

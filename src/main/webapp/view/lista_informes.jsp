@@ -48,15 +48,26 @@
                                     <span class="nombre">Inventario #${inv.idInventario} - ${inv.tipoControl}</span>
                                     <span class="estado">Inicio: ${inv.fechaInicio}</span>
                                     <span class="badge ${inv.estado == 'activo' ? 'badge-activo' : 'badge-finalizado'}">
-                                        ${inv.estado}
+                                        ${inv.estado == 'activo' ? 'ACTIVO' : 'CERRADO / INACTIVO'}
                                     </span>
                                 </div>
-                                <div class="acciones">
+                                <div class="acciones" style="display: flex; gap: 15px;">
                                     <a href="../InformeServlet?idInventario=${inv.idInventario}"
-                                        class="iniciar-invantario">
+                                        class="iniciar-invantario" style="text-align: center;">
                                         <h3>Ver Informe</h3>
-                                        <img src="../assets/img/icono_visualizar_bar.png" alt="icono_ver">
+                                        <img src="../assets/img/icono_visualizar_bar.png" alt="icono_ver"
+                                            style="margin: 0 auto;">
                                     </a>
+
+                                    <c:if test="${inv.estado == 'inactivo'}">
+                                        <a href="../InformeServlet?idInventario=${inv.idInventario}&action=ver_descuadre"
+                                            class="iniciar-invantario"
+                                            style="text-align: center; border-left: 2px solid #ddd; padding-left: 15px;">
+                                            <h3>Ver Descuadre</h3>
+                                            <i class="fa-solid fa-scale-balanced"
+                                                style="font-size: 32px; color: #ff9800; display: block; margin: 10px auto 0;"></i>
+                                        </a>
+                                    </c:if>
                                 </div>
                             </div>
                         </c:forEach>

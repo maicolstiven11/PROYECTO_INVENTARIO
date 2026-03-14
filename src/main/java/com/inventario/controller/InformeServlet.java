@@ -45,9 +45,21 @@ public class InformeServlet extends HttpServlet {
             return;
         }
 
-        // CASO 2: MOSTRAR INFORME DETALLADO DE UN INVENTARIO ESPECÍFICO
+        // CASO 2: MOSTRAR INFORME DETALLADO O DESCUADRE DE UN INVENTARIO ESPECÍFICO
         try {
             int idInventario = Integer.parseInt(idInventarioStr);
+            
+            // Si la acción es "ver_descuadre", mostramos el reporte de descuadre.
+            String action = request.getParameter("action");
+            if ("ver_descuadre".equals(action)) {
+                com.inventario.dao.DetalleInventarioDAO detalleDao = new com.inventario.dao.DetalleInventarioDAO();
+                java.util.List<com.inventario.model.DetalleInventario> detallesFinales = detalleDao.listarDetallesConPrecio(idInventario);
+                request.setAttribute("listaDescuadre", detallesFinales);
+                request.setAttribute("modoHistorial", true); // Para mostrar un botón de volver distinto
+                request.getRequestDispatcher("view/reporte_descuadre.jsp").forward(request, response);
+                return;
+            }
+
             InformeDAO dao = new InformeDAO();
 
             // Obtener totales específicos de este periodo de inventario

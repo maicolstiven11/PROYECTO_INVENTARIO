@@ -67,20 +67,17 @@ public class PedidoServlet extends HttpServlet {
     private void nuevoPedido(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         ProveedorDAO proveedorDAO = new ProveedorDAO();
-        com.inventario.dao.DetalleInventarioDAO detalleDAO = new com.inventario.dao.DetalleInventarioDAO();
+        ProductoDAO productoDAO = new ProductoDAO();
         
         HttpSession session = request.getSession();
         Integer idInventario = (Integer) session.getAttribute("idInventarioActual");
         
         List<Proveedor> proveedores = proveedorDAO.listarProveedores();
-        List<com.inventario.model.DetalleInventario> detalles = new ArrayList<>();
-        
-        if (idInventario != null) {
-            detalles = detalleDAO.listarDetalles(idInventario);
-        }
+        // Cargar TODOS los productos de la BD para permitir pedidos de productos nuevos
+        List<Producto> listaProductos = productoDAO.listarProductos();
         
         request.setAttribute("listaProveedores", proveedores);
-        request.setAttribute("listaDetalles", detalles);
+        request.setAttribute("listaProductos", listaProductos);
         request.setAttribute("idInventarioActual", idInventario);
         
         request.getRequestDispatcher("view/agregar_pedido.jsp").forward(request, response);
@@ -102,7 +99,7 @@ public class PedidoServlet extends HttpServlet {
             // RF-25 PASO 1: Recoger datos del formulario HTML
             // =====================================================================
             int idProveedor = Integer.parseInt(request.getParameter("id_proveedor"));
-            int idInvDetalle = Integer.parseInt(request.getParameter("id_inv_detalle")); // CAMBIADO: ahora recibe id_inv_detalle
+            int idProducto = Integer.parseInt(request.getParameter("id_producto")); // Recibe producto directo
             
             String fechaPedidoStr = request.getParameter("fecha_pedido");
             String fechaEntregaStr = request.getParameter("fecha_entrega");
@@ -122,6 +119,10 @@ public class PedidoServlet extends HttpServlet {
                 response.sendRedirect("NegocioServlet?error=SinInventarioActivo");
                 return;
             } 
+            
+            // Obtener o crear el detalle de inventario automáticamente si es un producto nuevo
+            com.inventario.dao.DetalleInventarioDAO detDao = new com.inventario.dao.DetalleInventarioDAO();
+            int idInvDetalle = detDao.obtenerOCrearDetalle(idInventario, idProducto);
             
             // Crear Pedido
             PedidoProveedor pedido = new PedidoProveedor();

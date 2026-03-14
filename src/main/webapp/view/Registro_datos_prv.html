@@ -18,25 +18,51 @@
         <h1 class="main__titulo">Contabilidad-Sistematica</h1>
         <h2 class="main__subtitulo">Registre los datos </h2>
         <h2 class="main__subtitulo">de proveedores </h2>
+
+        <!-- Contenedor para mensajes de error intuitivos -->
+        <div id="mensajeError"
+            style="display: none; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 5px; text-align: center; margin: 15px auto; width: 80%; border: 1px solid #f5c6cb; font-family: sans-serif; font-size: 14px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> <strong id="errorTexto">Error al registrar
+                proveedor.</strong>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('error')) {
+                    const error = urlParams.get('error');
+                    const divError = document.getElementById('mensajeError');
+                    const spanTexto = document.getElementById('errorTexto');
+                    divError.style.display = 'block';
+                    if (error === 'proveedor_duplicado') {
+                        spanTexto.textContent = 'El nombre o el correo del proveedor ya están registrados.';
+                    }
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            });
+        </script>
+
         <section class="main__contenedorForm">
             <form class="main__formulario" action="../ProveedorServlet" method="POST">
                 <div class="campo">
                     <label for="name" class="formulario__nombre"></label>
                     <input id="name" class="form__input_name" type="text" name="nombre_proveedor" required
-                        placeholder="Nombre del proveedor">
+                        placeholder="Nombre del proveedor" maxlength="100">
                 </div>
                 <div class="campo">
                     <label for="contacto"></label>
-                    <input type="text" id="contacto" name="contacto" placeholder="contacto" required>
+                    <input type="text" id="contacto" name="contacto" placeholder="contacto" required maxlength="100">
                 </div>
 
                 <div class="campo">
                     <label for="telefono"></label>
-                    <input type="text" id="telefono" name="telefono" placeholder="telefono" required>
+                    <input type="tel" id="telefono" name="telefono" placeholder="telefono" required minlength="7"
+                        maxlength="20" pattern="[0-9]+" title="Solo se permiten números"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 </div>
                 <div class="campo">
                     <label for="correo"></label>
-                    <input type="email" id="correo" name="correo" placeholder="correo" required>
+                    <input type="email" id="correo" name="correo" placeholder="correo" required maxlength="150">
                 </div>
                 <button class="contenedor__btnfinalizar">Finalizar</button>
             </form>
@@ -44,7 +70,8 @@
     </main>
     <footer>
 
-    </footer>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <script src="../js/validaciones.js"></script>
 </body>
 
 </html>

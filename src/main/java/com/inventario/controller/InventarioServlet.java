@@ -39,6 +39,13 @@ public class InventarioServlet extends HttpServlet {
         System.out.println("InventarioServlet: action=" + action); // Log de depuración
         
         if ("iniciar".equals(action)) {
+            // Validación de Rol: Los trabajadores NO pueden iniciar inventarios
+            com.inventario.model.Usuario usuario = (com.inventario.model.Usuario) request.getSession().getAttribute("usuarioLogueado");
+            if (usuario == null || usuario.getIdRol() == 2) {
+                response.sendRedirect("view/Menu_sistema.jsp?error=AccesoDenegado");
+                return;
+            }
+
             // =====================================================================
             // RF-13: INICIAR NUEVO INVENTARIO
             // Crea un registro en la tabla INVENTARIO con estado activo.
@@ -111,8 +118,12 @@ public class InventarioServlet extends HttpServlet {
                     response.sendRedirect("view/menu_inventario.jsp");                              // RF-14: Ir al menú del inventario
                 } else {
                     // RF-14 Restricción 1: No hay inventario activo para este negocio
-                    // RNF-08: Error descriptivo
-                    response.sendRedirect("NegocioServlet?error=NoInventarioActivo");
+                    com.inventario.model.Usuario usuario = (com.inventario.model.Usuario) request.getSession().getAttribute("usuarioLogueado");
+                    if (usuario != null && usuario.getIdRol() == 2) {
+                        response.sendRedirect("view/Menu_sistema.jsp?error=NoInventarioActivoTrabajador");
+                    } else {
+                        response.sendRedirect("NegocioServlet?error=NoInventarioActivo");
+                    }
                 }
             }
         } else if ("cargar_detalle".equals(action)) {
@@ -242,13 +253,22 @@ public class InventarioServlet extends HttpServlet {
                         }
                     }
                     
-                    // Cambiar estado del inventario a 'finalizado' y el negocio a 'inactivo'
-                    invDao.finalizarInventario(idInventario);
+                    // Cambiar estado del inventario a 'finalizado' (negocio sigue activo)
+                    // NOTA: Se valida si efectivamente se actualizó en la BD
+                    boolean cerrado = invDao.finalizarInventario(idInventario);
                     
-                    // Limpiar sesión para forzar inicio de nuevo periodo
-                    request.getSession().removeAttribute("idInventarioActual");
-                    
-                    response.sendRedirect("NegocioServlet?status=InventarioCerradoExito");
+                    if (cerrado) {
+                        // Limpiar sesión para forzar inicio de nuevo periodo
+                        request.getSession().removeAttribute("idInventarioActual");
+                        
+                        // Cargar los detalles actualizados con precios para el reporte de descuadre
+                        java.util.List<com.inventario.model.DetalleInventario> detallesFinales = detalleDao.listarDetallesConPrecio(idInventario);
+                        request.setAttribute("listaDescuadre", detallesFinales);
+                        request.setAttribute("mensajeExito", "¡Inventario cerrado y guardado correctamente!");
+                        request.getRequestDispatcher("view/reporte_descuadre.jsp").forward(request, response);
+                    } else {
+                        response.sendRedirect("NegocioServlet?error=ErrorGuardandoBD");
+                    }
                 } else {
                     response.sendRedirect("NegocioServlet?error=NoSePudoCerrar");
                 }

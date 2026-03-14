@@ -40,9 +40,7 @@
                                     <td class="data-table__cell" data-label="Teléfono">${prv.telefono}</td>
                                     <td class="data-table__cell" data-label="Correo">${prv.correo}</td>
                                     <td class="data-table__cell" data-label="Acciones">
-                                        <a href="#modal-editar" class="button button--edit">
-                                            <i class="fa-solid fa-pen-to-square"></i> Editar
-                                        </a>
+
                                         <a href="../ProveedorServlet?action=eliminar&id=${prv.idProveedor}"
                                             class="button button--delete"
                                             onclick="return confirm('¿Estás seguro de que deseas eliminar este proveedor?');"

@@ -10,6 +10,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.http.Part;
 /**
  * CONTROLADOR: Servlet encargado de gestionar los Productos.
  * 
@@ -19,7 +26,50 @@ import javax.servlet.http.HttpServletResponse;
  *         RNF-13 (Arquitectura MVC - Capa Controlador)
  */
 @WebServlet(name = "ProductoServlet", urlPatterns = {"/ProductoServlet"})
+@MultipartConfig(
+    fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
+    maxFileSize = 1024 * 1024 * 10,      // 10 MB
+    maxRequestSize = 1024 * 1024 * 100   // 100 MB
+)
 public class ProductoServlet extends HttpServlet {
+
+    private String subirImagen(Part part, HttpServletRequest request) throws IOException {
+        String fileName = null;
+        if (part != null && part.getSize() > 0) {
+            String contentDisp = part.getHeader("content-disposition");
+            String[] items = contentDisp.split(";");
+            for (String s : items) {
+                if (s.trim().startsWith("filename")) {
+                    fileName = s.substring(s.indexOf("=") + 2, s.length() - 1);
+                }
+            }
+            if (fileName != null && !fileName.isEmpty()) {
+                fileName = System.currentTimeMillis() + "_" + new File(fileName).getName();
+                
+                String uploadPath = request.getServletContext().getRealPath("") + File.separator + "assets" + File.separator + "img";
+                String sourcePath = "c:\\adso\\2994281\\PROYECTO_INVENTARIO\\src\\main\\webapp\\assets\\img";
+                
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) uploadDir.mkdirs();
+                
+                File sourceDir = new File(sourcePath);
+                if (!sourceDir.exists()) sourceDir.mkdirs();
+                
+                // Guardar en el directorio de despliegue
+                part.write(uploadPath + File.separator + fileName);
+                
+                // Copiar también al código fuente
+                try {
+                    Files.copy(Paths.get(uploadPath + File.separator + fileName), 
+                               Paths.get(sourcePath + File.separator + fileName), 
+                               StandardCopyOption.REPLACE_EXISTING);
+                } catch(Exception e) {
+                    System.out.println("Error copiando imagen a carpeta fuente: " + e.getMessage());
+                }
+            }
+        }
+        return (fileName != null && !fileName.isEmpty()) ? fileName : null;
+    }
 
     /**
      * RF-09, RF-11: Método doPost - Registra un nuevo producto o actualiza uno existente.
@@ -46,7 +96,18 @@ public class ProductoServlet extends HttpServlet {
         String nombre = request.getParameter("nombre");              // RF-09: Nombre (obligatorio)
         String marca = request.getParameter("marca");                // RF-09: Marca (obligatorio)
         String tipo = request.getParameter("tipo");                  // RF-09: Tipo/categoría (obligatorio)
-        String imagen = request.getParameter("imagen");              // RF-09: Ruta de la imagen
+        
+        // Manejo de imagen con Multipart
+        String imagen = null;
+        try {
+            Part filePart = request.getPart("imagen");
+            if (filePart != null && filePart.getSize() > 0) {
+                imagen = subirImagen(filePart, request);
+            }
+        } catch(Exception e) {
+            System.out.println("Error al procesar la imagen: " + e.getMessage());
+        }
+        
         String cantidadMedida = request.getParameter("cantidad_medida"); // RF-09: Cantidad/medida (ej: "1 Litro")
         
         // RF-09 Restricción 1: El precio debe ser numérico positivo
@@ -82,6 +143,12 @@ public class ProductoServlet extends HttpServlet {
         // RF-09 PASO 3: Llamar al DAO para guardar en la BD
         ProductoDAO dao = new ProductoDAO();
         
+        // VALIDACIÓN DE UNICIDAD: Verificar si el nombre del producto ya existe
+        if (dao.existeNombreProducto(nombre)) {
+            response.sendRedirect("view/Registro_produc.html?error=producto_duplicado");
+            return; // Detener el flujo
+        }
+
         try {
             boolean exito = dao.registrarProducto(p);  // RF-09: Inserta el producto en la tabla PRODUCTO
             if (exito) {
@@ -171,7 +238,27 @@ public class ProductoServlet extends HttpServlet {
             String nombre = request.getParameter("nombre");
             String marca = request.getParameter("marca");
             String tipo = request.getParameter("tipo");
-            String imagen = request.getParameter("imagen");
+            
+            // Procesamiento de imagen en actualización
+            String imagen = null;
+            try {
+                Part filePart = request.getPart("imagen");
+                if (filePart != null && filePart.getSize() > 0) {
+                    imagen = subirImagen(filePart, request);
+                }
+            } catch(Exception e) {
+                System.out.println("Error al actualizar imagen: " + e.getMessage());
+            }
+            
+            // Si no subió una nueva imagen, intentamos conservar la anterior
+            if (imagen == null) {
+                ProductoDAO tempDao = new ProductoDAO();
+                Producto original = tempDao.obtenerProducto(idProducto);
+                if (original != null) {
+                    imagen = original.getImagen();
+                }
+            }
+            
             String cantidadMedida = request.getParameter("cantidad_medida");
             
             double precio = 0.0;

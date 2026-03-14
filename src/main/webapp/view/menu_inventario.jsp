@@ -23,7 +23,7 @@
                     <h2 class="aside__title">Contabilidad-Sistematica</h2>
 
                     <!-- Perfil de usuario -->
-                    <a href="perfil_admin.jsp" class="user-profile user-profile--link">
+                    <a href="../PerfilServlet" class="user-profile user-profile--link">
                         <i class="fa-solid fa-circle-user user-profile__icon"></i>
                         <div class="user-profile__info">
                             <p class="user-profile__name">${usuarioLogueado.nombre}</p>
@@ -61,7 +61,7 @@
 
                             <a href="../ProveedorServlet" class="aside__link">
                                 <i class="fa-solid fa-truck-field aside__icon"></i>
-                                Editar proveedores
+                                Visualizar proveedores
                             </a>
 
                             <a href="../InformeServlet" class="aside__link">

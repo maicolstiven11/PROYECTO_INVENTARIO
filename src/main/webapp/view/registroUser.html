@@ -25,6 +25,34 @@
             <a href="#" class="registrarse">Registrarse</a>
         </section>
 
+        <!-- Contenedor para mensajes de error intuitivos -->
+        <div id="mensajeError"
+            style="display: none; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 5px; text-align: center; margin: 15px auto; width: 80%; border: 1px solid #f5c6cb; font-family: sans-serif; font-size: 14px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> <strong id="errorTexto">Error en el registro.</strong>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('error')) {
+                    const error = urlParams.get('error');
+                    const divError = document.getElementById('mensajeError');
+                    const spanTexto = document.getElementById('errorTexto');
+
+                    divError.style.display = 'block';
+
+                    if (error === 'correo_duplicado') {
+                        spanTexto.textContent = 'Este correo electrónico ya está registrado por otro usuario.';
+                    } else if (error === 'fallo_registro') {
+                        spanTexto.textContent = 'Sucedió un error inesperado. Por favor, intenta de nuevo.';
+                    }
+
+                    // Limpiar URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            });
+        </script>
+
         <form class="main__formulario" action="registroUser2.html">
             <div class="form__iconTiposDoc">
                 <i class="fas fa-angle-down icono"></i>
@@ -37,7 +65,8 @@
             <div class="form__iconDocum">
                 <i class="fas fa-caret-right icono"></i>
                 <label for="formulario__documento"></label>
-                <input type="text" id="numero-documento" name="nombre" placeholder="Nombre" required>
+                <input type="text" id="numero-documento" name="nombre" placeholder="Nombre" required minlength="3"
+                    maxlength="50">
             </div>
 
             <div class="estilo_difuminado">
@@ -56,6 +85,7 @@
 
     </footer>
 
+    <script src="../js/validaciones.js"></script>
 </body>
 
 </html>

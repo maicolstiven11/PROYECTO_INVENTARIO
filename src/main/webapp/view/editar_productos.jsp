@@ -96,7 +96,7 @@
                     <form class="modal__form">
                         <div class="form-group">
                             <label class="form-group__label">Nombre del Producto</label>
-                            <input class="form-group__input" type="text" value="">
+                            <input class="form-group__input" type="text" value="" maxlength="100">
                         </div>
                         <!-- Más campos... -->
                         <div class="modal__actions">

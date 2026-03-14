@@ -78,6 +78,12 @@ public class ProveedorServlet extends HttpServlet {
         // RF-22 PASO 3: Llamar al DAO para guardar en la BD
         ProveedorDAO dao = new ProveedorDAO();
         
+        // VALIDACIÓN DE UNICIDAD: Verificar si el proveedor ya existe
+        if (dao.existeProveedor(nombre, correo)) {
+            response.sendRedirect("view/Registro_datos_prv.html?error=proveedor_duplicado");
+            return; // Detener flujo
+        }
+
         try {
             boolean exito = dao.registrarProveedor(p);  // RF-22: Inserta el proveedor en la tabla PROVEEDOR
             if (exito) {

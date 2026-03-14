@@ -57,11 +57,16 @@ public class RegistroServlet extends HttpServlet {
         
         // =====================================================================
         // RF-01 PASO 3: LLAMAR AL DAO PARA GUARDAR EN LA BASE DE DATOS
-        // El DAO maneja la transacción completa: inserta en 3 tablas (USUARIO, CORREO, TELEFONO).
-        // RNF-02: El DAO usa PreparedStatement (protección contra SQL Injection).
-        // RNF-13: El Servlet NO hace consultas SQL directamente.
         // =====================================================================
-        UsuarioDAO dao = new UsuarioDAO();                                        // Crea un objeto DAO para acceder a la BD
+        UsuarioDAO dao = new UsuarioDAO();
+
+        // VALIDACIÓN DE UNICIDAD: Verificar si el correo ya existe
+        if (dao.existeCorreo(email1)) {
+            // Redirigir de vuelta al paso 2 con los datos originales para no perder el primer paso
+            response.sendRedirect("view/registroUser2.html?error=correo_duplicado&nombre=" + nombre + "&rol=" + rol);
+            return; // Detener el flujo
+        }
+
         int idGenerado = dao.registrarUsuario(nuevoUsuario, email1, telefono1, rol); // RF-01: Inserta usuario en BD. Retorna ID generado o -1 si falló.
         
         // =====================================================================
@@ -76,8 +81,14 @@ public class RegistroServlet extends HttpServlet {
             session.setAttribute("usuarioLogueado", nuevoUsuario);  // RF-01: Guarda al nuevo usuario en sesión
             System.out.println("Servlet: Usuario registrado y guardado en sesión con ID: " + idGenerado);
             
-            // RF-01: Redirigir a la página de Bienvenida (donde puede registrar su primer bar)
-            response.sendRedirect("view/Bienvenida.jsp");
+            // RF-01: Redirigir según el rol
+            if ("TRABAJADOR".equalsIgnoreCase(rol)) {
+                // Al trabajador se le asignan bares, no los crea. Redirigimos a su menú principal.
+                response.sendRedirect("view/Menu_sistema.jsp");
+            } else {
+                // El admin sí va a Bienvenida para crear su primer bar
+                response.sendRedirect("view/Bienvenida.jsp");
+            }
         } else {
             // RF-01: REGISTRO FALLIDO - Algo salió mal en la BD (correo duplicado, error de conexión, etc.)
             // RNF-08: Redirigir de vuelta al formulario de registro con parámetro de error

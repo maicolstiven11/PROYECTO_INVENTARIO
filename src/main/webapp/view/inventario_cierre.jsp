@@ -63,7 +63,7 @@
                                                 <input type="hidden" name="id_producto" value="${det.idProducto}">
                                                 <input type="number" name="cantidad_final"
                                                     class="inventario__entrada-cantidad" step="0.01"
-                                                    placeholder="Cantidad actual" required min="0">
+                                                    placeholder="Cantidad actual" required min="0" max="100000">
                                             </td>
                                         </tr>
                                     </c:forEach>
