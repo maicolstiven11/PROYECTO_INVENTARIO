@@ -1,75 +1,74 @@
-package com.inventario.model; // Instrucción funcional de enrutamiento o package para vincular modelo POJO.
+package com.inventario.model; // Paquete donde viven las clases molde
 
-import java.sql.Date; // Referencia central base utilitaria relacional tipo SQL en encapsulamientos estéticos temporales.
+import java.sql.Date; // Para manejar la fecha de la venta compatible con MySQL
 
 /**
- * Modelo de datos: Clase Venta (Entidad o POJO - Plain Old Java Object).
+ * Clase Venta (Modelo / POJO).
  * 
- * Abstracción de encapsulado general en memoria correspondiente a la tabla transaccional origen 'Venta'.
- * Modela un objeto envolvente principal fuerte (cabeza), cuya naturaleza compositiva abarca o enlaza numéricamente
- * y por referenciación foránea una superposición iterativa u orquestación de sub-componentes débiles adjuntos (DetalleVenta) logrando consolidación de operación general o "factura web virtual".
+ * Es el molde que representa UNA venta o factura del negocio.
+ * Por ejemplo: "Venta #12 del inventario de Marzo, total $25.000, fecha 2026-03-18".
+ * Corresponde a la tabla 'venta' de la base de datos.
+ * Cada venta puede tener varios renglones (DetalleVenta) con los productos vendidos.
  */
-public class Venta { // Declaración matriz genérica
+public class Venta { // Declaración de la clase pública
 
     // =====================================================================
-    // ATRIBUTOS PRIVADOS ENCAPSULADOS PRINCIPALES MATEADOS (Persistencia)
-    // Conformadores atómicos en analogía estricta de variables en BD asociadas.
+    // ATRIBUTOS PRIVADOS (Columnas de la tabla)
     // =====================================================================
 
-    private int idVenta;        // Serialización auto escalada tipo variable primitivo entero, anclaje relacional e indispensable del propio objeto. 
-    private int idInventario;   // Objeto primitivo entero interviniente en memoria; llave externa asociativa fuerte para tributar y confinar su validez o sub-entidad a un super-macro activo general en estado Activo en BD.
-    private double totalVenta;  // Propiedad decimal envoltura de primitiva numérico en punto flotante atada relacionalmente de forma asimétrica para cálculos acumulativos netos computados localmente como general transaccional.
-    private Date fechaVenta;    // Estructura Data de referencia o clase enlazable base que fija inamovible la línea cruzada cronológica que generó su concepción lógica base transiente o de red.
+    private int idVenta;        // ID único de la venta (Clave Primaria, la genera la BD)
+    private int idInventario;   // ID del inventario al que pertenece (Clave Foránea hacia tabla INVENTARIO)
+    private double totalVenta;  // El total cobrado en esta factura (ej: $25.000)
+    private Date fechaVenta;    // Fecha en que se realizó la venta (ej: 2026-03-18)
 
     /**
-     * CONSTRUCTOR POR DEFECTO BASE NULA
-     * Pre-instancia o modelaje ortogonal nativo y por omisión (sin argumentos forzosos) que ampara, desde el inicio base en JVM estricta o coleccionados iterados masivos DAO como List, a la entidad referenciable.
+     * CONSTRUCTOR VACÍO.
+     * Crea una Venta sin datos, como un recibo nuevo sin llenar.
      */
-    public Venta() { // Llama el apuntador inicializado sin carga relacional de atributos para su construcción MVC post.
+    public Venta() {
     }
 
     // =====================================================================
-    // Interface Protegida base y Modular de Rutinas Funcionales: GETTERS Y SETTERS
-    // Control exclusivo sobre la arquitectura y la accesibilidad interna, blindando su modelado inicial instanciado ante capas adyacentes lógicas.
+    // GETTERS Y SETTERS
     // =====================================================================
 
-    /** Accesor descriptivo base simple entero (Int/PK) para anclar reportes u otros objetos */
-    public int getIdVenta() { // Extrae identificador serial atómico relacional.
-        return idVenta; // Puntero inyectado y expuesto nativo int.
+    /** Devuelve el ID de la venta */
+    public int getIdVenta() {
+        return idVenta;
     }
 
-    /** Inyecta internamente o sobrepone de modo local referenciado la variable transaccional identificatoria maestra general id. */
-    public void setIdVenta(int idVenta) { // Aceptador con argumentación requerida in-situ paramétrica 
-        this.idVenta = idVenta; // Operación reestructuradora y transitoria estricta relacional cruzada apuntando local in-memory.
+    /** Guarda el ID de la venta */
+    public void setIdVenta(int idVenta) {
+        this.idVenta = idVenta;
     }
 
-    /** Acceso relacional: Recupera el escalar o alias primitivo referencial hacia inventarios maestros temporales u operacionales fijos. */
-    public int getIdInventario() { // Evoca local el parámetro para filtrar
-        return idInventario; // Retorno en simple inercia sin transformaciones.
+    /** Devuelve el ID del inventario al que pertenece */
+    public int getIdInventario() {
+        return idInventario;
     }
 
-    /** Modificador de pertenencia asociativa cruzada: Adiciona relacional jerárquica obligatoria transitoria, indicando el origen padre en lógica global POO antes de insertar persistente base.*/
-    public void setIdInventario(int idInventario) { // Apunte base estricto 
-        this.idInventario = idInventario; // Acepta la orden y condiciona dependencia funcional externa paramétrica in memory.
+    /** Guarda el ID del inventario */
+    public void setIdInventario(int idInventario) {
+        this.idInventario = idInventario;
     }
 
-    /** Accesor contable sumatorio de base primitiva o asimilador decimal cruzado final de todos los envoltorios en detalles en su matriz y expuesto a GUI view */
-    public double getTotalVenta() { // Genera o exporta el resultante puro.
-        return totalVenta; // Permeabiliza variable protegida transiente hacia lógica superior o vista en modo float base POO. 
+    /** Devuelve el total cobrado en la venta (ej: $25.000) */
+    public double getTotalVenta() {
+        return totalVenta;
     }
 
-    /** Mutador aritmético resolutivo posicional asimilador final: Asienta lógica y localmente como entidad transitoria sujeta al envoltorio la referencial totalitaria base. */
-    public void setTotalVenta(double totalVenta) { // Recibe cálculo doble flotante pre derivado
-        this.totalVenta = totalVenta; // Sustituye numérico estáticamente amarrándolo a this y referenciado paramétrico local.
+    /** Guarda el total de la venta */
+    public void setTotalVenta(double totalVenta) {
+        this.totalVenta = totalVenta;
     }
 
-    /** Accesor temporal directo asimétrico y puro para resoluciones SQL. Evoca sello u horizonte atado.*/
-    public Date getFechaVenta() { // Llamada con objeto derivado Date como valor output.
-        return fechaVenta; // Referencia primitiva instanciada 
+    /** Devuelve la fecha en que se hizo la venta */
+    public Date getFechaVenta() {
+        return fechaVenta;
     }
 
-    /** Mutador forzado lógico y temporal referenciado sobre base atada Date pre-cazada u orquestada de modo asíncrono temporal base en rutinas. */
-    public void setFechaVenta(Date fechaVenta) { // Componente relacional Date recibido nativo
-        this.fechaVenta = fechaVenta; // Aplicación estricta al estado original transaccional modificado u originado
+    /** Guarda la fecha de la venta */
+    public void setFechaVenta(Date fechaVenta) {
+        this.fechaVenta = fechaVenta;
     }
 }

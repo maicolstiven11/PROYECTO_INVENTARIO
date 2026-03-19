@@ -1,4 +1,4 @@
-package com.inventario.controller; // Declaración de espacio de nombres organizativo
+package com.inventario.controller;
 
 import com.inventario.dao.InventarioDAO;
 import com.inventario.dao.ProductoDAO;
@@ -13,314 +13,316 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Controlador Frontal Orquestador de Ciclo Lógico: InventarioServlet.
+ * Controlador InventarioServlet.
  * 
- * Clase MVC Interceptora que agrupa bajo una envoltura transaccional el estado y las colecciones
- * de los DAOs relacionados al entorno o Contexto Físico (Inventarios, Detalles y Productos Base).
- * Centraliza e inyecta parámetros de enrutamiento y sesión foráneos.
+ * Es el controlador principal y más extenso. Gestiona todo el ciclo de vida
+ * de abrir un inventario (mes, semana), contar el stock, cerrarlo y buscar los anteriores.
  */
-@WebServlet(name = "InventarioServlet", urlPatterns = {"/InventarioServlet"}) // Vincula el Endpoint lógico a clase constructora nativa servlet.
-public class InventarioServlet extends HttpServlet { // Polimorfismo sub-tipo base protocolo Web
+@WebServlet(name = "InventarioServlet", urlPatterns = {"/InventarioServlet"}) // Expone esta funcionalidad hacia el navegador bajo esta URL
+public class InventarioServlet extends HttpServlet { 
 
     /**
-     * Sobreescritura evaluativa GET.
-     * Generador múltiple condicionado: Actúa como Switch Case asíncrono instanciando Factory DAOs 
-     * y mutando contextos in-memory dependiendo de la clave string extractada en la solicitud HTTP.
+     * El método doGet atiende peticiones según la palabra clave o acción ("action") 
+     * que se haya enviado por la URL del navegador.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Propagación controlada asíncrona Web 
+            throws ServletException, IOException { 
         
-        String action = request.getParameter("action"); // Localizador semántico 
-        System.out.println("InventarioServlet: action=" + action); // Instanciador print logger buffer consola JVM
+        String action = request.getParameter("action"); // Leemos la clave de lo que quiere hacer (iniciar, entrar, cargar_detalle...)
+        System.out.println("InventarioServlet: action=" + action); 
         
-        if ("iniciar".equals(action)) { // Inyector Booleano
-            // Validador de Autorización: Condiciona instanciación basada en rol en memoria.
-            com.inventario.model.Usuario usuario = (com.inventario.model.Usuario) request.getSession().getAttribute("usuarioLogueado"); // Cast forzado object transiente a entity real.
-            if (usuario == null || usuario.getIdRol() == 2) { // Fallback de autorización jerárquica
-                response.sendRedirect("view/Menu_sistema.jsp?error=AccesoDenegado"); // Destruye hilo 
-                return; // Break a scope 
+        if ("iniciar".equals(action)) { 
+            // ===============================================================================================
+            // ACCIÓN: INICIAR (CREAR UN NUEVO PERIODO DE INVENTARIO PARA GESTIONARLO)
+            // ===============================================================================================
+            // 1. Verificamos que sea Administrador, porque un cajero (rol 2) no debería crear el inventario
+            com.inventario.model.Usuario usuario = (com.inventario.model.Usuario) request.getSession().getAttribute("usuarioLogueado"); 
+            if (usuario == null || usuario.getIdRol() == 2) { 
+                response.sendRedirect("view/Menu_sistema.jsp?error=AccesoDenegado"); // Expulsamos a cajeros intrusos
+                return; 
             }
 
-            // =====================================================================
-            // ALGORITMO CONSTRUCTOR DE ESTADO ZERO (New Entity Context)
-            // =====================================================================
-            String idNegocioStr = request.getParameter("idNegocio"); // Extractor llave relacional FK
-            String tipoControl = request.getParameter("tipo");       // Descriptor literal asimétrico 
-            String fechaStr = request.getParameter("fecha");         // Descriptor crono asimétrico 
+            // 2. Extraer datos del formulario para este nuevo mes
+            String idNegocioStr = request.getParameter("idNegocio"); // ID Del local
+            String tipoControl = request.getParameter("tipo");       // Semanal o mensual
+            String fechaStr = request.getParameter("fecha");         // Desde cuándo rige
             
-            System.out.println("InventarioServlet: idNegocio=" + idNegocioStr + ", tipo=" + tipoControl + ", fecha=" + fechaStr); // Print Trace local buffer.
+            System.out.println("InventarioServlet: idNegocio=" + idNegocioStr + ", tipo=" + tipoControl + ", fecha=" + fechaStr); 
             
-            if (idNegocioStr != null && !idNegocioStr.isEmpty()) { // Filtro de nulidad 
+            if (idNegocioStr != null && !idNegocioStr.isEmpty()) { 
                 try {
-                     int idNegocio = Integer.parseInt(idNegocioStr); // Conversor aritmético forzoso
-                    java.sql.Date fechaInicio = null; // Setter base a nulidad local Date modelo 
+                     int idNegocio = Integer.parseInt(idNegocioStr); // Convertir ID a entero
+                    java.sql.Date fechaInicio = null; 
                     
-                    // Inicializador condicional polimorfo usando utilitario o parsing Date String.
+                    // Configuramos la variable fecha de SQL 
                     if (fechaStr != null && !fechaStr.isEmpty()) { 
-                        fechaInicio = java.sql.Date.valueOf(fechaStr); // Factory valueOf SQL Date POJO
+                        fechaInicio = java.sql.Date.valueOf(fechaStr); // Si le puso fecha, aplicamos esa
                     } else {
-                        fechaInicio = new java.sql.Date(System.currentTimeMillis()); // Subrutina estática JVM 
+                        fechaInicio = new java.sql.Date(System.currentTimeMillis()); // Si no, asumimos que arranca hoy mismo
                     }
                     
-                    // Orquestación delegada a Gestor de Persistencia 
-                    InventarioDAO dao = new InventarioDAO(); // Generador
-                    int idInventario = dao.iniciarInventario(idNegocio, tipoControl, fechaInicio); // Getter constructor 
+                    // 3. Crear en la base de datos el objeto abstracto de Cierre
+                    InventarioDAO dao = new InventarioDAO(); 
+                    int idInventario = dao.iniciarInventario(idNegocio, tipoControl, fechaInicio); // Nos debe devolver el ID Generado del periodo
                     
-                    System.out.println("InventarioServlet: idInventario generado=" + idInventario); // Debug Log 
+                    System.out.println("InventarioServlet: idInventario generado=" + idInventario); 
                     
-                    if (idInventario > 0) { // Integridad lógica verificador sobre id retornado 
-                        // Inyecta delimitadores asimétricos al entorno envolvente HTTP (session container)
-                        request.getSession().setAttribute("idInventarioActual", idInventario);  // Atadura temporal 
-                        request.getSession().setAttribute("idNegocioActual", idNegocio);        // Amarra llave matriz referencial
+                    if (idInventario > 0) { // Si sí se creó un ticket de inventario bien...
+                        // Guardamos ese número y el ID de negocio en el bolsillo del usuario (Sesión)
+                        request.getSession().setAttribute("idInventarioActual", idInventario);  
+                        request.getSession().setAttribute("idNegocioActual", idNegocio);        
                         
-                        // ALGORITMO AUTO-CARGA: Referencia interconectada pasiva a inventario base anterior histórico cerrado 
-                        com.inventario.model.Inventario invAnterior = dao.obtenerUltimoInventarioCerrado(idNegocio); // Getter relacional a modelo atómico
-                        boolean stockCargado = false; // Flag interruptor
+                        // 4. CARGA AUTOMÁTICA O ARRASTRE. Si hay un inventario cerrado del mes pasado, traemos su Stock sobrante a este mes nuevo.
+                        com.inventario.model.Inventario invAnterior = dao.obtenerUltimoInventarioCerrado(idNegocio); 
+                        boolean stockCargado = false; 
                         
-                        if (invAnterior != null) { // Instanciador booleano anclaje preventivo
-                            DetalleInventarioDAO detDao = new DetalleInventarioDAO(); // Llama manejador secundario enlace .
-                            java.util.List<com.inventario.model.DetalleInventario> detallesAnteriores = detDao.listarDetalles(invAnterior.getIdInventario()); // Array sub-colección de modelo fuerte.
+                        if (invAnterior != null) { // Si existió un mes pasado
+                            DetalleInventarioDAO detDao = new DetalleInventarioDAO(); 
+                            // Traemos todos los productos y cantidades que quedaron al cierre del anterior
+                            java.util.List<com.inventario.model.DetalleInventario> detallesAnteriores = detDao.listarDetalles(invAnterior.getIdInventario()); 
                             
-                            if (detallesAnteriores != null && !detallesAnteriores.isEmpty()) { // Previene Null array y length iterador.
-                                // Foreach constructivo iterado mapeando cierre viejo a inicio nuevo
-                                for (com.inventario.model.DetalleInventario d : detallesAnteriores) { // Bucle extrae cada object List iterable
-                                    detDao.insertarDetalle(idInventario, d.getIdProducto(), d.getCantidadFinal()); // Trasvasa iteración a DAO setter persistente.
+                            if (detallesAnteriores != null && !detallesAnteriores.isEmpty()) { 
+                                // Bucle o iterador para guardar en nuestra nueva tabla, el stock viejo.
+                                for (com.inventario.model.DetalleInventario d : detallesAnteriores) { 
+                                    detDao.insertarDetalle(idInventario, d.getIdProducto(), d.getCantidadFinal()); // Inserta producto con stock del cajón pasado como nuestra CantidadInicial
                                 }
-                                stockCargado = true; // Activa flag de resolución condicional
+                                stockCargado = true; // Flag activado
                                 System.out.println("InventarioServlet: Stock cargado automáticamente desde inventario anterior ID=" + invAnterior.getIdInventario());
                             }
                         }
                         
-                        if (stockCargado) { // Valuador de switch asimétrico
-                            // Direccionamiento resolutivo encodeando a asimétrico string param URL safe
+                        if (stockCargado) { 
+                            // Avanti, stock migrado automáticamente y vamos al menu
                             response.sendRedirect("view/menu_inventario.jsp?msg_exito=" + 
-                                java.net.URLEncoder.encode("¡Stock cargado automáticamente del inventario anterior!", "UTF-8")); // Factoría codificadora String Wrapper
+                                java.net.URLEncoder.encode("¡Stock cargado automáticamente del inventario anterior!", "UTF-8"));
                         } else {
-                            // Subrutina cruzada recursiva asincrónica llamando otro case
-                            response.sendRedirect("InventarioServlet?action=cargar_detalle"); // Corta redirigiendo ciclo nuevo 
+                            // Si no hubo inventarios pasados porque es su primero mes trabajando, redirige a que cuente sus productos manualmente por URL "cargar_detalle"
+                            response.sendRedirect("InventarioServlet?action=cargar_detalle"); 
                         }
                     } else {
-                        // Bifurcación fallida atómica SQL negativa 
                         System.out.println("InventarioServlet: DAO devolvió -1, algo falló");
-                        response.sendRedirect("NegocioServlet?error=FalloInicioInventario"); // Salida error log restrictiva 
+                        response.sendRedirect("NegocioServlet?error=FalloInicioInventario"); 
                     }
-                } catch (Exception e) { // Atrapatodo y debug.
+                } catch (Exception e) { 
                     System.out.println("InventarioServlet ERROR: " + e.getMessage());
-                    e.printStackTrace(); // Salida genérica sucia CLI
-                    // Fallback con trace catch 
+                    e.printStackTrace(); 
                     response.sendRedirect("NegocioServlet?error=" + e.getMessage());
                 }
-            } else { // Validador ID Negocio null pointer preventer 
-                response.sendRedirect("NegocioServlet?error=SinIdNegocio"); // Redireccion log clean
+            } else { 
+                response.sendRedirect("NegocioServlet?error=SinIdNegocio"); 
             }
-        } else if ("entrar".equals(action)) { // Discriminador string sub-lógico Action #2
-            // =====================================================================
-            // ALGORITMO ENRUTADOR REACTIVO E INYECTOR CONTEXTUAL
-            // =====================================================================
-            String idNegocioStr = request.getParameter("idNegocio"); // Cast envoltorio HTML param 
+        } else if ("entrar".equals(action)) { 
+            // ===============================================================================================
+            // ACCIÓN: ENTRAR (VERIFICAR SI YA HAY UNO ABIERTO PARA TRABAJAR EN ÉL)
+            // ===============================================================================================
+            String idNegocioStr = request.getParameter("idNegocio"); 
             
-            if (idNegocioStr != null && !idNegocioStr.isEmpty()) { // Comprueba flag
-                int idNegocio = Integer.parseInt(idNegocioStr); // Numeriza a escalar primario ID
-                InventarioDAO dao = new InventarioDAO(); // Prepara Factory 
-                com.inventario.model.Inventario inv = dao.obtenerInventarioActivo(idNegocio); // Getter asocia Entidad atómica POJO .
+            if (idNegocioStr != null && !idNegocioStr.isEmpty()) { 
+                int idNegocio = Integer.parseInt(idNegocioStr); 
+                InventarioDAO dao = new InventarioDAO(); 
+                // Busca rápidamente si el bar tiene un ciclo activo (en estado "A") abierto
+                com.inventario.model.Inventario inv = dao.obtenerInventarioActivo(idNegocio);  
                 
-                if (inv != null) { // Preventivo crash y bandera resolutiva booleana condicional 
-                    // Inyección Setter asigmático a capa Session .
-                    request.getSession().setAttribute("idInventarioActual", inv.getIdInventario()); // Bind FK 
-                    request.getSession().setAttribute("idNegocioActual", idNegocio);                // Bind PK FK ref 
-                    response.sendRedirect("view/menu_inventario.jsp");                              // Cortador de redirect asíncrono frontend .
+                if (inv != null) { // Si logra conseguir ese modelo...
+                    // Metemos el idInventario vivo en nuestro bolsillo (Sesión) para que Gastos y Ventas sepan a quién afectar
+                    request.getSession().setAttribute("idInventarioActual", inv.getIdInventario()); 
+                    request.getSession().setAttribute("idNegocioActual", idNegocio);                
+                    response.sendRedirect("view/menu_inventario.jsp"); // Va al menu verde
                 } else {
-                    // Bifurcación restrictiva de error y purgas .
-                    com.inventario.model.Usuario usuario = (com.inventario.model.Usuario) request.getSession().getAttribute("usuarioLogueado"); // Interpelación de permiso logueo 
-                    if (usuario != null && usuario.getIdRol() == 2) { // Verificador if booleano restrictivo .
-                        response.sendRedirect("view/Menu_sistema.jsp?error=NoInventarioActivoTrabajador"); // Redirec
-                    } else { // Redirect Admin Fallback .
-                        response.sendRedirect("NegocioServlet?error=NoInventarioActivo"); // Clean Param 
+                    // Si no había ninguno abierto
+                    com.inventario.model.Usuario usuario = (com.inventario.model.Usuario) request.getSession().getAttribute("usuarioLogueado"); 
+                    if (usuario != null && usuario.getIdRol() == 2) { // Si el que miraba era Cajero... manda error de que el admin le abra algo.
+                        response.sendRedirect("view/Menu_sistema.jsp?error=NoInventarioActivoTrabajador"); 
+                    } else { // Si es admin, lo manda al panel de crear uno.
+                        response.sendRedirect("NegocioServlet?error=NoInventarioActivo"); 
                     }
                 }
             }
-        } else if ("cargar_detalle".equals(action)) { // String evaluador iterativo #3
-            // =====================================================================
-            // GENERADOR DE FLUJO VISUAL LIST (Binding Dinámico Masivo a JSP Array)
-            // =====================================================================
-            ProductoDAO prodDao = new ProductoDAO(); // Constructor orquestador base 
-            List<Producto> listaProductos = prodDao.listarProductos();    // Subrutina Array recolectora general .
+        } else if ("cargar_detalle".equals(action)) { 
+            // ===============================================================================================
+            // ACCIÓN: CARGAR CATÁLOGO PARA ANOTAR INVENTARIO MANUAL INICIAL (Primera vez)
+            // ===============================================================================================
+            ProductoDAO prodDao = new ProductoDAO(); 
+            // Extraemos todo el catálogo de galletas y cervezas base para que las vean y cuenten.
+            List<Producto> listaProductos = prodDao.listarProductos();    
             
-            request.setAttribute("listaProductos", listaProductos);      // Despacha a memoria local viva .
-            request.getRequestDispatcher("view/inventario_detalle.jsp").forward(request, response); // Finalizador por forwarding o puente directo interno sin refrescar .
+            request.setAttribute("listaProductos", listaProductos); // Pegar al request para vista      
+            request.getRequestDispatcher("view/inventario_detalle.jsp").forward(request, response); 
             
-        } else if ("guardar_stock".equals(action)) { // String Evaluador Setter #4
-            // =====================================================================
-            // ALGORITMO ITERADOR ACUMULADOR (Persistencia Multitarea Enlazada Detalle)
-            // =====================================================================
-            try { // Protector encapsulado 
-                // Contexto base escalar Int cast 
-                Integer idInventario = (Integer) request.getSession().getAttribute("idInventarioActual"); // Ref session 
+        } else if ("guardar_stock".equals(action)) { 
+            // ===============================================================================================
+            // ACCIÓN: GUARDAR EL STOCK INICIAL A MANO
+            // ===============================================================================================
+            try { 
+                Integer idInventario = (Integer) request.getSession().getAttribute("idInventarioActual"); 
                 
-                if (idInventario != null) { // Base nulidad check .
-                    // Mapeos múltiples asimétricos HTTP Form HTML Input Name array binding .
-                    String[] idProductosStr = request.getParameterValues("id_producto"); // Factory recolector de multiples string values en String Array .
-                    String[] cantidadesStr = request.getParameterValues("cantidad"); // Array extractor cantidades html form param .
+                if (idInventario != null) { 
+                    // Como el formulario puede enviar 20 galletas a la vez, se recogen ARREGLOS o Vectores (múltiples registros de texto)
+                    String[] idProductosStr = request.getParameterValues("id_producto"); 
+                    String[] cantidadesStr = request.getParameterValues("cantidad"); 
                     
-                    if (idProductosStr != null && cantidadesStr != null) { // Validador Longitud Múltiple Booleano And .
-                        DetalleInventarioDAO detalleDao = new DetalleInventarioDAO(); // Preparador Relacional .
+                    if (idProductosStr != null && cantidadesStr != null) { 
+                        DetalleInventarioDAO detalleDao = new DetalleInventarioDAO(); 
                         
-                        for (int i = 0; i < idProductosStr.length; i++) { // For indexado puro Java Base.
-                            int idProd = Integer.parseInt(idProductosStr[i]); // Conversor asimétrico
-                            // Evaluador a valor flotante cero u orígen null
-                            double cant = 0; // Inicializador flotante pre-asignado double
-                            if (cantidadesStr[i] != null && !cantidadesStr[i].isEmpty()) { // Comprueba cada iteración
-                                cant = Double.parseDouble(cantidadesStr[i]); // Conversor coma flotante.
+                        // Iteramos renglón a renglón o producto a producto, anotando uno a uno su Stock en BD
+                        for (int i = 0; i < idProductosStr.length; i++) { 
+                            int idProd = Integer.parseInt(idProductosStr[i]); 
+                            double cant = 0; 
+                            if (cantidadesStr[i] != null && !cantidadesStr[i].isEmpty()) { 
+                                cant = Double.parseDouble(cantidadesStr[i]); // Convierte ese renglón a número decimal
                             }
                             
-                            // Traspaso DAO persistente setter
-                            detalleDao.insertarDetalle(idInventario, idProd, cant); // Query param .
+                            detalleDao.insertarDetalle(idInventario, idProd, cant); // Empuja el producto y su cantidad contada a la BD
                         }
                     }
                     
-                    // Resolución final asíncrona exitosa 
-                    response.sendRedirect("view/menu_inventario.jsp"); // Choque o salida frontend UI
+                    response.sendRedirect("view/menu_inventario.jsp"); // Devuelve al panel de mando
                 } else {
-                    // Rechazo local context perdido .
-                    response.sendRedirect("NegocioServlet?error=SesionInventarioInvalida"); // Error URL param flag.
+                    response.sendRedirect("NegocioServlet?error=SesionInventarioInvalida"); 
                 }
                 
-            } catch (Exception e) { // Protector asilado sobre parseo numérico array.
-                 e.printStackTrace(); // Salida standard sucia JVM console error apilada
-                 // Redireccion control 
-                 response.sendRedirect("NegocioServlet?error=ErrorGuardarStock"); // Pinta fallback general del módulo Negocio 
+            } catch (Exception e) { 
+                 e.printStackTrace(); 
+                 response.sendRedirect("NegocioServlet?error=ErrorGuardarStock"); 
             }
             
-        } else if ("cargar_cierre".equals(action)) { // Condicional Action sub-módulo #5
-            // =====================================================================
-            // PREPARADOR DE FLUJO ESTÁTICO (Extracción Array Cierre Relacional)
-            // =====================================================================
-            try { // Vigilancia de variables en RAM 
-                Integer idInventario = (Integer) request.getSession().getAttribute("idInventarioActual"); // Generador de acceso transiente
-                Integer idNegocio = (Integer) request.getSession().getAttribute("idNegocioActual"); // Getter asimétrico
-                if (idInventario != null && idNegocio != null) { // Condicional limitante Nulo.
+        } else if ("cargar_cierre".equals(action)) { 
+            // ===============================================================================================
+            // ACCIÓN: INGRESAR A LA PESTAÑA PARA CONCLUIR Y CERRAR EL MES/SEMANA (Escribir Sobrantes Cajas)
+            // ===============================================================================================
+            try { 
+                Integer idInventario = (Integer) request.getSession().getAttribute("idInventarioActual"); 
+                Integer idNegocio = (Integer) request.getSession().getAttribute("idNegocioActual"); 
+                if (idInventario != null && idNegocio != null) { 
                     
-                    // CALCULADOR LÓGICA DE TIEMPO FECHAS EN MEMORIA
-                    InventarioDAO invDao = new InventarioDAO(); // Llamada al manager DAO
-                    com.inventario.model.Inventario invActual = invDao.obtenerInventarioActivo(idNegocio); // Consigue POJO abstracto relacional vivo.
+                    // RESTRICCIÓN DE TIEMPOS DE APERTURA MATEMÁTICO 
+                    InventarioDAO invDao = new InventarioDAO(); 
+                    com.inventario.model.Inventario invActual = invDao.obtenerInventarioActivo(idNegocio); 
                     
-                    if (invActual != null) { // Chequeo null 
-                        long msActual = System.currentTimeMillis(); // Time util JVM as long num
-                        long msInicio = invActual.getFechaInicio().getTime(); // Method extractor Time over SQL Date Object
-                        long diffMs = msActual - msInicio; // Matematica de resta simple
-                        long diffDias = diffMs / (1000 * 60 * 60 * 24); // Matemática computacional base ms to dias.
+                    if (invActual != null) { 
+                        long msActual = System.currentTimeMillis(); // Tiempo actual local
+                        long msInicio = invActual.getFechaInicio().getTime(); // Tiempo guardado
+                        long diffMs = msActual - msInicio; // Restar diferencia en Milisegundos
+                        long diffDias = diffMs / (1000 * 60 * 60 * 24); // Convertir Milisegundos a Días transcurridos
                         
-                        String tipo = invActual.getTipoControl(); // Extraccion de metadato semantico descriptivo 
-                        boolean puedeCerrar = true; // Setter base restrictiva 
+                        String tipo = invActual.getTipoControl(); 
+                        boolean puedeCerrar = true; 
                         
-                        if ("semanal".equalsIgnoreCase(tipo) && diffDias >= 7) puedeCerrar = true; // String Utils igualador limitando .
-                        else if ("mensual".equalsIgnoreCase(tipo) && diffDias >= 30) puedeCerrar = true; // Idem para mensual
-                        else if (!"semanal".equalsIgnoreCase(tipo) && !"mensual".equalsIgnoreCase(tipo)) puedeCerrar = true; // Default handler libre asimetrico .
+                        // Evaluar
+                        if ("semanal".equalsIgnoreCase(tipo) && diffDias >= 7) puedeCerrar = true; 
+                        else if ("mensual".equalsIgnoreCase(tipo) && diffDias >= 30) puedeCerrar = true; 
+                        else if (!"semanal".equalsIgnoreCase(tipo) && !"mensual".equalsIgnoreCase(tipo)) puedeCerrar = true; 
 
-                        if (!puedeCerrar) { // Negativo bypass check boolean 
-                            String msg = "Aún no puede cerrar este periodo (" + tipo + "). Solo han pasado " + diffDias + " días."; // String builder asimétrico
-                            response.sendRedirect("view/menu_inventario.jsp?error_tiempo=" + java.net.URLEncoder.encode(msg, "UTF-8")); // Factoría segura HTTP redirect String buffer
-                            return; // Break hilo
+                        if (!puedeCerrar) { // Si falló la ecuación por no ser tiempo (Apenas lleva 3 días de mensual)
+                            String msg = "Aún no puede cerrar este periodo (" + tipo + "). Solo han pasado " + diffDias + " días."; 
+                            response.sendRedirect("view/menu_inventario.jsp?error_tiempo=" + java.net.URLEncoder.encode(msg, "UTF-8")); // Error
+                            return; 
                         }
                     }
 
-                    DetalleInventarioDAO detalleDao = new DetalleInventarioDAO(); // Lector secundario DAO
-                    List<com.inventario.model.DetalleInventario> detalles = detalleDao.listarDetalles(idInventario); // Constructor List 
+                    // Extraer los detalles contables para visualizarlos
+                    DetalleInventarioDAO detalleDao = new DetalleInventarioDAO(); 
+                    List<com.inventario.model.DetalleInventario> detalles = detalleDao.listarDetalles(idInventario); 
                     
-                    request.setAttribute("listaDetalles", detalles); // Disparo o inyección relacional .
-                    request.getRequestDispatcher("view/inventario_cierre.jsp").forward(request, response); // Despacho estático in memory render
-                } else { // Default NULL catch
-                    response.sendRedirect("NegocioServlet?error=SinInventarioActivo"); // Bypass error redirect flag.
+                    request.setAttribute("listaDetalles", detalles); 
+                    request.getRequestDispatcher("view/inventario_cierre.jsp").forward(request, response); // Pintar el formulario para Cerrar
+                } else { 
+                    response.sendRedirect("NegocioServlet?error=SinInventarioActivo"); 
                 }
-            } catch (Exception e) { // Excepciones base y null pointers asiladores
-                e.printStackTrace(); // Salida catch consola 
-                response.sendRedirect("NegocioServlet?error=ErrorCargandoCierre"); // Purificador.
+            } catch (Exception e) { 
+                e.printStackTrace(); 
+                response.sendRedirect("NegocioServlet?error=ErrorCargandoCierre"); 
             }
             
-        } else if ("finalizar_inventario".equals(action)) { // Discriminador booleano String #6
-            // =====================================================================
-            // RUTINA CIERRE TRANSACCIONAL COMPLETO (Destructor Periodo/Setter Masivo)
-            // =====================================================================
-            try { // Limitador general 
-                Integer idInventario = (Integer) request.getSession().getAttribute("idInventarioActual"); // Extract contexto RAM escalar 
-                if (idInventario != null) { // Validador pre Nullpointer flag.
-                    // RE-EVALUADOR DE TIEMPOS 
-                    InventarioDAO invDao = new InventarioDAO(); // Generador de Orquesta 
-                    Integer idNegocio = (Integer) request.getSession().getAttribute("idNegocioActual"); // Instancia llave 
-                    com.inventario.model.Inventario invActual = invDao.obtenerInventarioActivo(idNegocio); // Interconexión delegativa
+        } else if ("finalizar_inventario".equals(action)) { 
+            // ===============================================================================================
+            // ACCIÓN: APRETAR EL BOTÓN ABRUMADOR ("CERRAR Y MIGRAR") CON LAS CANTIDADES SOBRANTES INGRESADAS
+            // ===============================================================================================
+            try { 
+                Integer idInventario = (Integer) request.getSession().getAttribute("idInventarioActual"); 
+                if (idInventario != null) { 
                     
-                    if (invActual != null) { // Check objeto exist.
-                        long msActual = System.currentTimeMillis(); // Extraccion Time Millis as Long num primitive  .
-                        long msInicio = invActual.getFechaInicio().getTime(); // Idem object date method invoke.
-                        long diffMs = msActual - msInicio; // Operador matematico restador 
-                        long diffDias = diffMs / (1000 * 60 * 60 * 24); // Idem conversor numérico escalar largo.
+                    InventarioDAO invDao = new InventarioDAO(); 
+                    Integer idNegocio = (Integer) request.getSession().getAttribute("idNegocioActual"); 
+                    com.inventario.model.Inventario invActual = invDao.obtenerInventarioActivo(idNegocio); 
+                    
+                    // RE-EVALUACIÓN DE TIEMPO (Por seguridad web nuevamente)
+                    if (invActual != null) { 
+                        long msActual = System.currentTimeMillis(); 
+                        long msInicio = invActual.getFechaInicio().getTime(); 
+                        long diffMs = msActual - msInicio; 
+                        long diffDias = diffMs / (1000 * 60 * 60 * 24); 
                         
-                        String tipo = invActual.getTipoControl(); // Extractor literal string  
-                        boolean puedeCerrar = true; // Base condicional boolean  
+                        String tipo = invActual.getTipoControl(); 
+                        boolean puedeCerrar = true; 
                         
-                        if ("semanal".equalsIgnoreCase(tipo) && diffDias >= 7) puedeCerrar = true; // Limitador restrictivo condicional combinacional 
-                        else if ("mensual".equalsIgnoreCase(tipo) && diffDias >= 30) puedeCerrar = true; // Idem .
-                        else if (!"semanal".equalsIgnoreCase(tipo) && !"mensual".equalsIgnoreCase(tipo)) puedeCerrar = true; // Fallback generico booleano and restrictivo invertido
+                        // Limitantes lógicas
+                        if ("semanal".equalsIgnoreCase(tipo) && diffDias >= 7) puedeCerrar = true; 
+                        else if ("mensual".equalsIgnoreCase(tipo) && diffDias >= 30) puedeCerrar = true; 
+                        else if (!"semanal".equalsIgnoreCase(tipo) && !"mensual".equalsIgnoreCase(tipo)) puedeCerrar = true; 
 
-                        if (!puedeCerrar) { // Check condicional Bypass Inverso booleano.
-                            String msg = "No puede cerrar el inventario " + tipo + " aun. Faltan dias (Lleva: " + diffDias + ")"; // Cadena iteradora concat .
-                            response.sendRedirect("InventarioServlet?action=cargar_cierre&error_tiempo=" + java.net.URLEncoder.encode(msg, "UTF-8")); // Coded redirect asimétrico.
-                            return; // Break JVM logic hilo  .
+                        if (!puedeCerrar) { 
+                            String msg = "No puede cerrar el inventario " + tipo + " aun. Faltan dias (Lleva: " + diffDias + ")"; 
+                            response.sendRedirect("InventarioServlet?action=cargar_cierre&error_tiempo=" + java.net.URLEncoder.encode(msg, "UTF-8")); 
+                            return;  
                         }
                     }
 
-                    String[] idProductosStr = request.getParameterValues("id_producto"); // Consigue Arrays string input Form HTML.
-                    String[] cantidadesFinalesStr = request.getParameterValues("cantidad_final"); // Idem.
+                    // Tomamos del formulario de la Tabla de sobrantes cada cajita que escribió
+                    String[] idProductosStr = request.getParameterValues("id_producto"); 
+                    String[] cantidadesFinalesStr = request.getParameterValues("cantidad_final"); 
                     
-                    DetalleInventarioDAO detalleDao = new DetalleInventarioDAO(); // Constructor relacional a capa Link_DAO_DB .
-                    if (idProductosStr != null && cantidadesFinalesStr != null) { // Chequeador multi-nulo booleano conjuncion.
-                        for (int i = 0; i < idProductosStr.length; i++) { // Bucle indexador contador clásico.
-                            int idProd = Integer.parseInt(idProductosStr[i]); // Aritmética parsificadora en stack 
-                            double cantFinal = 0; // Preinicializador flotante preventivo .
-                            if (cantidadesFinalesStr[i] != null && !cantidadesFinalesStr[i].isEmpty()) { // Comprobador por casillas .
-                                cantFinal = Double.parseDouble(cantidadesFinalesStr[i]); // Setter Aritmético fraccionario de Cadena a Real Primitivo .
+                    DetalleInventarioDAO detalleDao = new DetalleInventarioDAO(); 
+                    if (idProductosStr != null && cantidadesFinalesStr != null) { 
+                        // Bucle actualizador
+                        for (int i = 0; i < idProductosStr.length; i++) { 
+                            int idProd = Integer.parseInt(idProductosStr[i]); 
+                            double cantFinal = 0; 
+                            if (cantidadesFinalesStr[i] != null && !cantidadesFinalesStr[i].isEmpty()) { 
+                                cantFinal = Double.parseDouble(cantidadesFinalesStr[i]); // Recoge lo que sobró físico en estantes
                             }
-                            detalleDao.actualizarCantidadFinal(idInventario, idProd, cantFinal); // Metodo inyector relacional BD (Mutating State Update) .
+                            // Inyecta o actualiza esta nueva cifra en la tabla general base
+                            detalleDao.actualizarCantidadFinal(idInventario, idProd, cantFinal); 
                         }
                     }
                     
-                    // DESTRUCTOR LÓGICO ESTADO ORQUESTADOR
-                    boolean cerrado = invDao.finalizarInventario(idInventario); // Delegado con retorno de afirmación lógica booleana 
+                    // PASO FÚNEBRE MATADOR: Acaba el ciclo convirtiéndolo de "A" Activo a Cerrado (False/Finalizado)
+                    boolean cerrado = invDao.finalizarInventario(idInventario); 
                     
-                    if (cerrado) { // Si afirmativo
-                        // Depuración o Invalidación forzada in-memory
-                        request.getSession().removeAttribute("idInventarioActual"); // Dispara borrador hash map de sesión sobre el Id específico 
+                    if (cerrado) { 
+                        // Le borramos la referencia a "idInventarioActivo" por si trata de facturar o gastar de la nada (Ya quedó cerrado)
+                        request.getSession().removeAttribute("idInventarioActual"); 
                         
-                        // CARGADOR ADICIONAL (Pre renderizador)
-                        java.util.List<com.inventario.model.DetalleInventario> detallesFinales = detalleDao.listarDetallesConPrecio(idInventario); // Query compleja a List Array Object
-                        request.setAttribute("listaDescuadre", detallesFinales); // Inyector Polimorfo
-                        request.setAttribute("mensajeExito", "¡Inventario cerrado y guardado correctamente!"); // Binding literal .
-                        request.getRequestDispatcher("view/reporte_descuadre.jsp").forward(request, response); // Despacha JSP render passthrough via Request pipeline asíncrona.
-                    } else { // Fallo SQL booleano atrapado interno
-                        response.sendRedirect("NegocioServlet?error=ErrorGuardandoBD"); // Limpieza control url param flag .
+                        // Ahora le mostramos un pequeño Dashboard visual para que evalúe si faltaron papitas o platica
+                        java.util.List<com.inventario.model.DetalleInventario> detallesFinales = detalleDao.listarDetallesConPrecio(idInventario); 
+                        request.setAttribute("listaDescuadre", detallesFinales); // Colección de array atada
+                        request.setAttribute("mensajeExito", "¡Inventario cerrado y guardado correctamente!"); 
+                        request.getRequestDispatcher("view/reporte_descuadre.jsp").forward(request, response); // Pintar reporte descuadres
+                    } else { 
+                        response.sendRedirect("NegocioServlet?error=ErrorGuardandoBD"); 
                     }
-                } else { // Fallo nulo check 
-                    response.sendRedirect("NegocioServlet?error=NoSePudoCerrar"); // Redirect flag error param 
+                } else {  
+                    response.sendRedirect("NegocioServlet?error=NoSePudoCerrar"); 
                 }
-            } catch (Exception e) { // Try catch encapsulador framework 
-                e.printStackTrace(); // Suciedad trace CLI 
-                response.sendRedirect("NegocioServlet?error=ErrorAlFinalizar"); // Catch fallback redirect url.
+            } catch (Exception e) { 
+                e.printStackTrace();  
+                response.sendRedirect("NegocioServlet?error=ErrorAlFinalizar"); 
             }
             
-        } else { // Fallback principal general default no matches Switch IF - ELSE_IF String
-            // Fallback no condicionado destructivo ciclo completo 
-            response.sendRedirect("NegocioServlet"); // Retorna a Origen inicial Controller Negocio
+        } else { 
+            // Si el Action no coincidió con ninguna palabra esperada.
+            response.sendRedirect("NegocioServlet"); 
         }
     }
 
     /**
-     * Sobreescritura puente Post a Get Http Methods.
-     * Envoltura pasiva recicladora redirigiendo flujo iterativo para usar un solo método de resolución final .
+     * El método doPost simplemente recicla o envía a doGet. 
+     * Es un pequeño truco para que si una web envia esto en formato oculto, también valga en este servlet unificado.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Captura base Java Servlets framework JVM
-        doGet(request, response); // Invoca a sí misma polimorfizando inyección .
+            throws ServletException, IOException { 
+        doGet(request, response); 
     }
 }

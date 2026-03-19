@@ -1,146 +1,141 @@
-package com.inventario.model; // Define el paquete lógico donde reside esta clase de modelo
+package com.inventario.model; // Paquete donde viven las clases molde
 
-import java.sql.Date; // Importa la clase de fecha de Java específica para mapear campos DATE de la base de datos MySQL
+import java.sql.Date; // Para manejar la fecha de vencimiento compatible con MySQL
 
 /**
- * Modelo de datos: Clase Producto (Entidad o POJO - Plain Old Java Object).
+ * Clase Producto (Modelo / POJO).
  * 
- * Esta clase es la representación en la Programación Orientada a Objetos 
- * de la tabla física 'producto' alojada en la base de datos relacional.
- * Actúa como una estructura de transporte de datos entre diferentes capas arquitectónicas.
+ * Es el molde que representa UN artículo del catálogo del negocio.
+ * Por ejemplo: "Cerveza Águila, marca Bavaria, precio $3.500, tipo Bebida, vence 2026-12-01".
+ * Corresponde a la tabla 'producto' de la base de datos.
  */
-public class Producto { // Definición de la clase pública Producto
+public class Producto { // Declaración de la clase pública
 
     // =====================================================================
-    // ATRIBUTOS PRIVADOS (Encapsulamiento de los estados de la entidad)
-    // Cada atributo tiene una correlación directa funcional con una columna de la tabla.
+    // ATRIBUTOS PRIVADOS (Cada uno es una columna de la tabla)
     // =====================================================================
 
-    private int idProducto;        // Atributo de tipo primitivo entero, mapea la Clave Primaria (PK) autogenerada del producto.
-    private String nombre;         // Atributo de tipo objeto String, almacena la cadena de caracteres del nombre del producto.
-    private String marca;          // Atributo de tipo objeto String, representa la marca comercial del producto.
-    private double precioUnitario; // Atributo primitivo de doble precisión para representar el valor económico fraccionario (precio).
-    private String tipo;           // Atributo de tipo String para almacenar la clasificación o categoría del producto.
-    private String imagen;         // Atributo de tipo String que guarda la ruta simbólica o el de referencia del archivo de imagen.
-    private Date fechaVencimiento; // Atributo instanciado con la clase Date (java.sql.Date) para representar el vencimiento del producto.
-    private String cantidadMedida; // Atributo String empleado para definir descripciones de volumen o peso (p.ej: "750ml").
+    private int idProducto;        // ID único del producto (Clave Primaria, la genera la BD)
+    private String nombre;         // Nombre del producto (ej: "Cerveza Águila")
+    private String marca;          // Marca comercial (ej: "Bavaria")
+    private double precioUnitario; // Precio de cada unidad (ej: $3.500)
+    private String tipo;           // Categoría del producto (ej: "Bebida", "Paquete", "Enlatado")
+    private String imagen;         // Nombre del archivo de la foto (ej: "1710203942_cerveza.jpg")
+    private Date fechaVencimiento; // Fecha en que vence el producto (puede ser nulo si no vence)
+    private String cantidadMedida; // Descripción del tamaño o peso (ej: "750ml", "200gr")
 
     /**
-     * CONSTRUCTOR POR DEFECTO
-     * Método de instanciación fundamental que permite asignar espacio en memoria dinámica 
-     * a un objeto Producto en estado vacío, previo a la inyección de sus atributos mediante Setters.
+     * CONSTRUCTOR VACÍO.
+     * Crea un Producto sin datos, como una etiqueta en blanco.
      */
-    public Producto() { // Declaración del constructor vacío
+    public Producto() {
     }
 
     /**
-     * CONSTRUCTOR SOBRECARGADO (Parametrizado)
-     * Constructor avanzado que facilita inicializar la instancia de Producto con todos
-     * sus estados cargados de forma inmediata en una sola instrucción de código.
+     * CONSTRUCTOR CON PARÁMETROS (Sobrecarga).
+     * Crea un Producto con todos los datos de una sola vez.
      * 
-     * @param idProducto Identificador principal numérico
-     * @param nombre Cadena de texto correspondiente al nombre
-     * @param marca Cadena representativa de la marca
-     * @param precioUnitario Valor numérico decimal del precio
-     * @param tipo Clasificación del artículo
-     * @param imagen Cadena de ruta al archivo multimedia
-     * @param fechaVencimiento Instancia de Date señalando la validéz del producto
-     * @param cantidadMedida Descripción técnica de porción o medida
+     * @param idProducto ID del producto
+     * @param nombre Nombre del producto
+     * @param marca Marca comercial
+     * @param precioUnitario Precio por unidad
+     * @param tipo Categoría
+     * @param imagen Nombre del archivo de imagen
+     * @param fechaVencimiento Fecha de caducidad
+     * @param cantidadMedida Tamaño o peso
      */
-    public Producto(int idProducto, String nombre, String marca, double precioUnitario, String tipo, String imagen, Date fechaVencimiento, String cantidadMedida) { // Implementación del constructor con firma extensa
-        this.idProducto = idProducto;           // Resuelve ambigüedad y asocia el ID recibido al atributo propio de la instancia
-        this.nombre = nombre;                   // Asigna la cadena recibida al atributo privado correspondiente
-        this.marca = marca;                     // Asocia la marca inyectada por el invocador al miembro de la clase
-        this.precioUnitario = precioUnitario;   // Inicializa el estado primitivo del atributo precio de esta instancia
-        this.tipo = tipo;                       // Establece el atributo interno 'tipo' con la referencia proporcionada
-        this.imagen = imagen;                   // Sobrescribe la referencia a la ruta multimedia en estado interno
-        this.fechaVencimiento = fechaVencimiento; // Establece un puntero hacia la instancia de Date recibida en tiempo de ejecución
-        this.cantidadMedida = cantidadMedida;   // Inyecta el texto descriptivo de proporción en el objeto actual
+    public Producto(int idProducto, String nombre, String marca, double precioUnitario, String tipo, String imagen, Date fechaVencimiento, String cantidadMedida) {
+        this.idProducto = idProducto;           // Guarda el ID
+        this.nombre = nombre;                   // Guarda el nombre
+        this.marca = marca;                     // Guarda la marca
+        this.precioUnitario = precioUnitario;   // Guarda el precio
+        this.tipo = tipo;                       // Guarda la categoría
+        this.imagen = imagen;                   // Guarda el nombre de la foto
+        this.fechaVencimiento = fechaVencimiento; // Guarda la fecha de vencimiento
+        this.cantidadMedida = cantidadMedida;   // Guarda el tamaño/peso
     }
 
     // =====================================================================
-    // MÉTODOS ACCESORES (Getters) Y MUTADORES (Setters)
-    // Constituyen la interfaz pública única admisible para inspeccionar (get) o alterar (set)
-    // el estado de la información contenida en la clase protegida por el paradigma de encapsulamiento.
+    // GETTERS Y SETTERS
     // =====================================================================
 
-    /** Accesor: Devuelve el identificador de tipo entero del producto */
-    public int getIdProducto() { // Método público de lectura de la propiedad ID
-        return idProducto; // Instrucción de retorno del miembro privado
+    /** Devuelve el ID del producto */
+    public int getIdProducto() {
+        return idProducto;
     }
 
-    /** Mutador: Establece un nuevo estado entero en la propiedad ID del producto */
-    public void setIdProducto(int idProducto) { // Método público de inyección void (sin retorno)
-        this.idProducto = idProducto; // Reemplazo condicional sin validación del identificador
+    /** Guarda el ID del producto */
+    public void setIdProducto(int idProducto) {
+        this.idProducto = idProducto;
     }
 
-    /** Accesor: Obtiene la cadena de texto con el nombre configurado en instancia */
-    public String getNombre() { // Método público de lectura de la propiedad Nombre
-        return nombre; // Retorna la referencia al objeto String en memoria
+    /** Devuelve el nombre del producto (ej: "Cerveza Águila") */
+    public String getNombre() {
+        return nombre;
     }
 
-    /** Mutador: Define o reescribe el nombre descriptivo apuntado por el objeto actual */
-    public void setNombre(String nombre) { // Método sin retorno, toma un String como inyector
-        this.nombre = nombre; // Reemplaza la referencia local actual
+    /** Guarda el nombre del producto */
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
-    /** Accesor: Retorna el nombre comercial de la marca asociada al objeto instanciado */
-    public String getMarca() { // Declaración de método público
-        return marca; // Retorna el miembro almacenado marca
+    /** Devuelve la marca del producto (ej: "Bavaria") */
+    public String getMarca() {
+        return marca;
     }
 
-    /** Mutador: Reasigna el valor en texto sobre la marca vinculada a este producto */
-    public void setMarca(String marca) { // Se provee función que recibe String
-        this.marca = marca; // Setea en memoria la referencia
+    /** Guarda la marca del producto */
+    public void setMarca(String marca) {
+        this.marca = marca;
     }
 
-    /** Accesor: Lee el escalar de punto flotante de doble abstracción matemática correspondiente al precio */
-    public double getPrecioUnitario() { // Retorno de tipo primitivo de máquina
-        return precioUnitario; // Expone exteriormente el valor
+    /** Devuelve el precio unitario (ej: 3500.0) */
+    public double getPrecioUnitario() {
+        return precioUnitario;
     }
 
-    /** Mutador: Inicializa con un valor puramente numérico el estado primitivo del precio */
-    public void setPrecioUnitario(double precioUnitario) { // Inyecta double recibido
-        this.precioUnitario = precioUnitario; // Modifica registro lógico con el dato formal
+    /** Guarda el precio unitario */
+    public void setPrecioUnitario(double precioUnitario) {
+        this.precioUnitario = precioUnitario;
     }
 
-    /** Accesor: Consulta la semántica o categorización de la cadena de tipo */
-    public String getTipo() { // Función pública con retorno en abstracción String
-        return tipo; // Libera contexto sobre el dato encapsulado "tipo"
+    /** Devuelve la categoría del producto (ej: "Bebida") */
+    public String getTipo() {
+        return tipo;
     }
 
-    /** Mutador: Cambia el criterio de clasificación apuntando la memoria a nueva cadena String asignada */
-    public void setTipo(String tipo) { // Toma parámetro lógico desde el llamador
-        this.tipo = tipo; // Efectiviza el cambio asignando variable miembro
+    /** Guarda la categoría del producto */
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
     }
 
-    /** Accesor: Muestra la ubicación referenciada de recursos iconográficos como String */
-    public String getImagen() { // Lectura desde exterior limitando mutabilidad directa
-        return imagen; // Extrae atributo local
+    /** Devuelve el nombre del archivo de imagen (ej: "1710203942_cerveza.jpg") */
+    public String getImagen() {
+        return imagen;
     }
 
-    /** Mutador: Cambia el puntero local al camino (Path) del archivo de imagen procesado */
-    public void setImagen(String imagen) { // Toma texto del path relativo multimedia
-        this.imagen = imagen; // Sobrescritura en la asignación orientada
+    /** Guarda el nombre del archivo de imagen */
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 
-    /** Accesor: Retorna la instancia de un objeto Date complejo contenido dentro del objeto global actual */
-    public Date getFechaVencimiento() { // Expone variable tipo Date relacional
-        return fechaVencimiento; // Retorna referencia
+    /** Devuelve la fecha de vencimiento (puede ser null si no aplica) */
+    public Date getFechaVencimiento() {
+        return fechaVencimiento;
     }
 
-    /** Mutador: Enlaza una nueva instancia de un objeto Date al registro temporal del producto */
-    public void setFechaVencimiento(Date fechaVencimiento) { // Adopta argumento estructurado y no primitivo
-        this.fechaVencimiento = fechaVencimiento; // Enlace del puntero en el atributo miembro actual
+    /** Guarda la fecha de vencimiento */
+    public void setFechaVencimiento(Date fechaVencimiento) {
+        this.fechaVencimiento = fechaVencimiento;
     }
 
-    /** Accesor: Describe textualmente cualquier métrica dimensionada física (gramaje, volumetría) */
-    public String getCantidadMedida() { // Devuelve puntero de Cadena de Caracteres
-        return cantidadMedida; // Retorno base
+    /** Devuelve la cantidad/medida (ej: "750ml") */
+    public String getCantidadMedida() {
+        return cantidadMedida;
     }
 
-    /** Mutador: Acepta y sustituye texto detallando la magnitud métrica del elemento */
-    public void setCantidadMedida(String cantidadMedida) { // Toma literal textual dimensionado
-        this.cantidadMedida = cantidadMedida; // Ajuste directo del miembro paramétrico
+    /** Guarda la cantidad/medida */
+    public void setCantidadMedida(String cantidadMedida) {
+        this.cantidadMedida = cantidadMedida;
     }
 }

@@ -1,4 +1,4 @@
-package com.inventario.controller; // Declaración de espacio de nombres organizativo de artefactos de red 
+package com.inventario.controller;
 
 import com.inventario.dao.NegocioDAO;
 import com.inventario.model.Negocio;
@@ -13,115 +13,105 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- * Controlador Lógico Orquestador: NegocioServlet.
+ * Controlador NegocioServlet.
  * 
- * Clase de fachada interceptora (Front Controller Pattern approach limitado a su entidad).
- * Ejerce de núcleo iterativo captador en la capa Servlet, interconectando el modelo abstracto (Negocio)
- * y la persistencia (NegocioDAO) con el cliente HTTP (Front-end), gestionando el estado local a través de atributos de Sesión transientes.
+ * Clase que opera con las "sucursales" o bares. Lista los locales de un dueño, 
+ * inserta los nuevos construidos y es capaz de demolerlos en DB si se lo piden.
  */
-@WebServlet(name = "NegocioServlet", urlPatterns = {"/NegocioServlet"}) // Inyección de dependencia estática para el framework contenedor servlet HTTP.
-public class NegocioServlet extends HttpServlet { // Extensión de herencia abstracta base para comunicación I/O asíncrona Web.
+@WebServlet(name = "NegocioServlet", urlPatterns = {"/NegocioServlet"}) 
+public class NegocioServlet extends HttpServlet { 
 
     /**
-     * Sobreescritura del método transaccional HTTP GET.
-     * Analizador condicionado del Request URI asumiendo dos subrutinas de consulta o destrucción:
-     * - Destrucción condicional: elimina un nodo u objeto negocio si recibe parametrización específica.
-     * - Listado Relacional (Default): Recoge el envoltorio de sesión vivo e intercede para llenar un buffer con Arrays relacionales del contexto.
+     * El método doGet puede mostrar todos los negocios en tabla o borrar uno dependiendo 
+     * lo que le pongamos al final (action).
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Excepción de framework de I/O
+            throws ServletException, IOException { 
         
-        String action = request.getParameter("action"); // Binding inicial temporal de string discriminador
+        String action = request.getParameter("action"); // Escucha instrucciones
         
         // =====================================================================
-        // ALGORITMO ORTOGONAL DE DESTRUCCIÓN: (Bifurcación Eliminación en Modelo DAO)
+        // ACCIÓN: ELIMINAR (O DESTRUIR EL ESTABLECIMIENTO)
         // =====================================================================
-        if ("eliminar".equals(action)) { // Chequeo booleano lógico comparador en stack local de cadena
+        if ("eliminar".equals(action)) { // Si pidió romper
             try {
-                int idNegocio = Integer.parseInt(request.getParameter("id")); // Parseador unívoco de ID foráneo literal a tipo primitivo Java
-                NegocioDAO dao = new NegocioDAO(); // Instanciador base utilitario extractor de persistencia relacional
-                boolean eliminado = dao.eliminarNegocio(idNegocio);           // Llamada al orquestador delegador destructor y espera de afirmación booleana lógica.
+                int idNegocio = Integer.parseInt(request.getParameter("id")); // Extrae qué Local especifico destruir
+                NegocioDAO dao = new NegocioDAO(); 
+                boolean eliminado = dao.eliminarNegocio(idNegocio); // Le pide al martillo DAO borrar en base SQL (Tabla NEGOCIO)
                 
-                // Finalización del hilo ordenando un reciclaje reactivo al front apuntando al controlador limpio (sin action)
-                response.sendRedirect("NegocioServlet"); // Reseteo transaccional Web de capa asíncrono
-                return; // Corta el árbol condicionado 
+                // Si eliminó bien, redirige o repinta a sí mismo para reflejar visualmente que la fila no está.
+                response.sendRedirect("NegocioServlet"); 
+                return;  
             } catch (Exception e) {
-                e.printStackTrace(); // Salida sucia no logueada de crash I/O 
+                e.printStackTrace(); 
             }
         }
         
         // =====================================================================
-        // ALGORITMO SELECTIVO EN BIFURCACIÓN PRINCIPAL (Consulta transaccional)
-        // Acoplamiento relacional vía atributo inyectado transiente.
+        // ACCIÓN POR DEFECTO: LISTAR Y NAVEGAR BAR POR BAR (MIS NEGOCIOS VIEW)
         // =====================================================================
-        HttpSession session = request.getSession(); // Llama al constructor provisto por el Wrapper general (Estado pre-autorizado).
-        Usuario usuarioLogueado = (Usuario) session.getAttribute("usuarioLogueado"); // Cast explícito referenciado al POJO superior User en vivo .
+        HttpSession session = request.getSession(); // Acceso al guardián local de variables del usuario
+        Usuario usuarioLogueado = (Usuario) session.getAttribute("usuarioLogueado"); // Se obtiene a la persona conectada para preguntar el listado por dueño
         
-        int idUsuario = 0; // Inicializador escalar defensivo
-        if (usuarioLogueado != null) { // Validador atómico booleano contra punteros vacíos huérfanos .
-            idUsuario = usuarioLogueado.getIdUsuario(); // Método asimila getter interno devolviendo puntero .
+        int idUsuario = 0; 
+        if (usuarioLogueado != null) { 
+            idUsuario = usuarioLogueado.getIdUsuario(); // Saca ID abstracto 
         }
         
-        NegocioDAO dao = new NegocioDAO(); // Inicializa transaccional pasivo DAO relacional.
-        List<Negocio> lista = dao.listarNegocios(idUsuario);        // Función interviniente retornando Arreglo List genérico estricto del modelo (Entity collection).
+        NegocioDAO dao = new NegocioDAO(); 
+        List<Negocio> lista = dao.listarNegocios(idUsuario); // Trae el conjunto de locales de "Su Propiedad" exclusivamente 
         
-        request.setAttribute("listaBares", lista);                  // Atribución de objeto lista y metadato relacional interconectado para visualización .
-        request.getRequestDispatcher("view/Lista_bares.jsp").forward(request, response); // Despachaje (Forwarding passivo) del request completo con la request pipeline .
+        request.setAttribute("listaBares", lista); // Pinta la tabla de modelos al frente JSP
+        request.getRequestDispatcher("view/Lista_bares.jsp").forward(request, response); 
     }
 
     /**
-     * Sobreescritura del método transaccional HTTP POST (Payload inyectivo).
-     * Orígenes form client -> Instanciación en memoria Local (Negocio POJO) -> DAO Save.
-     * Completa el proceso con la inserción de banderas u atributos session relacionales de estado en runtime .
+     * El método doPost atrapa la apertura o inicio de la creación de Local (Cuando llena el Form "El Bar de Homero").
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Atrapa error 
+            throws ServletException, IOException { 
         
-        // Mapea y guarda en constructores Strings puros en la Local stack .
-        String nombre = request.getParameter("nombre");       // Función extractora de atributo literario alfanumérico principal en POJO
-        String direccion = request.getParameter("direccion"); // Extracto de metadato de ubicación string .
+        // Atrapa texto formulario
+        String nombre = request.getParameter("nombre");       // Bar Moe
+        String direccion = request.getParameter("direccion"); // Evergreen Terrace 2 
         
-        // Contexto envoltura 
-        HttpSession session = request.getSession(); // Accesor a la metadata relacional viva HTTP.
-        Usuario usuarioLogueado = (Usuario) session.getAttribute("usuarioLogueado"); // Castea al perfil completo instanciado .
+        HttpSession session = request.getSession(); // Llama variables activas
+        Usuario usuarioLogueado = (Usuario) session.getAttribute("usuarioLogueado"); 
         
-        int idUsuario = 0; // Pre-declaración a base 
-        if (usuarioLogueado != null) { // Bloque null check en pipeline .
-            idUsuario = usuarioLogueado.getIdUsuario(); // Extrae getter escalar clave 
+        int idUsuario = 0; 
+        if (usuarioLogueado != null) { 
+            idUsuario = usuarioLogueado.getIdUsuario(); // Extraer el "Dueño" (ID usuario)
         }
         
-        // CONSTRUCTOR Y ALMACÉN DE MODELO VIVO 
-        Negocio n = new Negocio(); // Factory patter simple, POJO vacío preparado en HEAP.
-        n.setNombre(nombre); // Método encapsulado inyector modificador variable atributo privado interno .
-        n.setDireccion(direccion); // Transvasa lógica escalar referenciada string .
+        // Armamos un pequeño molde temporal "Negocio" POJO en memoria.
+        Negocio n = new Negocio(); 
+        n.setNombre(nombre); 
+        n.setDireccion(direccion); 
         
-        // DELEGATIVO DAO MANAGER 
-        NegocioDAO dao = new NegocioDAO(); // Nuevo envoltorio de DB 
+        NegocioDAO dao = new NegocioDAO(); 
         try {
-            // Persistencia del modelo acoplado y la Foreign Key abstracta , recibiendo escalar numérico autoincremental de llave Primaria 
+            // Guardamos físicamente en Base de Datos (Nos retorna el ID Nro que DB haya auto-creado)
             int idGenerado = dao.registrarNegocio(n, idUsuario); 
             
-            if (idGenerado > 0) { // Evalúa condición booleana pasiva confirmando integridad .
-                // Mantiene el polimorfismo o recalcula métrica foránea interconectada 
-                try { // Previene caídas en métrica para no colgar hilo .
-                    int cantBares = dao.contarNegocios(idUsuario);        // Subrutina contable a motor BD .
-                    session.setAttribute("numBares", cantBares);          // Refresca la variable temporal relacional del flag cardinal 
-                } catch(Exception e) { e.printStackTrace(); } // Nullifica error y pasa 
+            if (idGenerado > 0) { // Si sí hubo confirmación atómica
+                try { // Calcula actualizar la estática del dashboard 
+                    int cantBares = dao.contarNegocios(idUsuario);        
+                    session.setAttribute("numBares", cantBares);          
+                } catch(Exception e) { e.printStackTrace(); } 
 
-                // Almacena transaccionalmente en sesión los delimitadores lógicos .
-                session.setAttribute("idNegocioActual", idGenerado);     // Ajuste dinámico referencial principal inyectado  
-                session.setAttribute("nombreNegocioActual", nombre);     // Guardado literal transiente
-                response.sendRedirect("view/registroBar_fin.html");      // Direccionamiento resolutivo asíncrono
+                // Por último, como acaba de crear un lugar, automáticamente "viajamos" o empezamos el hilo operando localmente en él.
+                session.setAttribute("idNegocioActual", idGenerado);     
+                session.setAttribute("nombreNegocioActual", nombre);     
+                response.sendRedirect("view/registroBar_fin.html");      // Manda a panel de inicio inventario verde .
             } else {
-                // Fallo controlado por el recolector DAO (Validación False / <= 0)
-                response.sendRedirect("view/registroBar.html?error=FalloRegistroDAO"); // Agrega parametro log
+                response.sendRedirect("view/registroBar.html?error=FalloRegistroDAO"); 
             }
-        } catch (Exception e) { // Atrapatodo y print
+        } catch (Exception e) { 
             e.printStackTrace(); 
-            // Fallo condicional por excepción JVM transaccional , serializa String Error
-            response.sendRedirect("view/registroBar.html?error=" + e.getMessage().replace(" ", "_")); // Muta salida HTTP
+            // Fallo devolviendo string exception al front visual 
+            response.sendRedirect("view/registroBar.html?error=" + e.getMessage().replace(" ", "_")); 
         }
     }
 }

@@ -1,99 +1,96 @@
-package com.inventario.model; // Instrucción que empaqueta y ubica al código en el subdirectorio del módulo model
+package com.inventario.model; // Paquete donde viven las clases molde
 
-import java.sql.Date; // Importación para manejar la instancia de fecha mapeada al gestor de base de datos MySQL
+import java.sql.Date; // Importamos la clase Date de SQL para manejar fechas compatibles con la base de datos
 
 /**
- * Modelo de datos: Clase Gasto (Entidad o POJO - Plain Old Java Object).
+ * Clase Gasto (Modelo / POJO).
  * 
- * Capa de abstracción Orientada a Objetos para la estructura física de la tabla 'gasto_diario'.
- * Funciona como unidad de transporte temporal que representa estáticamente en memoria 
- * un registro transaccional transitorio (egreso) que se contabiliza como pérdida operativa asociada a un entorno mayor (Inventario).
+ * Es el molde que representa UN gasto del negocio.
+ * Por ejemplo: "Compré 2 traperos el 15 de marzo por $8.000".
+ * Corresponde a la tabla 'gasto_diario' de la base de datos.
  */
-public class Gasto { // Declaración encapsulada para la clase modelo
+public class Gasto { // Declaración de la clase pública
 
     // =====================================================================
-    // ATRIBUTOS DE CLASE O ESTADOS PERSISTIDOS
-    // Estructuras de propiedades que mimetizan exactamente columnas o tuplas físicas en BD.
+    // ATRIBUTOS PRIVADOS (Cada uno es una columna de la tabla)
     // =====================================================================
 
-    private int id_gastos;       // Llave primaria auto-escalable (PK) que proporciona identidad única indiscutible al objeto gasto.
-    private int id_inventario;   // Llave foránea (FK), punto de anclaje relacional que supedita la validez funcional a la existencia de un inventario maestro activo temporal.
-    private int cantidad;        // Atributo primitivo entero donde reside el conteo abstracto de ítems unitarios aplicables al egreso.
-    private Date fecha;          // Componente envolvente Date referencial orientado a rastrear la dimensión temporal del suceso contable.
-    private Double subtotal;     // Abstracción numérica fraccionaria basada en objetos Wrappers que consolida el flujo saliente monetario originado por la sumatoria atómica.
-    private String descripcion;  // Atributo de tipo texto descriptivo libre (String) donde se documenta la naturaleza alfanumérica cualitativa que justificó la operación.
+    private int id_gastos;       // ID único del gasto (Clave Primaria, la genera la BD automáticamente)
+    private int id_inventario;   // ID del inventario al que pertenece este gasto (Clave Foránea hacia tabla INVENTARIO)
+    private int cantidad;        // Cuántos artículos compré (ej: 2 traperos)
+    private Date fecha;          // Fecha en que se hizo el gasto (ej: 2026-03-15)
+    private Double subtotal;     // Cuánto costó en total (ej: $8.000). Usamos Double (objeto) por si llega nulo
+    private String descripcion;  // Para qué fue el gasto (ej: "Materiales de limpieza")
 
     /**
-     * CONSTRUCTOR POR DEFECTO (Vacío)
-     * Constructor inherente. Método fundamental que provee memoria base sin estado inicial forzoso.
-     * Facilita al contenedor crear el objeto en memoria desde los ResultsSets o Formularios 
-     * antes de someterlo a iteración poblando sus atributos a nivel unitario mediante getters/setters.
+     * CONSTRUCTOR VACÍO.
+     * Crea un Gasto sin datos, como un recibo en blanco.
+     * Los datos se llenan después usando los setters.
      */
-    public Gasto() { // Inicializador dinámico vacío
+    public Gasto() {
     }
 
     // =====================================================================
-    // METODOS ENCAPSULADORES PROTECTORES Y RESTAURADORES (Getters, Setters)
-    // Conforman la única interfaz que cumple con el principio de ocultación y abstracción para el estado del POJO.
+    // GETTERS Y SETTERS (Leer y escribir cada atributo de forma segura)
     // =====================================================================
 
-    /** Accesor simple: Exposición controlada en solo lectura lógica del identificador maestro de base de datos */
-    public int getId_gastos() { // Firma de lectura directa
-        return id_gastos; // Retorno de variable privada
+    /** Devuelve el ID del gasto */
+    public int getId_gastos() {
+        return id_gastos;
     }
 
-    /** Mutador unitario: Permite al patrón Activo/DAO modificar restrictivamente o inyectar ID en las rutinas de lectura en bulk */
-    public void setId_gastos(int id_gastos) { // Setter de inyección atómica
-        this.id_gastos = id_gastos; // Afectación referencial usando auto-puntero 'this'
+    /** Guarda el ID del gasto */
+    public void setId_gastos(int id_gastos) {
+        this.id_gastos = id_gastos;
     }
 
-    /** Accesor relacional: Identifica a qué grupo generalizado y efímero de control perimetral (inventario) tributa financieramente este elemento */
-    public int getId_inventario() { // Lectura auxiliar foránea
-        return id_inventario; // Obtención simple
+    /** Devuelve el ID del inventario al que pertenece */
+    public int getId_inventario() {
+        return id_inventario;
     }
 
-    /** Mutador estructural inter-objetos: Transfiere a la memoria este objeto la firma numérica (ID) de su clase gobernante para garantizar la atomicidad en un JOIN o INSERT futuro */
-    public void setId_inventario(int id_inventario) { // Argumento inyectivo
-        this.id_inventario = id_inventario; // Fija o corrige relacionalidad funcional 
+    /** Guarda el ID del inventario al que pertenece */
+    public void setId_inventario(int id_inventario) {
+        this.id_inventario = id_inventario;
     }
 
-    /** Consulta volumétrica: Evalúa la escala atómica ingresada correspondiente al factor de repetición del egreso descripto */
-    public int getCantidad() { // Método de extracción primitivo entero
-        return cantidad; // Resolución directa al llamador
+    /** Devuelve la cantidad de artículos comprados */
+    public int getCantidad() {
+        return cantidad;
     }
 
-    /** Modificación aritmética: Procesa y guarda como valor nominal puramente transitorio el input de cantidad antes de persistir la operación en el motor */
-    public void setCantidad(int cantidad) { // Método de manipulación paramétrica
-        this.cantidad = cantidad; // Sobrescribe con input recibido
+    /** Guarda la cantidad de artículos comprados */
+    public void setCantidad(int cantidad) {
+        this.cantidad = cantidad;
     }
 
-    /** Accesor temporal: Genera como respuesta el envoltorio Date que encuadra y posiciona localmente al objeto dentro de loggers de eventos o reportes cronológicos */
-    public Date getFecha() { // Firma con respuesta estructurada de objeto relacional
-        return fecha; // Devolución de instancia compleja instanciada 
+    /** Devuelve la fecha en que se realizó el gasto */
+    public Date getFecha() {
+        return fecha;
     }
 
-    /** Mutador temporal: Intercepta y ajusta el campo apuntador de fecha vinculando explícitamente al registro la dimensión día generada en controladores */
-    public void setFecha(Date fecha) { // Adaptador o recibidor dinámico general de la librería util.java o equivalente sql
-        this.fecha = fecha; // Vínculo duro estático post inicialización
+    /** Guarda la fecha del gasto */
+    public void setFecha(Date fecha) {
+        this.fecha = fecha;
     }
 
-    /** Accesor financiero atómico: Obtiene la fracción derivada en envoltorio Objeto Wrapper 'Double' pre calculada para salidas u operaciones sumatorias de agregación local */
-    public Double getSubtotal() { // Entrega orientada a objetos usando clase envolvente Float extendida
-        return subtotal; // Referencia compartida
+    /** Devuelve el costo total del gasto */
+    public Double getSubtotal() {
+        return subtotal;
     }
 
-    /** Seteo paramétrico computacional: Absorbe internamente valores de moneda generados por la GUI limitados o no en rango primitivo flotante */
-    public void setSubtotal(Double subtotal) { // Recepción genérica polimórfica (Wrapper/primitivo)
-        this.subtotal = subtotal; // Anula la huella anterior referenciando paramétricamente a la nueva en memoria
+    /** Guarda el costo total del gasto */
+    public void setSubtotal(Double subtotal) {
+        this.subtotal = subtotal;
     }
 
-    /** Accesor derivado nominal: Consumo y liberación del arreglo textual ingresado manualmente que le da sentido orgánico o cualitativo a la entidad abstracta (¿Para qué se gastó?) */
-    public String getDescripcion() { // Firma y tipo String compatible 
-        return descripcion; // Flujo inverso de lectura de memoria persistente o temporal
+    /** Devuelve la descripción del gasto (ej: "Materiales de limpieza") */
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    /** Mutador auxiliar de justificación: Inyecta semántica humana almacenada estáticamente a lo largo de las transacciones seriales Web y MVC antes del commit transaccional  */
-    public void setDescripcion(String descripcion) { // Adquisidor paramétrico inyectable simple sin parsing 
-        this.descripcion = descripcion; // Persistencia de modificación de carácter contextual
+    /** Guarda la descripción del gasto */
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 }

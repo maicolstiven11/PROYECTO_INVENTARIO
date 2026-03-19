@@ -1,4 +1,4 @@
-package com.inventario.controller; // Declaración de espacio de nombres organizativo de artefactos de red 
+package com.inventario.controller; 
 
 import com.inventario.dao.ProductoDAO;
 import com.inventario.model.Producto;
@@ -18,283 +18,275 @@ import java.nio.file.StandardCopyOption;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.Part;
 /**
- * Controlador Orquestador Integrador: ProductoServlet.
+ * Controlador ProductoServlet.
  * 
- * Fachada interceptora delegativa enfocada en el Modelo base dependiente (Producto).
- * Extiende la funcionalidad nativa de Servlet manejando I/O asíncrono e integrado con soporte Multipart/Form-Data para subida de binarios (imágenes).
- * Resuelve interacciones orquestando un Data Access Object propio.
+ * Es el gestor del Catálogo de la tienda. Puedes añadir productos (con imagen),
+ * quitar del catálogo o editar sus descripciones y precios.
  */
-@WebServlet(name = "ProductoServlet", urlPatterns = {"/ProductoServlet"}) // Decorador instanciador asimétrico Web .
-@MultipartConfig( // Metadata restrictiva relacional sobre payload binario
-    fileSizeThreshold = 1024 * 1024 * 1, // 1 MB (Umbral en memoria RAM)
-    maxFileSize = 1024 * 1024 * 10,      // 10 MB (Techo de entidad binaria simple)
-    maxRequestSize = 1024 * 1024 * 100   // 100 MB (Techo total payload HTTP)
+@WebServlet(name = "ProductoServlet", urlPatterns = {"/ProductoServlet"}) 
+@MultipartConfig( // Etiqueta estricta obligatoria para que Java te permita arrastrar Archivos (Fotos jpg, png) en los formularios
+    fileSizeThreshold = 1024 * 1024 * 1, // 1 MB límite temporal antes de usar el disco
+    maxFileSize = 1024 * 1024 * 10,      // 10 MB límite de peso de tu simple foto
+    maxRequestSize = 1024 * 1024 * 100   // 100 MB máximo en toda la red de peticiones a la vez
 )
-public class ProductoServlet extends HttpServlet { // Polimorfismo sub-tipo base protocolo Web Framework HTTP .
+public class ProductoServlet extends HttpServlet { 
 
     /**
-     * Subrutina utilitaria IO de abstracción binaria.
-     * Recibe una Part o Entidad Binaria Multipart encapsulándola para su persistencia en el filesystem Host de la JVM,
-     * y genera una cadena alfanumérica persistible en BD de la URI o name del fichero.
+     * Función interna oculta auxiliar. 
+     * Se usa para recortarle el nombre original a la foto, hacerle un código único (Para que 2 fotos de 'papa.jpg' no se pisen entre ellas)
+     * y las guarda/copia físicamente en la carpeta 'assets/img' de tu proyecto Java.
      */
-    private String subirImagen(Part part, HttpServletRequest request) throws IOException { // Declaración que acusa fallo potencial base IO .
-        String fileName = null; // Instancia temporal string pointer nulo .
-        if (part != null && part.getSize() > 0) { // Limitador boolean comprobador objeto payload 
-            String contentDisp = part.getHeader("content-disposition"); // Busca metadata de capa HTTP .
-            String[] items = contentDisp.split(";"); // Splitter divisor en Arrays para extraer parametrización de headers .
-            for (String s : items) { // Iterador recursivo index simple
-                if (s.trim().startsWith("filename")) { // String utils validador
-                    fileName = s.substring(s.indexOf("=") + 2, s.length() - 1); // Mutador extractor String puro.
+    private String subirImagen(Part part, HttpServletRequest request) throws IOException { 
+        String fileName = null; 
+        if (part != null && part.getSize() > 0) { // Si realmente sí arrastró una imagen 
+            String contentDisp = part.getHeader("content-disposition"); 
+            String[] items = contentDisp.split(";"); // Leemos la cabecera oculta para averiguar su extensión (.png, .jpg)
+            for (String s : items) { 
+                if (s.trim().startsWith("filename")) { 
+                    fileName = s.substring(s.indexOf("=") + 2, s.length() - 1); // Cortamos la URI original ("foto1") 
                 }
             }
-            if (fileName != null && !fileName.isEmpty()) { // Comprueba flag .
-                fileName = System.currentTimeMillis() + "_" + new File(fileName).getName(); // Factoría concatenadora asegurando llave única pseudo-random (Timestamp) y nombre original validado.
+            if (fileName != null && !fileName.isEmpty()) { 
+                // Le pegamos el Tiempo Actual a la foto + nombre (Ej: 13904810934_foto1.jpg)
+                fileName = System.currentTimeMillis() + "_" + new File(fileName).getName(); 
                 
-                String uploadPath = request.getServletContext().getRealPath("") + File.separator + "assets" + File.separator + "img"; // Orquestador armador String ruta Absoluta Host compilado
-                String sourcePath = "c:\\adso\\2994281\\PROYECTO_INVENTARIO\\src\\main\\webapp\\assets\\img"; // Orquestador ruta absoluta hardcoded Host estático .
+                // Ubicaciones de carpetas de tu servidor local
+                String uploadPath = request.getServletContext().getRealPath("") + File.separator + "assets" + File.separator + "img"; 
+                String sourcePath = "c:\\adso\\2994281\\PROYECTO_INVENTARIO\\src\\main\\webapp\\assets\\img"; 
                 
-                File uploadDir = new File(uploadPath); // Envuelve y genera Modelación Objeto File Directory API .
-                if (!uploadDir.exists()) uploadDir.mkdirs(); // Disparador constructor comando subyacente mkdirs .
+                // Crea carpetas si no existían 
+                File uploadDir = new File(uploadPath); 
+                if (!uploadDir.exists()) uploadDir.mkdirs(); 
                 
-                File sourceDir = new File(sourcePath); // Ídem source.
-                if (!sourceDir.exists()) sourceDir.mkdirs(); // Ídem create .
+                File sourceDir = new File(sourcePath); 
+                if (!sourceDir.exists()) sourceDir.mkdirs(); 
                 
-                // Traspaso de buffers IO del stream a memoria estática disco .
-                part.write(uploadPath + File.separator + fileName); // Method writer framework envuelto .
+                // Escribe en ambas carpetas copiándola
+                part.write(uploadPath + File.separator + fileName); 
                 
-                // Traspaso asimétrico síncrono reflejando copia a carpeta Dev
                 try {
-                    Files.copy(Paths.get(uploadPath + File.separator + fileName), // Java NIO API Object param .
+                    Files.copy(Paths.get(uploadPath + File.separator + fileName), 
                                Paths.get(sourcePath + File.separator + fileName), 
-                               StandardCopyOption.REPLACE_EXISTING); // Flag sobreescribir.
+                               StandardCopyOption.REPLACE_EXISTING); 
                 } catch(Exception e) {
-                    System.out.println("Error copiando imagen a carpeta fuente: " + e.getMessage()); // Fail silencioso y purgado buffer trace.
+                    System.out.println("Error copiando imagen a carpeta fuente: " + e.getMessage()); 
                 }
             }
         }
-        return (fileName != null && !fileName.isEmpty()) ? fileName : null; // Retorno de variable local (Ternario utilitario boolean).
+        return (fileName != null && !fileName.isEmpty()) ? fileName : null; // Retorna cómo se llamaba finalmente el archivo para que BD lo sepa (ej: 031201_papa.png)
     }
 
     /**
-     * Sobreescritura del método transaccional de posteo mutativo síncrono.
-     * Enruta flujos alternos: Instanciación/Creación Total de Entidad, o Actualización de Entidad Activa, discriminado semánticamente.
+     * El doPost guarda tanto que un producto se CREA nuevo en el catálogo general, 
+     * como también en caso de que un administrador EDITE algún valor del producto.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Captura framework API
+            throws ServletException, IOException { 
         
-        // Atrapa y filtra param semántico para subrutina update.
-        String action = request.getParameter("action"); // Binding Local
-        if ("actualizar".equals(action)) { // String Match restrictivo 
-            procesarActualizacion(request, response);  // Invoca Helper passthrough en la subclase local proxy .
-            return; // Nullifies current execution stack.
+        String action = request.getParameter("action"); 
+        if ("actualizar".equals(action)) { // Si nos avisaron que solo íbamos a editar...
+            procesarActualizacion(request, response);  // Llama debajo la función de editar 
+            return; 
         }
         
         // =====================================================================
-        // ALGORITMO ORQUESTADOR DE CREACIÓN ZERO E INYECCIÓN CON BINDING MULTIPART
+        // ACCIÓN NORMAL: CREAR UN NUEVO PRODUCTO AL CATÁLOGO
         // =====================================================================
+        String nombre = request.getParameter("nombre");              // Sabritas    
+        String marca = request.getParameter("marca");                // Margarita
+        String tipo = request.getParameter("tipo");                  // Paquete
         
-        // Recoge param string de forms frontend (Instanciación variable local asilada nulas si no manda el front)
-        String nombre = request.getParameter("nombre");              // Extractor literal primitivo .
-        String marca = request.getParameter("marca");                // Idem.
-        String tipo = request.getParameter("tipo");                  // Idem categorizado.
-        
-        // Delegación Binary File (Multipart) a método auxiliar .
-        String imagen = null; // Variable nula por defecto .
+        // Atrapa la imagen o binario
+        String imagen = null; 
         try {
-            Part filePart = request.getPart("imagen"); // Atrapa el binario framework 
-            if (filePart != null && filePart.getSize() > 0) { // Limitador flag logic 
-                imagen = subirImagen(filePart, request); // Delega buffer Stream .
+            Part filePart = request.getPart("imagen"); 
+            if (filePart != null && filePart.getSize() > 0) { 
+                imagen = subirImagen(filePart, request); // Utiliza subrutina mágica de arriba para transformar en string 'xx_foto.png'
             }
-        } catch(Exception e) { // Suciedad null .
-            System.out.println("Error al procesar la imagen: " + e.getMessage()); // Print Trace asilado .
+        } catch(Exception e) { 
+            System.out.println("Error al procesar la imagen: " + e.getMessage()); 
         }
         
-        String cantidadMedida = request.getParameter("cantidad_medida"); // String relacional escalar semántico .
+        String cantidadMedida = request.getParameter("cantidad_medida"); // (200 gr, 1.5 L) 
         
-        // Constructor Float Decimal.
-        double precio = 0.0; // Base constructor primitivo.
-        try { // Trata conversión 
-            precio = Double.parseDouble(request.getParameter("precio")); // Matemáticas Float parsing cast .
+        // Precio transformado
+        double precio = 0.0; 
+        try { 
+            precio = Double.parseDouble(request.getParameter("precio")); 
         } catch (NumberFormatException e) {
-            precio = 0.0;  // Asilamiento fall-back o protector de Null .
+            precio = 0.0;  
         }
         
-        // Constructor y parser SQL Entity time-model Date.
-        Date fechaVencimiento = null; // Nulo Base
+        // Vencimiento configurado
+        Date fechaVencimiento = null; 
         try {
-            String fechaStr = request.getParameter("fecha_vencimiento"); // Cadena format param
-            if(fechaStr != null && !fechaStr.isEmpty()){ // Booleano .
-                fechaVencimiento = Date.valueOf(fechaStr);  // Polimorfismo o Factoría de instanciación tipo Date desde string param ISO.
+            String fechaStr = request.getParameter("fecha_vencimiento"); 
+            if(fechaStr != null && !fechaStr.isEmpty()){ 
+                fechaVencimiento = Date.valueOf(fechaStr);  
             }
-        } catch (IllegalArgumentException e) { // Excepciones por format Date .
-            fechaVencimiento = null;  // Purifica setter protector base 
+        } catch (IllegalArgumentException e) { 
+            fechaVencimiento = null;  
         }
 
-        // FÁBRICA CONSTRUCTIVA DEL POJO ENTIDAD MADRE .
-        Producto p = new Producto(); // Asigna HEAP RAM space vacío al wrapper Object Entity .
-        p.setNombre(nombre); // Método mutador o setter en instanciado de abstracción private object.
-        p.setMarca(marca); // Setter String .
-        p.setPrecioUnitario(precio); // Setter Floating point.
-        p.setTipo(tipo); // Setter Category string referencial .
-        p.setImagen(imagen); // Set URI pointer a filesystem Host BD abstracción string 
-        p.setFechaVencimiento(fechaVencimiento); // Setter capa modelo object instanciador o puntero .
-        p.setCantidadMedida(cantidadMedida); // Setter text-form float/unit abstraction .
+        // Armamos un gran modelo POJO para empaquetarlo (El Producto)
+        Producto p = new Producto(); 
+        p.setNombre(nombre); 
+        p.setMarca(marca); 
+        p.setPrecioUnitario(precio); 
+        p.setTipo(tipo); 
+        p.setImagen(imagen); // Set de foto URI
+        p.setFechaVencimiento(fechaVencimiento); 
+        p.setCantidadMedida(cantidadMedida); 
 
-        // INYECCIÓN MÚLTIPLE DE TRANSACCIÓN A CAPA BD
-        ProductoDAO dao = new ProductoDAO(); // Constructor del Orquestador Enrutador de Modelo DAO .
+        ProductoDAO dao = new ProductoDAO(); 
         
-        // Subrutina restrictiva condicional chequeando consistencia Booleana. 
-        if (dao.existeNombreProducto(nombre)) { // Llamada método comparador selectivo boolean retornado.
-            response.sendRedirect("view/Registro_produc.html?error=producto_duplicado"); // Resolutivo Web redirect y flag error .
-            return; // Corta flujo actual por integridad.
+        // Primero, se asgura que no metas 2 veces a la fuerza el mismo string nombre "Coca-Colas"
+        if (dao.existeNombreProducto(nombre)) { 
+            response.sendRedirect("view/Registro_produc.html?error=producto_duplicado"); 
+            return; 
         }
 
         try {
-            boolean exito = dao.registrarProducto(p);  // Instancia llamada principal insertando Object Entity completo en método asíncrono.
-            if (exito) { // Rama afirmativa bool
-                response.sendRedirect("view/Produc_registrado.html");  // Conclusión UI exitosa síncrona visual .
+            boolean exito = dao.registrarProducto(p);  // Mágicamente lo manda completo 
+            if (exito) { 
+                response.sendRedirect("view/Produc_registrado.html");  // Todo chidori  
             } else {
-                // Caída lógica false boolean
-                response.sendRedirect("view/Registro_produc.html?error=NoSeGuardoEnBD"); // Param Error fallback logic .
+                response.sendRedirect("view/Registro_produc.html?error=NoSeGuardoEnBD");  
             }
         } catch (Exception e) {
-            // Caída asíncrona error runtime SQL/Parse Exception 
-             response.sendRedirect("view/Registro_produc.html?error=" + e.getMessage().replace(" ", "_")); // Muta e inyecta log .
+             response.sendRedirect("view/Registro_produc.html?error=" + e.getMessage().replace(" ", "_"));  
         }
     }
 
     /**
-     * Sobreescritura evaluativa transitoria GET.
-     * Módulo switch iterativo analizando Strings para bifurcar el árbol asíncrono hacia subrutinas de Carga Inicial Frontal, Lista de Colección Modelo o Destructor.
+     * El doGet en este caso sirve para "Eliminar Catálogo", "Cargar Editar" o
+     * simplemente listar todo el catálogo de compras para mostrarlos.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Capturador API Web .
+            throws ServletException, IOException { 
         
-        String action = request.getParameter("action"); // Extrae limitante y flag director String from HTTP Get query
-        ProductoDAO dao = new ProductoDAO(); // Generador Gestor Relacional
+        String action = request.getParameter("action"); 
+        ProductoDAO dao = new ProductoDAO(); 
         
-        if (action != null && action.equals("eliminar")) { // Limitador y Match boolean operator and String Equaliser.
+        if (action != null && action.equals("eliminar")) { 
             // =====================================================================
-            // ALGORITMO ORTOGONAL DE DESTRUCCIÓN:
+            // ELIMINAR O QUITAR DEFINITIVAMENTE PRODUCTO DE TABLA
             // =====================================================================
             try {
-                int id = Integer.parseInt(request.getParameter("id"));  // Getter unívoco PK param casteo Primitivo numérico .
-                boolean eliminado = dao.eliminarProducto(id);           // Método Setter Disparador booleano destructor en Orquesta DAO .
-                response.sendRedirect("ProductoServlet");               // Retorna recursivo frontal purificando base view param o refresh cycle .
-            } catch (Exception e) { // Suciedad I/O .
-                e.printStackTrace(); // Consola trace .
-                // Exito no completado fallback
-                response.sendRedirect("ProductoServlet?error=ErrorEliminar"); // Salida param flag asíncrono
+                int id = Integer.parseInt(request.getParameter("id"));  // Coge el click ID PK
+                boolean eliminado = dao.eliminarProducto(id);           // Manda la guillotina  
+                response.sendRedirect("ProductoServlet");               // Vuelve a repintarse el servlet sin datos para ver vacío...
+            } catch (Exception e) { 
+                e.printStackTrace(); 
+                response.sendRedirect("ProductoServlet?error=ErrorEliminar"); 
             }
-        } else if (action != null && action.equals("editar")) { // Switch iterativo secundario string eq comparator
+        } else if (action != null && action.equals("editar")) { 
             // =====================================================================
-            // ALGORITMO INVERSO PREPARADOR EDICIÓN ENTIDAD:
+            // ABRIR FORMULARIO DE EDICIÓN YA CON LOS TEXTOS LLENOS DEL VIEJO
             // =====================================================================
             try {
-                int id = Integer.parseInt(request.getParameter("id")); // Lector PK asimétrica url query a Integer
-                Producto p = dao.obtenerProducto(id);                   // Método Getter delegativo y cargador instanciador asilado singular PK obj .
+                int id = Integer.parseInt(request.getParameter("id")); 
+                Producto p = dao.obtenerProducto(id); // Obtiene todos los campos del que vas a editar (Ej: cerveza Costeñita)                 
                 
-                if (p != null) { // Instancia flag protectora null.
-                    request.setAttribute("productoEditar", p);          // Carga el encapsulado POJO activo referencial a param transitorio HTTP Context buffer del framework frontend.
-                    request.getRequestDispatcher("view/formulario_editar_producto.jsp").forward(request, response); // Render de passthrough server side directo para JSP.
+                if (p != null) { 
+                    request.setAttribute("productoEditar", p);          // Le inyecta toda esa data al form HTML  
+                    request.getRequestDispatcher("view/formulario_editar_producto.jsp").forward(request, response); // Redirige a Form
                 } else {
-                    // Null checker error 
-                    response.sendRedirect("ProductoServlet?error=ProductoNoEncontrado"); // Flag log .
+                    response.sendRedirect("ProductoServlet?error=ProductoNoEncontrado"); 
                 }
-            } catch (Exception e) { // Catch base object errors framework
-                e.printStackTrace(); // Suciedad logger JVM
-                response.sendRedirect("ProductoServlet?error=ErrorCargarEdicion"); // Clean param fallbacks .
+            } catch (Exception e) { 
+                e.printStackTrace(); 
+                response.sendRedirect("ProductoServlet?error=ErrorCargarEdicion"); 
             }
-        } else { // Switch Iterativo default genérico final 
+        } else { 
             // =====================================================================
-            // GENERADOR MATRIZ VISUAL LISTA ENTIDADES
+            // LISTAR: COMPORTAMIENTO POR DEFECTO DEL NAVEGADOR (VER PRODUCTOS)
             // =====================================================================
-            java.util.List<Producto> lista = dao.listarProductos();    // Inicia fábrica recolectora masiva y agrupa en Array Dinámico estricto polimorfismo Entidad .
-            request.setAttribute("listaProductos", lista);             // Bind in-memory a variable literal referencial render .
-            request.getRequestDispatcher("view/editar_productos.jsp").forward(request, response); // Disparo final pasivo asilado para motor template local render (Server render bypass).
+            java.util.List<Producto> lista = dao.listarProductos();    // Pide su catálogo entero 
+            request.setAttribute("listaProductos", lista);             // Los pega   
+            request.getRequestDispatcher("view/editar_productos.jsp").forward(request, response); // Dibuja la pestaña del menú
         }
     }
     
     /**
-     * Módulo Privado Sub-Estructural Auxiliar (Helper encapsulado de Update).
-     * Secuencia repetitiva extraída que parsea un Payload FormData y un MultiPart, generando
-     * o conservando punteros de binarios previos, para recrear un Modelo modificado y sobreescribir atómicamente la capa DAO.
+     * Subrutina complementaria: ACTUALIZAR PRODUCTO (MODIFICAR)
+     * Cuando le dan al botón verde "Actualizar" del formulario
      */
     private void procesarActualizacion(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Amparo Web Frame 
+            throws ServletException, IOException { 
         
-        try { // Vigila parseo num y MultiPart Array errors.
-            // Parseo primitivo a vars de capa base JVM y variables aisladas locale
-            int idProducto = Integer.parseInt(request.getParameter("id_producto")); // Cast clave inamovible .
-            String nombre = request.getParameter("nombre"); // Bind String 
-            String marca = request.getParameter("marca"); // Bind literal .
-            String tipo = request.getParameter("tipo"); // Bind semántico .
+        try { 
+            // Recibe todos los atributos nuevos modificados (Ej: Antes costaba 2mil y ahora cuesta 3mil)
+            int idProducto = Integer.parseInt(request.getParameter("id_producto")); 
+            String nombre = request.getParameter("nombre"); 
+            String marca = request.getParameter("marca"); 
+            String tipo = request.getParameter("tipo"); 
             
-            // Re-procesamiento iterativo para File Pointer stream
-            String imagen = null; // Instancia Nulo a priori .
+            // Re-procesar Foto Nueva
+            String imagen = null; 
             try {
-                Part filePart = request.getPart("imagen"); // Captura Blob File param in framework .
-                if (filePart != null && filePart.getSize() > 0) { // Test check sizes .
-                    imagen = subirImagen(filePart, request); // Traspaso Stream delegativo a function custom subrutina binaria helper IO y devuelve pointer .
+                Part filePart = request.getPart("imagen"); 
+                if (filePart != null && filePart.getSize() > 0) { 
+                    imagen = subirImagen(filePart, request); 
                 }
-            } catch(Exception e) { // Catch Stream .
-                System.out.println("Error al actualizar imagen: " + e.getMessage()); // System Buffer Print trace only.
+            } catch(Exception e) { 
+                System.out.println("Error al actualizar imagen: " + e.getMessage()); 
             }
             
-            // Subrutina auxiliar protectora u lógica asimétrica de conservación referencial: Si la part es nula, recarga el pointer string object Entity Old Base .
-            if (imagen == null) { // Lógica Null.
-                ProductoDAO tempDao = new ProductoDAO(); // Inicializa gestor transaccional iterativo corto .
-                Producto original = tempDao.obtenerProducto(idProducto); // Llama Factory generatriz y acopla objeto puro modelo previo .
-                if (original != null) { // Validador 
-                    imagen = original.getImagen(); // Extrae con getter string pointer previo in memory string variable param asilada mutable target.
+            // MAGIA: Si el usuario NO subió ninguna foto nueva, no queremos borrar la anterior.
+            if (imagen == null) { 
+                ProductoDAO tempDao = new ProductoDAO(); 
+                Producto original = tempDao.obtenerProducto(idProducto); // Traemos una copia vieja de este producto
+                if (original != null) { 
+                    imagen = original.getImagen(); // Extraemos cómo se llamaba su antigua foto vieja para no perderla.
                 }
             }
             
-            String cantidadMedida = request.getParameter("cantidad_medida"); // Setter .
+            String cantidadMedida = request.getParameter("cantidad_medida"); 
             
-            double precio = 0.0; // Constructor Default .
+            double precio = 0.0; 
             try {
-                precio = Double.parseDouble(request.getParameter("precio")); // Matemáticas string Cast Float.
+                precio = Double.parseDouble(request.getParameter("precio")); 
             } catch (NumberFormatException e) {
-                precio = 0.0; // Fail 
+                precio = 0.0; 
             }
             
-            java.sql.Date fechaVencimiento = null; // String setter param Date Base .
+            java.sql.Date fechaVencimiento = null; 
             try {
-                String fechaStr = request.getParameter("fecha_vencimiento"); // Variable asilada .
-                if (fechaStr != null && !fechaStr.isEmpty()) { // Booleano .
-                    fechaVencimiento = java.sql.Date.valueOf(fechaStr); // Parsificador object Date base SQL construct object model .
+                String fechaStr = request.getParameter("fecha_vencimiento"); 
+                if (fechaStr != null && !fechaStr.isEmpty()) { 
+                    fechaVencimiento = java.sql.Date.valueOf(fechaStr); 
                 }
             } catch (IllegalArgumentException e) {
-                fechaVencimiento = null; // Purgador format error Date param.
+                fechaVencimiento = null; 
             }
             
-            // FÁBRICA MUTATIVA COMPLETA POJO INSTANCIADO: Wrapper Builder completo de sobreescritura a memoria .
-            Producto p = new Producto(); // Asigna Heap vacío para contenedor modelo .
-            p.setIdProducto(idProducto);  // Setter Clave (Inamovible Update Condicional relacional where) .
-            p.setNombre(nombre); // Método encapsulado .
-            p.setMarca(marca); // ..
-            p.setPrecioUnitario(precio); // ..
-            p.setTipo(tipo); // ..
-            p.setImagen(imagen); // Inyección polimórfica (nuevo ó viejo link URI pointer local).
-            p.setFechaVencimiento(fechaVencimiento); // Metadato de time abstract model inyector.
-            p.setCantidadMedida(cantidadMedida); // Inyector genérico 
+            // Embolsamos la segunda versión de tu POJO nuevo editado
+            Producto p = new Producto(); 
+            p.setIdProducto(idProducto);  // ¡Muy importante decirle qué ID actualizar! 
+            p.setNombre(nombre); 
+            p.setMarca(marca); 
+            p.setPrecioUnitario(precio); 
+            p.setTipo(tipo); 
+            p.setImagen(imagen); 
+            p.setFechaVencimiento(fechaVencimiento); 
+            p.setCantidadMedida(cantidadMedida); 
             
-            // DISPARO A BD FINALIZANDO
-            ProductoDAO dao = new ProductoDAO(); // Lector DB relacional base .
-            boolean exito = dao.actualizarProducto(p);  // Disparo método generatriz boolean afirmativo transaccional atómico delegativo .
+            // Mandar a Mutar base SQL
+            ProductoDAO dao = new ProductoDAO(); 
+            boolean exito = dao.actualizarProducto(p);  // Sentencia Update
             
-            if (exito) { // Check true
-                response.sendRedirect("ProductoServlet?msg=ProductoActualizado");  // Redirect clean UI param msg success flag iterativo log .
-            } else { // Fail check 
-                response.sendRedirect("ProductoServlet?error=ErrorActualizar");    // Redirect log error boolean fail  .
+            if (exito) { 
+                response.sendRedirect("ProductoServlet?msg=ProductoActualizado");  // Felicidades  
+            } else { 
+                response.sendRedirect("ProductoServlet?error=ErrorActualizar");    // Mal :c  
             }
             
-        } catch (Exception e) { // Suciedad Exception catch 
-            e.printStackTrace(); // Dump trace  CLI buffer
-            response.sendRedirect("ProductoServlet?error=" + e.getMessage()); // Redirect flag print exception .
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+            response.sendRedirect("ProductoServlet?error=" + e.getMessage()); 
         }
     }
 }

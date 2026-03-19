@@ -17,248 +17,244 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- * Controlador Transaccional Orquestador: VentaServlet.
+ * Controlador VentaServlet.
  * 
- * Fachada encapsuladora que extiende abstracción HttpServlet. Controla y dirige el ciclo de vida mutativo (CRUD dinámico in-memory param HTTP Session) del carrito de ventas y persiste el POJO contenedor al sistema Gestor relacional de Base de Datos apoyándose en su delegativo Data Access Object.
+ * Es la caja registradora del sistema. Maneja un "carrito" virtual temporal 
+ * mientras el usuario decide qué facturar, permite agregar o quitar productos,
+ * y luego consolida y guarda la venta final a la BD.
  */
-@WebServlet(name = "VentaServlet", urlPatterns = {"/VentaServlet"}) // Atributo decorativo enrutador instanciando la clase subyacente al Servlet container JVM
-public class VentaServlet extends HttpServlet { // Polimorfismo hereditario del Framework Java EE base asíncrono.
+@WebServlet(name = "VentaServlet", urlPatterns = {"/VentaServlet"}) 
+public class VentaServlet extends HttpServlet { 
 
     /**
-     * Rescritura Genérica evaluadora HTTP Get.
-     * Funciona como método de passthrough encadenando peticiones directas de URL (Query string parameters) al procesador central de Orquestación o switch.
+     * El doGet y el doPost apuntan a la misma función "processRequest" 
+     * porque como es un carrito de compras, recibe clics rápidos (Get) y botones de form (Post).
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Capturador delegativo .
-        processRequest(request, response);  // Invoca Sub-rutina asilada delegando scope del contexto buffer HTTP actual vivo.
+            throws ServletException, IOException { 
+        processRequest(request, response);  
     }
 
-    /**
-     * Rescritura Genérica evaluadora HTTP Post.
-     * Funciona como método de passthrough encadenando peticiones de Payload asíncronos FormData.
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Amparo catch frame object
-        processRequest(request, response);  // Delega in-memory a método central unificado encapsulado .
+            throws ServletException, IOException { 
+        processRequest(request, response);  
     }
 
     /**
-     * Algoritmo Principal de Orquestación y Enrutamiento Funcional (Router).
-     * Subrutina central que actúa como Switch Statement sobre la variable flag asimétrica (Action). Analiza el param String y decide en base a flujos condicionales de tipo Árbol de Ejecución el método a invocar, manipulando las Interacciones asíncronas de in-memory object List Arrays en Sesión viva.
+     * La función central. Es un menú o "Switch" gigante 
+     * que según el botón que oprimas, hace una acción del carrito diferente.
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Frame buffer error catch .
+            throws ServletException, IOException { 
         
-        String action = request.getParameter("action"); // Capturador de metadato param evaluativo lógico restrictivo o Flag .
-        if (action == null) action = "mostrar";  // Inyección protectora Null fall-back (Default switch loop behavior)
+        String action = request.getParameter("action"); // Lee la acción (Agregar, Quitar...)
+        if (action == null) action = "mostrar";  // Si recargas la página, por defecto solo muestra el carrito
         
-        HttpSession session = request.getSession(); // Getter constructor asilando Factory Pattern u originando Object Container HTTP Scope Persistence State Session Vivo de framework .
+        HttpSession session = request.getSession(); 
         
         // =====================================================================
-        // ALGORITMO ACUMULADOR MEMORIA VIVA (Instanciación Carrito Dinámico Buffer Session Object Arrays)
+        // BOLSILLO MÁGICO DEL CARRITO: Lo guardamos en su Sesión para no perderlo
         // =====================================================================
-        List<DetalleVenta> carrito = (List<DetalleVenta>) session.getAttribute("carrito"); // Recuperador In Memory Pointer Cast Object .
-        if (carrito == null) { // Validador limitante Boolean Array Size Initialization Checker .
-            carrito = new ArrayList<>();                // Invoca constructor vacío Array POJO Object list memory heap allocation factoría de colecciones (Estructura dinámica .
-            session.setAttribute("carrito", carrito);   // Binding atómico Inyectando referencial pointer array al Pool Singleton user JVM context session persistente .
+        List<DetalleVenta> carrito = (List<DetalleVenta>) session.getAttribute("carrito"); 
+        if (carrito == null) { // Si su carrito estaba vacío o no existía al loguearse...
+            carrito = new ArrayList<>();                // Le regalamos una canasta de compras nueva y vacía
+            session.setAttribute("carrito", carrito);   // Se la pegamos a su sesión de forma permanente
         }
         
-        // Extracción In Memory flag activo id de contexto relacional inventario 
-        Integer idInventario = (Integer) session.getAttribute("idInventarioActual"); // Cast referencial object wrapper primitivo PK base scope Vivo Session.
+        // Atrapamos su turno de facturación (ID de Inventario Activo para sumar las facturas al mes correcto)
+        Integer idInventario = (Integer) session.getAttribute("idInventarioActual"); 
         
-        switch (action) { // Ciclo comparador literal Iterativo switch boolean param flag strings .
+        switch (action) { 
             case "mostrar":
-                // Algoritmo de inicialización base y acumulación matemática sumatoría Front UI View.
-                cargarProductos(request);                                       // Disparador a helper subrutina para bind de POJO arr lists general
-                double totalActual = calcularTotal(carrito);                    // Función matemática constructora getter total param.
-                request.setAttribute("totalVenta", totalActual);               // Passthrough Setter In memory de motor View renderizador 
-                request.getRequestDispatcher("view/agregar_venta.jsp").forward(request, response); // Despachador asíncrono o forward local .
+                // 1. DIBUJAR PANTALLA CARRO: 
+                cargarProductos(request);                                       // Trae toda la lista de empanadas/cervezas disponibles a la vista
+                double totalActual = calcularTotal(carrito);                    // Suma el precio de su carro
+                request.setAttribute("totalVenta", totalActual);                // Asigna total a la pantalla
+                request.getRequestDispatcher("view/agregar_venta.jsp").forward(request, response); // Mostrar HTML Formulario Caja
                 break;
                 
             case "agregar":
-                // Inyector lógico mutativo transitorio en in-memory arrays model details.
-                agregarProducto(request, session, carrito); // Helper Passthrough encapsulando param context framework variables e Instancias Arrays locales.
-                response.sendRedirect("VentaServlet?action=mostrar");           // Redirect Asíncrono Refresh Buffer HTTP ciclo Request.
+                // 2. METER UN PRODUCTO CON SU CANTIDAD AL CARRITO
+                agregarProducto(request, session, carrito); 
+                response.sendRedirect("VentaServlet?action=mostrar");           // Recarga la página
                 break;
                 
             case "quitar":
-                // Destructor lógico remove() en array Collection Collection utils memory target
-                quitarProducto(request, carrito); // Helpers encapsulados POO destructors.
-                response.sendRedirect("VentaServlet?action=mostrar"); // Clear UI UI render update redirect web param framework.
+                // 3. QUITAR UN REGLÓN (Me equivoqué marcando 10 papas)
+                quitarProducto(request, carrito); 
+                response.sendRedirect("VentaServlet?action=mostrar"); 
                 break;
                 
             case "finalizar":
-                // Disparo Atómico delegador Final Persistencia In Memoriam arrays object to Database DAO transactions.
-                if (idInventario == null) { // Guard checking param flag FK .
-                    response.sendRedirect("NegocioServlet?error=SinInventarioActivo"); // Clean log UI redirect fail abort.
-                    return; // Nullifies logic flow stack .
+                // 4. ¡IMPRIMIR FACTURA Y COBRAR!: Guardar todo el carrito en BD
+                if (idInventario == null) { // Error, la caja está cerrada, no hay Inventario mensual
+                    response.sendRedirect("NegocioServlet?error=SinInventarioActivo"); 
+                    return; 
                 }
-                finalizarVenta(session, carrito, idInventario, response); // Helper Method Subrutina Construct wrapper model .
+                finalizarVenta(session, carrito, idInventario, response); 
                 break;
                 
             case "listar":
-                // Gestor visual iterador pasivo arrays Object Models DAO getters arrays list collection 
-                Integer idNegocio = (Integer) session.getAttribute("idNegocioActual"); // Instancia cast pointer PK referencial
-                if (idNegocio != null) { // Guardian Boolean restrictivo flag variable error protector null Exception.
-                    VentaDAO vDao = new VentaDAO(); // Instanciador generatriz DAO
-                    List<Venta> listaVentas = vDao.listarVentas(idNegocio);    // Extracción encapsulando a Array Objeto envolvente Entity
-                    request.setAttribute("listaVentas", listaVentas);          // Context Injector Object variables List reference UI Web layer.
-                    request.getRequestDispatcher("view/visualizar_ventas.jsp").forward(request, response); // Delegate Rendering bypass .
-                } else { // Abort fall back exception Null check .
-                    response.sendRedirect("index.jsp");                        // Log Off Refresh clean
+                // 5. HISTORIAL DE RECIBOS DE ESTE BAR
+                Integer idNegocio = (Integer) session.getAttribute("idNegocioActual"); 
+                if (idNegocio != null) { 
+                    VentaDAO vDao = new VentaDAO(); 
+                    List<Venta> listaVentas = vDao.listarVentas(idNegocio);    // Extrae todas las ventas exitosas
+                    request.setAttribute("listaVentas", listaVentas);          
+                    request.getRequestDispatcher("view/visualizar_ventas.jsp").forward(request, response); 
+                } else { 
+                    response.sendRedirect("index.jsp");                        
                 }
                 break;
                 
             case "ver_detalle":
-                // Visualizador Analítico secundario Arrays Hijos details FK models collections
+                // 6. MIRAR DETALLE ÍNTIMO DE UNA FACTURA EN ESPECÍFICO (Qué me cobraron adentro del total)
                 try {
-                    int idVenta = Integer.parseInt(request.getParameter("id_venta")); // Parse primitive getter url String query params .
-                    VentaDAO vDaoDet = new VentaDAO(); // Constructor instance Object Factory Transaction relation
-                    List<DetalleVenta> listaDetalles = vDaoDet.listarDetalleVenta(idVenta); // Constructor delegador query DAO getters array object details POJOs Entities models.
-                    request.setAttribute("listaDetalles", listaDetalles); // Setter Framework object variables 
-                    request.setAttribute("idVenta", idVenta); // Setter primitives variables
-                    request.getRequestDispatcher("view/detalle_venta.jsp").forward(request, response); // Despacho síncrono Framework .
-                } catch (Exception e) { // Trata param dirty exception
-                    response.sendRedirect("VentaServlet?action=listar&error=ErrorAlVerDetalle"); // Web error Redirect Log  .
+                    int idVenta = Integer.parseInt(request.getParameter("id_venta")); 
+                    VentaDAO vDaoDet = new VentaDAO(); 
+                    List<DetalleVenta> listaDetalles = vDaoDet.listarDetalleVenta(idVenta); // Desglosa hijos
+                    request.setAttribute("listaDetalles", listaDetalles); 
+                    request.setAttribute("idVenta", idVenta); 
+                    request.getRequestDispatcher("view/detalle_venta.jsp").forward(request, response); 
+                } catch (Exception e) { 
+                    response.sendRedirect("VentaServlet?action=listar&error=ErrorAlVerDetalle"); 
                 }
                 break;
                 
             case "cancelar":
-                // Destructor Abstracto JVM memory object referencial Session attribute.
-                session.removeAttribute("carrito");                             // Mutador framework JVM memory free destructor collection reference.
-                response.sendRedirect("view/menu_inventario.html"); // Refresh flow View UI
+                // 7. BOTAR LA CANASTA (Vaciar Carrito en rojo)
+                session.removeAttribute("carrito");                             
+                response.sendRedirect("view/menu_inventario.html"); // Volver a escritorio principal sin factura
                 break;
                 
-            default: // Guard genérico preventivo fallbacks 
+            default: 
                 response.sendRedirect("view/menu_inventario.html");
         }
     }
 
     /**
-     * Módulo Auxiliar Setter Pasivo de Objetos.
-     * Carga array list dinámico factory de modelos de entidad base producto invocando delegación abstracta read query del Data Access object y lo setea in memory binding the servlet container contexts.
+     * Subrutina auxiliar. Trae el catálogo del kiosko 
+     * para que el cajero pueda seleccionarlo en una etiqueta HTML select.
      */
-    private void cargarProductos(HttpServletRequest request) { // Scope Method helper POO subrutina private asilada abstraction.
-        ProductoDAO pDao = new ProductoDAO(); // Constructor instanciador
-        List<Producto> lista = pDao.listarProductos();      // Getter array factoría iterativa Entity Models collection polimorfa List .
-        request.setAttribute("listaProductos", lista); // Binding pointer .
+    private void cargarProductos(HttpServletRequest request) { 
+        ProductoDAO pDao = new ProductoDAO(); 
+        List<Producto> lista = pDao.listarProductos();      
+        request.setAttribute("listaProductos", lista); 
     }
 
     /**
-     * Algoritmo Inyector / Modificador de Array In-memory Session.
-     * Generador factoría iterativo que lee variables input param y, comparador condicional loop for-each buscando repetidos in array (acumulación int sumar cantidad), y/o instanciación Zero constructor object Array list Append inyección Elemento Nuevo Array of Details object.
+     * Función que maneja la lógica de inyectar papas al carrito vivo y evalua Stock Restante.
      */
-    private void agregarProducto(HttpServletRequest request, HttpSession session, List<DetalleVenta> carrito) { // Dependency Inyection method POO Helper.
-        try { // Vigila String Parses format int errors 
-            int idProd = Integer.parseInt(request.getParameter("id_producto")); // Cast primitivo getter 
-            int cantidad = Integer.parseInt(request.getParameter("cantidad")); // Cast param .
+    private void agregarProducto(HttpServletRequest request, HttpSession session, List<DetalleVenta> carrito) { 
+        try {  
+            int idProd = Integer.parseInt(request.getParameter("id_producto")); // Id Papa Limón 
+            int cantidad = Integer.parseInt(request.getParameter("cantidad")); // Quiero 5 paquetes
             
-            if (cantidad <= 0) return;  // Nullifies loop restriction flag control.
+            if (cantidad <= 0) return;  // Si tipeó -5, se devuelve.
             
-            // Consultor instanciador singular Getter Delegative DAO abstract connection inyección 1 obj model .
-            ProductoDAO pDao = new ProductoDAO(); // Constructor delegativo 
-            Producto p = pDao.obtenerProducto(idProd); // Invoca Setter POJO Base reference 
+            ProductoDAO pDao = new ProductoDAO(); 
+            Producto p = pDao.obtenerProducto(idProd); // Buscamos toda la info (Precio e Imagen)
             
-            if (p != null) { // Guardian Exception obj .
-                // SUB-ALGORITMO ESTRICTO GUARDIA LOGICA MATEMÁTICO DISPONIBILIDAD DAO CHECK 
-                com.inventario.dao.DetalleInventarioDAO detDao = new com.inventario.dao.DetalleInventarioDAO(); // Factory constructor .
-                Integer idInventario = (Integer) session.getAttribute("idInventarioActual"); // Pointer PK 
-                double stockDisponible = detDao.obtenerStockActual(idInventario, idProd); // Delegative Getter Math .
+            if (p != null) { 
                 
-                // Módulo analítico loop sumatoria iterador para validar en memoria vs base de datos stock amount
-                int cantidadEnCarrito = 0; // Setter default math sum array vars base.
-                for (DetalleVenta d : carrito) { // Iterator POO Objects collection List model items in abstract collection .
-                    if (d.getIdProducto() == idProd) { // Condicional POJO Getter id Math int eq comparator target .
-                        cantidadEnCarrito = d.getCantidad(); // Math getter variable extraction scope limited pointer int.
-                        break; // Loop optimizado destructor return
+                // VALIDACIÓN CRÍTICA MATEMÁTICA: ¿SÍ TENEMOS 5 PAPAS PARA VENDER?
+                com.inventario.dao.DetalleInventarioDAO detDao = new com.inventario.dao.DetalleInventarioDAO(); 
+                Integer idInventario = (Integer) session.getAttribute("idInventarioActual"); 
+                double stockDisponible = detDao.obtenerStockActual(idInventario, idProd); 
+                
+                // Validar cuántas papas YA ECHÓ a esta misma canasta
+                int cantidadEnCarrito = 0; 
+                for (DetalleVenta d : carrito) { 
+                    if (d.getIdProducto() == idProd) { 
+                        cantidadEnCarrito = d.getCantidad(); 
+                        break; 
                     }
                 }
                 
-                if (cantidad + cantidadEnCarrito > stockDisponible) { // Logic Math Boolean checker constraint
-                    session.setAttribute("error_stock", "Stock insuficiente: " + p.getNombre() + " (Disponible: " + (int)stockDisponible + ")"); // UI flag setter String message error validation log error bind attribute context var param in JVM frame .
-                    return; // Aborts Append cycle process validation Error exception
+                // Si la suma de las 5 de ahora + las que ya tenía rebasa el sobrante, lo escupe con un mensajito rojo.
+                if (cantidad + cantidadEnCarrito > stockDisponible) { 
+                    session.setAttribute("error_stock", "Stock insuficiente: " + p.getNombre() + " (Disponible: " + (int)stockDisponible + ")"); 
+                    return; 
                 }
 
-                // SUB ALGORITMO ACUMULADOR INCREMENTAL UPDATER OR INSERT ARRAY FACTORY APPEN 
-                boolean existe = false; // Flag Bool Iterador comparator boolean.
-                for (DetalleVenta d : carrito) { // Iterador Iterator collection List de model pojos Array object 
-                    if (d.getIdProducto() == idProd) { // Comparator
-                        d.setCantidad(d.getCantidad() + cantidad);                 // Mutable Setter In Memory Update model logic sum math property
-                        d.setSubtotal(d.getCantidad() * p.getPrecioUnitario());    // Math Float property Set update logic.
-                        existe = true; // Boolean Mutator State updater condition check
-                        break; // Break optimizar speed memory
+                // SI PASÓ EL FILTRO DE ESTANTERÍAS FÍSICAS:
+                boolean existe = false; 
+                // A) Si el producto ya existía en la canasta (Le suma encima en esa misma fila)
+                for (DetalleVenta d : carrito) { 
+                    if (d.getIdProducto() == idProd) { 
+                        d.setCantidad(d.getCantidad() + cantidad);                 // Sumar
+                        d.setSubtotal(d.getCantidad() * p.getPrecioUnitario());    // Multiplico Precio total
+                        existe = true; 
+                        break; 
                     }
                 }
                 
-                if (!existe) { // Mutador Check constructor instanciación Zero Fall-back condition
-                    // Factoría de Nuevo Entidad POJO Detalle Construct Model 
-                    DetalleVenta det = new DetalleVenta(); // Inyection Constructor vacío de Objeto Instanciador Memory Object Allocation heap ram space.
-                    det.setIdProducto(idProd); // Setter Mutador Primitive attribute POJO Abstract object reference
-                    det.setNombreProducto(p.getNombre());                          // Setter mutator POO object.
-                    det.setCantidad(cantidad); // ...
-                    det.setSubtotal(cantidad * p.getPrecioUnitario());             // ...
-                    carrito.add(det);                                              // Collection In Memory Append Method Setter pointer array buffer mutador.
+                // B) Si el producto es nuevo en el carro, crea un renglón virgen 
+                if (!existe) { 
+                    DetalleVenta det = new DetalleVenta(); 
+                    det.setIdProducto(idProd); 
+                    det.setNombreProducto(p.getNombre());                          
+                    det.setCantidad(cantidad); 
+                    det.setSubtotal(cantidad * p.getPrecioUnitario());             
+                    carrito.add(det); // Al cajón
                 }
             }
-        } catch (NumberFormatException e) { // framework IO primitive Cast exception error check protection scope
-            e.printStackTrace(); // dump buffer trace error console log dirty string .
+        } catch (NumberFormatException e) { 
+            e.printStackTrace(); 
         }
     }
     
     /**
-     * Módulo Privado Sub-Estructural Destructor de Colecciones in-Memory.
-     * Auxiliar utilitario encapsulado encapsulando API nativa de List Objects Collections framework method .remove(int) eliminando de heap variable de Instanciación un POJO Detail vivo .
+     * Romper la canasta un objeto según su índice (Remover renglón específico)
      */
-    private void quitarProducto(HttpServletRequest request, List<DetalleVenta> carrito) { // Dependency Inyection list pointer collection helper module private asilado abstract .
-        try { // Trata cast error params .
-            int index = Integer.parseInt(request.getParameter("index")); // Instancia pointer get as integer 
-            if (index >= 0 && index < carrito.size()) {                  // Guardian Array Index Boolean bounds limitator protector restrictivo limits bounds size
-                carrito.remove(index);                                   // Setter JVM object destruct collection In-Memory Mutator.
+    private void quitarProducto(HttpServletRequest request, List<DetalleVenta> carrito) { 
+        try { 
+            int index = Integer.parseInt(request.getParameter("index")); // Sacar el ID posicional (Ej: Elimina renglón Num 2) 
+            if (index >= 0 && index < carrito.size()) {                  
+                carrito.remove(index);                                   // Cortar!
             }
-        } catch (NumberFormatException e) {} // Framework Empty Catch exception handler exception silent destructor.
+        } catch (NumberFormatException e) {} 
     }
 
     /**
-     * Subrutina Matemática Iteradora Exclusiva Retorno Getter Sumatoria Dinámica Array Properties getter Collection Models in memoty.
+     * Matemáticas de calculadora simple, sumando todos los parciales de la Tira Factura.
      */
-    private double calcularTotal(List<DetalleVenta> carrito) { // Argument pointer pass-through collection.
-        double total = 0; // Instanciación Math Default variable local var Float wrapper.
-        for (DetalleVenta d : carrito) { // OOP loop Iterator collection of entity model objects Detalle.
-            total += d.getSubtotal(); // Expresión sumatoria param get math property return float number primitivo sum loop.
+    private double calcularTotal(List<DetalleVenta> carrito) { 
+        double total = 0; 
+        for (DetalleVenta d : carrito) { 
+            total += d.getSubtotal(); // Va sumándole al cajón cada renglón
         }
-        return total; // Devuelve num float primitive sum limit math property
+        return total; 
     }
     
     /**
-     * Módulo Factory Subrutina Mutativa delegadora de Disparo Persistencia Relacional a Model Factory.
-     * Cierra el ciclo encapsulando el array de Instancias Objeto List DetalleVenta en memoria RAM Context Server alive JVM session array objects a una capa Dao Generatriz y Limpia Object references Destroying the Object Session Attribute Collections List Array alive memory.
+     * Módulo Final: Venderlo oficialmente a Bases relacionales SQL
      */
-    private void finalizarVenta(HttpSession session, List<DetalleVenta> carrito, int idInventario, HttpServletResponse response) throws IOException { // Helper Scope Asilado Delegatiion parameters IO error catching exceptions object model inyección dependency.
-        // Limitador de seguridad para protección Check Null Sizes List Empty validation.
-        if (carrito.isEmpty()) { // Getter size limit boolean condition list abstract evaluator api.
-            response.sendRedirect("VentaServlet?action=mostrar&error=CarritoVacio"); // Delegate error loop response HTTP log param URL .
-            return; // Destroy Method stack recursion context abort exit flow logic limit.
+    private void finalizarVenta(HttpSession session, List<DetalleVenta> carrito, int idInventario, HttpServletResponse response) throws IOException { 
+        
+        if (carrito.isEmpty()) { // Nadie factura aire 
+            response.sendRedirect("VentaServlet?action=mostrar&error=CarritoVacio"); 
+            return; 
         }
         
-        // Constructor ORQUESTADOR POJO Principal Contenedor Entity Transaccional Builder Pattern Instanciation wrapper object constructor Base logic.
-        VentaDAO vDao = new VentaDAO(); // Heap Allocation Method instance class memory base manager query relacional object framework.
-        Venta venta = new Venta(); // Heap Allocation Class Model wrapper instance constructor null .
-        venta.setIdInventario(idInventario);                           // Setter POO attribute FK Object pointer dependency injection PK 
-        venta.setFechaVenta(new Date(System.currentTimeMillis()));     // Constructor Time Date setter POO metadato Object model Date util .
-        venta.setTotalVenta(calcularTotal(carrito));                    // Math method float Getter setter delegando total acumulador number float.
+        // Cúspide: Crea el papel Venta de Factura grande
+        VentaDAO vDao = new VentaDAO(); 
+        Venta venta = new Venta(); 
+        venta.setIdInventario(idInventario);                           
+        venta.setFechaVenta(new Date(System.currentTimeMillis()));     
+        venta.setTotalVenta(calcularTotal(carrito));                    
         
-        // Disparo Síncrono Atómico Booleano de Transaction DAO Factory Commit SQL Logic Multiple inserts.
-        boolean resultado = vDao.registrarVenta(venta, carrito); // Metodo delegativo DAO method send params arrays POJO and Wrapper Entytis for relation sql model generation asinc connection pool transaction check state getter logic return.
+        // ¡Se guarda en el DAO de las transacciones atómicas dobles!
+        boolean resultado = vDao.registrarVenta(venta, carrito); 
         
-        if (resultado) { // Comparator boolean true ok validation constraint transaction if true successful flag check ok.
-            // Destructor In Memory Framework object target Session context cleaning pointer Heap object
-            session.removeAttribute("carrito"); // Eliminador recolector pointer array object model reference HTTP pool.
-            response.sendRedirect("view/venta_finalizada.html"); // Frame URL Param UI Success View Dispatcher Asynchronous Refresh Cycle Response log ok flag success UI statics update loop user notification flow success conclusion action process ok flag
-        } else { // Validation abort Check false validation check no changes or insert.
-            // Log UI HTTP exception
-            response.sendRedirect("VentaServlet?action=mostrar&error=ErrorAlGuardar"); // Asíncrona Log Update framework Web Response .
+        if (resultado) { 
+            // Felicidades, el cajero cobró y el cliente se llevó la cerveza.
+            session.removeAttribute("carrito"); // Borramos su carrito para la próxima persona
+            response.sendRedirect("view/venta_finalizada.html"); // Ventana de ¡Éxito de caja!
+        } else { 
+            response.sendRedirect("VentaServlet?action=mostrar&error=ErrorAlGuardar"); // Base error
         }
     }
 }

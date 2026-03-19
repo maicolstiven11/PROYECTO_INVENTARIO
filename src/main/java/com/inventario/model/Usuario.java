@@ -1,176 +1,167 @@
-package com.inventario.model; // Define el paquete lógico donde reside esta clase de modelo
+package com.inventario.model; // Paquete donde viven las clases molde
 
 /**
- * Modelo de datos: Clase Usuario (Entidad o POJO - Plain Old Java Object).
+ * Clase Usuario (Modelo / POJO).
  * 
- * Esta clase es la representación en el paradigma Orientado a Objetos (Java)
- * de la tabla 'usuario' física que existe en la base de datos MySQL.
- * Funciona como un contenedor para transportar datos del usuario entre las distintas
- * capas arquitectónicas (Vista → Controlador → DAO → Base de Datos).
- * Cada atributo encapsulado corresponde directamente a una columna de la tabla.
+ * Es el molde que representa UNA persona registrada en el sistema.
+ * Puede ser un Administrador (dueño de bares) o un Trabajador (cajero).
+ * Corresponde a la tabla 'usuario' de la base de datos.
  */
-public class Usuario { // Definición de la clase pública Usuario
+public class Usuario { // Declaración de la clase pública
 
     // =====================================================================
-    // ATRIBUTOS PRIVADOS (Aplicación del Principio de Encapsulamiento de POO)
-    // Estos atributos almacenan el estado del objeto de tipo Usuario.
-    // Solo pueden ser accedidos desde el exterior mediante métodos Getters y Setters.
+    // ATRIBUTOS PRIVADOS (Columnas de la tabla)
     // =====================================================================
 
-    private int idUsuario;    // Clave primaria (Primary Key). Identificador único del usuario autogenerado en la base de datos.
-    private int idRol;        // Clave foránea (Foreign Key). Relaciona al usuario con la clase y tabla Rol (ej: 1 para Admin, 2 para Trabajador).
-    private String nombre;    // Atributo de tipo cadena de texto que almacena el nombre completo del usuario.
-    private String password;  // Atributo que almacena la contraseña del usuario (idealmente cifrada).
-    private String email;     // Atributo que almacena el correo electrónico único del usuario.
-    private String telefono;  // Atributo opcional que almacena el número de contacto del usuario.
+    private int idUsuario;    // ID único del usuario (Clave Primaria, la genera la BD)
+    private int idRol;        // ID del rol: 1 = Administrador, 2 = Trabajador (Clave Foránea hacia tabla ROL)
+    private String nombre;    // Nombre completo de la persona (ej: "Juan Pérez")
+    private String password;  // Contraseña del usuario (se guarda cifrada con SHA-256)
+    private String email;     // Correo electrónico principal
+    private String telefono;  // Teléfono de contacto
 
     /**
-     * CONSTRUCTOR POR DEFECTO (Constructor vacío)
-     * Es un método especial de inicialización que permite instanciar un objeto de la clase Usuario
-     * sin pasar ningún parámetro inicial (usando 'new Usuario()').
-     * Los atributos se poblarán posteriormente utilizando los métodos Setters.
+     * CONSTRUCTOR VACÍO.
+     * Crea un Usuario sin datos, como un formulario de registro en blanco.
+     * Los datos se llenan después con los setters.
      */
-    public Usuario() { // Declaración del constructor vacío
+    public Usuario() {
     }
 
     /**
-     * CONSTRUCTOR PARAMETRIZADO (Sobrecarga de constructores)
-     * Permite instanciar un objeto Usuario inicializando todos sus atributos de una sola vez
-     * al momento de su creación.
+     * CONSTRUCTOR CON PARÁMETROS (Sobrecarga).
+     * Crea un Usuario con todos los datos de una sola vez.
      * 
-     * @param idUsuario Identificador del usuario.
-     * @param idRol Identificador del rol.
-     * @param nombre Nombre del usuario.
-     * @param password Contraseña del usuario.
-     * @param email Correo electrónico.
-     * @param telefono Teléfono de contacto.
+     * @param idUsuario ID del usuario
+     * @param idRol ID del rol (1=Admin, 2=Trabajador)
+     * @param nombre Nombre completo
+     * @param password Contraseña
+     * @param email Correo electrónico
+     * @param telefono Teléfono de contacto
      */
-    public Usuario(int idUsuario, int idRol, String nombre, String password, String email, String telefono) { // Declaración del constructor con todos los parámetros
-        this.idUsuario = idUsuario;  // La palabra reservada 'this' diferencia el atributo de la clase del parámetro del método
-        this.idRol = idRol;          // Asigna el parámetro recibido al atributo de la instancia actual
-        this.nombre = nombre;        // Asigna el parámetro recibido al atributo de la instancia actual
-        this.password = password;    // Asigna el parámetro recibido al atributo de la instancia actual
-        this.email = email;          // Asigna el parámetro recibido al atributo de la instancia actual
-        this.telefono = telefono;    // Asigna el parámetro recibido al atributo de la instancia actual
+    public Usuario(int idUsuario, int idRol, String nombre, String password, String email, String telefono) {
+        this.idUsuario = idUsuario;  // "this" diferencia el atributo de la clase del parámetro del constructor
+        this.idRol = idRol;          // Guarda el rol
+        this.nombre = nombre;        // Guarda el nombre
+        this.password = password;    // Guarda la contraseña
+        this.email = email;          // Guarda el correo
+        this.telefono = telefono;    // Guarda el teléfono
     }
 
     // =====================================================================
-    // MÉTODOS ACCESORES Y MUTADORES (Getters y Setters)
-    // Permiten la lectura y escritura segura de los atributos privados,
-    // garantizando el encapsulamiento y el control sobre el estado del objeto.
+    // GETTERS Y SETTERS
     // =====================================================================
 
-    /** Método accesor (Getter) que retorna el identificador único del usuario */
-    public int getIdUsuario() { // Retorna un valor de tipo entero
-        return idUsuario; // Retorna el valor actual del atributo idUsuario
+    /** Devuelve el ID del usuario */
+    public int getIdUsuario() {
+        return idUsuario;
     }
 
-    /** Método mutador (Setter) que asigna o modifica el identificador del usuario */
-    public void setIdUsuario(int idUsuario) { // Recibe un entero y no retorna nada (void)
-        this.idUsuario = idUsuario; // Asigna el valor pasado por parámetro al atributo de la clase
+    /** Guarda el ID del usuario */
+    public void setIdUsuario(int idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
-    /** Método accesor (Getter) que retorna el identificador lógico del rol asociado a este usuario */
-    public int getIdRol() { // Retorna un valor de tipo entero
-        return idRol; // Retorna el valor actual del atributo idRol
+    /** Devuelve el ID del rol (1=Admin, 2=Trabajador) */
+    public int getIdRol() {
+        return idRol;
     }
 
-    /** Método mutador (Setter) que asigna el rol correspondiente a este usuario */
-    public void setIdRol(int idRol) { // Recibe un entero y no retorna nada (void)
-        this.idRol = idRol; // Asigna el valor del parámetro al atributo interno
+    /** Guarda el ID del rol */
+    public void setIdRol(int idRol) {
+        this.idRol = idRol;
     }
 
-    /** Método accesor (Getter) que retorna la cadena de texto con el nombre del usuario */
-    public String getNombre() { // Retorna un objeto tipo String
-        return nombre; // Retorna el valor actual del atributo nombre
+    /** Devuelve el nombre completo del usuario */
+    public String getNombre() {
+        return nombre;
     }
 
-    /** Método mutador (Setter) que asigna el nombre ingresado al objeto actual */
-    public void setNombre(String nombre) { // Recibe un String y no retorna nada (void)
-        this.nombre = nombre; // Establece el atributo interno de nombre
+    /** Guarda el nombre del usuario */
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
-    /** Método accesor (Getter) que obtiene la contraseña actual en memoria del usuario */
-    public String getPassword() { // Retorna un objeto tipo String
-        return password; // Retorna el valor actual del atributo password
+    /** Devuelve la contraseña del usuario */
+    public String getPassword() {
+        return password;
     }
 
-    /** Método mutador (Setter) que establece o actualiza la contraseña en el objeto */
-    public void setPassword(String password) { // Recibe un String y no retorna nada (void)
-        this.password = password; // Sobrescribe la contraseña interna del objeto con la nueva proporcionada
+    /** Guarda la contraseña del usuario */
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    /** Método accesor (Getter) que retorna el correo electrónico del usuario */
-    public String getEmail() { // Retorna un objeto tipo String
-        return email; // Retorna el valor actual del atributo email
+    /** Devuelve el correo electrónico del usuario */
+    public String getEmail() {
+        return email;
     }
 
-    /** Método mutador (Setter) que asigna el correo electrónico suministrado al atributo interno */
-    public void setEmail(String email) { // Recibe un String como parámetro
-        this.email = email; // Guarda el nuevo correo en el estado del objeto
+    /** Guarda el correo electrónico */
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    /** Método accesor (Getter) que retorna el número de teléfono como String */
-    public String getTelefono() { // Retorna un objeto tipo String
-        return telefono; // Retorna el atributo teléfono
+    /** Devuelve el teléfono del usuario */
+    public String getTelefono() {
+        return telefono;
     }
 
-    /** Método mutador (Setter) que almacena el número de contacto del usuario */
-    public void setTelefono(String telefono) { // Recibe un String y no retorna nada (void)
-        this.telefono = telefono; // Asigna el valor del teléfono a la variable privada
+    /** Guarda el teléfono del usuario */
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
     
     /**
-     * Método auxiliar (propiedad derivada) que devuelve explícitamente el nombre del rol en formato texto.
-     * Esta función evalúa el estado interno del objeto (idRol) y genera una respuesta inteligible.
-     * Es útil para integraciones con componentes de Vista (como JSP).
+     * Método auxiliar que traduce el número del rol a un texto legible.
+     * Si el idRol es 1, devuelve "Administrador". Si es otro, devuelve "Trabajador".
+     * Se usa en las páginas JSP para mostrar el rol con nombre en vez de número.
      * 
-     * @return Una cadena de texto ("Administrador" o "Trabajador") dependiendo de la lógica interna.
+     * @return "Administrador" o "Trabajador" según el rol del usuario
      */
-    public String getNombreRol() { // Declaración de método público que retorna un String
-        if (this.idRol == 1) { // Condicional if: evalúa si el atributo lógico idRol equivale al entero 1
-            return "Administrador";  // Retorna el literal "Administrador" si la condición es verdadera
-        } else { // Caso contrario (bloque else)
-            return "Trabajador";     // Retorna el literal "Trabajador" al asumir cualquier otro identificador
+    public String getNombreRol() {
+        if (this.idRol == 1) {       // Si el rol es 1
+            return "Administrador";  // Es el dueño
+        } else {                     // Si es cualquier otro número
+            return "Trabajador";     // Es un cajero
         }
     }
     
     // =====================================================================
-    // ESTRUCTURA DE DATOS COMPLEJA PARA PERMISOS
-    // Se utiliza una Colección (java.util.List) para alojar múltiples objetos de tipo String
-    // correspondientes a los permisos dinámicos asignados a este objeto Usuario iterando sobre la Base de Datos.
+    // LISTA DE PERMISOS (Para controlar qué puede hacer cada usuario)
     // =====================================================================
     
     /** 
-     * Inicialización del atributo de colección.
-     * Crea una instancia de lista vacía en memoria dinámica usando ArrayList (implementación concreta de la interfaz List).
+     * Lista (colección) de permisos del usuario.
+     * Se crea vacía al principio y se llena desde la base de datos.
+     * Ejemplo: ["VENTAS", "GASTOS", "INFORMES"]
      */
     private java.util.List<String> permisos = new java.util.ArrayList<>(); 
 
-    /** Método accesor (Getter) que retorna la conexión orientada a objetos hacia la lista en memoria de permisos */
-    public java.util.List<String> getPermisos() { // Retorna un objeto de tipo List
-        return permisos; // Devuelve la referencia al objeto estático en memoria que contiene la lista
+    /** Devuelve la lista de permisos del usuario */
+    public java.util.List<String> getPermisos() {
+        return permisos;
     }
 
-    /** Método mutador (Setter) que inyecta en el objeto una lista completa pre-cargada con los permisos recuperados */
-    public void setPermisos(java.util.List<String> permisos) { // Recibe como argumento una List genérica de tipo String
-        this.permisos = permisos; // Sustituye la colección actual del objeto por la proporcionada mediante el parámetro
+    /** Guarda una lista completa de permisos en el usuario */
+    public void setPermisos(java.util.List<String> permisos) {
+        this.permisos = permisos;
     }
     
     /**
-     * Método lógico y de utilidad funcional en POO.
-     * Itera (recorre) la colección de memoria interna 'permisos' evaluando un caso de uso particular.
+     * Método que verifica si el usuario tiene un permiso específico.
+     * Recorre la lista de permisos buscando el nombre que le pasemos.
      * 
-     * @param nombrePermiso Cadena de texto correspondiente al nombre descriptivo a evaluar (ej: "VENTAS").
-     * @return true si el objeto interno List contiene una coincidencia, false en caso contrario.
+     * @param nombrePermiso El permiso a buscar (ej: "VENTAS")
+     * @return true si lo tiene, false si no
      */
-    public boolean tienePermiso(String nombrePermiso) { // Firma del método, retorna un valor primitivo booleano
-        if (permisos == null) return false;          // Validación temprana: Si el objeto puntero List es nulo, se previene NullPointerException y se retorna falso.
-        for (String p : permisos) {                  // Bucle for-each (iterador sintáctico). Itera objeto por objeto 'p' (tipo String) perteneciente a la colección 'permisos'.
-            if (p.equalsIgnoreCase(nombrePermiso)) { // Invocación a método estricto de la clase String: Compara el objeto iterado contra el parámetro omitiendo sensibilidad entre mayúsculas y minúsculas.
-                return true;                         // Si hay coincidencia exacta de strings, finaliza la iteración y retorna verdadero.
+    public boolean tienePermiso(String nombrePermiso) {
+        if (permisos == null) return false;          // Si la lista no existe, no tiene permisos
+        for (String p : permisos) {                  // Recorremos permiso por permiso
+            if (p.equalsIgnoreCase(nombrePermiso)) { // Comparamos sin importar mayúsculas/minúsculas
+                return true;                         // ¡Lo encontró! Sí tiene ese permiso
             }
         }
-        return false;                                // Si tras iterar completamente la colección no hubo retorno previo, se devuelve falso confirmando la ausencia de coincidencia.
+        return false;                                // Terminó de buscar y no lo encontró
     }
 }

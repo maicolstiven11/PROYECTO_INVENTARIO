@@ -12,93 +12,98 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Patrón DAO Analítico Estructural Transaccional: PedidoDAO.
+ * Clase PedidoDAO.
  *
- * Módulo encargado del factor relacional y de encapsulación persistente (CRUD) 
- * correspondiente a la entidad de Pedidos, gestionando también la inyección a modelos detallados. 
+ * Módulo encargado de guardar en la base de datos las compras o pedidos
+ * que se le hacen a un proveedor, incluyendo todos los productos detalle.
  */
 public class PedidoDAO {
 
     /**
-     * Componente Factory Mutativo Batch y Update Escalado (Transaction Unit).
-     * 
-     * Subrutina Setter atómica de dependencias foráneas. Realiza operaciones de instanciación
-     * masiva de arreglos estructurados (batch insertion) y aplica modificadores aritméticos sobre atributos DB (UPDATE de persistencia cruzada).
+     * Guarda un pedido completo junto con su lista de productos pedida.
+     * Esta función hace varias cosas a la vez: guarda la cabecera del pedido,
+     * guarda cada producto que compramos y actualiza el stock sumando lo que compramos.
      */
     public boolean registrarPedido(PedidoProveedor pedido, List<DetallePedido> detalles) {
-        Connection con = null;
-        PreparedStatement psPedido = null;
-        PreparedStatement psDetalle = null;
-        PreparedStatement psStock = null;
-        ResultSet rs = null;
-        boolean registrado = false;
+        Connection con = null; // Conexión
+        PreparedStatement psPedido = null; // Para la tabla principal de pedidos (factura)
+        PreparedStatement psDetalle = null; // Para los items de cada pedido
+        PreparedStatement psStock = null; // Para sumarle al stock lo que acabó de llegar
+        ResultSet rs = null; // Para leer la respuesta y el ID autogenerado
+        boolean registrado = false; // Bandera para saber si triunfó
 
         try {
-            con = Conexion.getConexion();
-            con.setAutoCommit(false); 
+            con = Conexion.getConexion(); // Enlace a la bd
+            con.setAutoCommit(false); // IMPORTANTE: Apagamos el guardado automático para que no quede nada a medias si algo falla (Transacciones).
 
-            // Setter Instanciador Base Relacional
+            // 1. Guardamos los datos base del pedido (fecha, entrega, total, iva) en PEDIDOS_PROVEEDOR
             String sqlPedido = "INSERT INTO PEDIDOS_PROVEEDOR (fecha_pedido, fecha_entrega, total_pedido, subtotal, iva_pedido, id_inventario, id_proveedor) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            // Le pedimos de nuevo que nos devuelva el ID que le asignó (RETURN_GENERATED_KEYS)
             psPedido = con.prepareStatement(sqlPedido, Statement.RETURN_GENERATED_KEYS);
-            psPedido.setDate(1, pedido.getFechaPedido());
-            psPedido.setDate(2, pedido.getFechaEntrega());
-            psPedido.setDouble(3, pedido.getTotalPedido());
-            psPedido.setDouble(4, pedido.getSubtotal());    
-            psPedido.setDouble(5, pedido.getIvaPedido()); 
-            psPedido.setInt(6, pedido.getIdInventario());
-            psPedido.setInt(7, pedido.getIdProveedor());
-
-            int filas = psPedido.executeUpdate();
-            if (filas == 0) {
-                throw new SQLException("Error Exception: Rollback Transaction limit exception");
+            psPedido.setDate(1, pedido.getFechaPedido()); // Fecha en que se pide
+            psPedido.setDate(2, pedido.getFechaEntrega()); // Fecha calculada de entrega
+            psPedido.setDouble(3, pedido.getTotalPedido()); // Dinero total a pagarle
+            psPedido.setDouble(4, pedido.getSubtotal()); // Dinero antes de IVA
+            psPedido.setDouble(5, pedido.getIvaPedido()); // Valor del IVA cobrado
+            psPedido.setInt(6, pedido.getIdInventario()); // En qué inventario entra
+            psPedido.setInt(7, pedido.getIdProveedor()); // A quién se le compró
+            
+            int filas = psPedido.executeUpdate(); // Guardamos el pedido principal
+            if (filas == 0) { // Si falló al iniciar...
+                throw new SQLException("Error: No se pudo registrar el pedido base."); // Forzamos un salto al CATCH de error
             }
 
-            // Framework Getter Memory Key Limit (AutoIncrement fetcher)
+            // Atrapamos qué número de venta/pedido se formó recién
             rs = psPedido.getGeneratedKeys();
             int idPedidoBase = 0;
             if (rs.next()) {
-                idPedidoBase = rs.getInt(1);
+                idPedidoBase = rs.getInt(1); // Lo guardamos
             }
 
-            // Setter Mutador Constructor de Lote (Batch Array Property Setter) + Persistence Modificator
+            // 2. Preparamos las sentencias para hacer bulto (lotes/batch) y mandar a hacerlas todas de un solo golpe.
+            // Para la tabla DETALLE_PEDIDOS (lista del mercado)
             String sqlDetalle = "INSERT INTO DETALLE_PEDIDOS (id_pedido_base, id_inv_detalle, cantidad_pedida, precio_unitario_real) VALUES (?, ?, ?, ?)";
             psDetalle = con.prepareStatement(sqlDetalle);
 
+            // Para la tabla de INVENTARIO_DETALLE para subir nuestro inventario actual
             String sqlSumar = "UPDATE INVENTARIO_DETALLE SET cantidad_inicial = cantidad_inicial + ? WHERE id_detalle = ?";
             psStock = con.prepareStatement(sqlSumar);
 
+            // 3. Recorremos lo que compramos producto por producto
             for (DetallePedido det : detalles) {
-                // Setter Dependency Array Loop Insertion Limit Formats (addBatch limit mapping parameters logic)
-                psDetalle.setInt(1, idPedidoBase);
-                psDetalle.setInt(2, det.getIdInvDetalle());
-                psDetalle.setInt(3, det.getCantidadPedida());
-                psDetalle.setDouble(4, det.getPrecioUnitarioReal());
-                psDetalle.addBatch();
+                // Rellenamos el formato para el detalle
+                psDetalle.setInt(1, idPedidoBase); // Apuntamos a la factura principal
+                psDetalle.setInt(2, det.getIdInvDetalle()); // ID del producto de nuestro negocio
+                psDetalle.setInt(3, det.getCantidadPedida()); // Cuántos trajimos
+                psDetalle.setDouble(4, det.getPrecioUnitarioReal()); // A cuánto nos lo vendió
+                psDetalle.addBatch(); // En vez de ejecutar de una, lo añadimos a una "cola de espera" (batch)
 
-                // Updater parameter limits mapping
-                psStock.setInt(1, det.getCantidadPedida());
-                psStock.setInt(2, det.getIdInvDetalle());
-                psStock.addBatch();
+                // Rellenamos el formato de la suma del stock
+                psStock.setInt(1, det.getCantidadPedida()); // +X de este producto
+                psStock.setInt(2, det.getIdInvDetalle()); // A este producto en específico
+                psStock.addBatch(); // Añadir a la otra "cola de espera"
             }
 
+            // 4. Se sueltan de golpe y ejecutan todas las órdenes encoladas.
             psDetalle.executeBatch();
             psStock.executeBatch();
 
+            // 5. Tras triunfar en todos los pasos anteriores, hacemos oficial el guardado.
             con.commit();
-            registrado = true;
-            System.out.println("Transaction Batch Limit Executed. ID: " + idPedidoBase);
+            registrado = true; // Todo bien
+            System.out.println("Pedido " + idPedidoBase + " registrado y stock actualizado con éxito.");
 
-        } catch (SQLException e) {
-            System.err.println("Error constraint context loop: " + e.getMessage());
+        } catch (SQLException e) { // Si algo falló en cualquier lado (hasta en sumar el stock)
+            System.err.println("Error al procesar el pedido: " + e.getMessage());
             e.printStackTrace();
             if (con != null) {
                 try {
-                    con.rollback();
+                    con.rollback(); // Anular ABSOLUTAMENTE todo para no dejar un pedido a medias pero sin sumar al inventario
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
             }
-        } finally {
+        } finally { // Libera las 4 sentencias
             try {
                 if (rs != null) rs.close();
                 if (psPedido != null) psPedido.close();
@@ -109,24 +114,25 @@ public class PedidoDAO {
                 e.printStackTrace();
             }
         }
-        return registrado;
+        return registrado; // Informar si salió exitoso.
     }
 
     /**
-     * Módulo Getter Coleccionador de Extracción con Instanciación (Join Iterator limit bounds properties mapping).
-     * 
-     * Iterador ResultSet loop encapsulador a constructores por defecto.
-     * Retorna un Array List dinámico con propiedades de la cadena relacional.
+     * Trae una lista de todos los pedidos (solo las cabeceras/facturas del bulto) realizados
+     * en el sistema para ese negocio (independiente de en qué mes fue).
      */
     public List<PedidoProveedor> listarPedidos(int idNegocio) {
-        List<PedidoProveedor> lista = new ArrayList<>();
+        List<PedidoProveedor> lista = new ArrayList<>(); // Almacenaje de resultados
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            con = Conexion.getConexion();
+            con = Conexion.getConexion(); // Nos enlazamos
             
+            // Pide datos principales de la factura (pp.*), pega además DATOS_PROVEEDOR para llevarse su bonito nombre (p.nombre_proveedor)
+            // Se asocia también con INVENTARIO para limitar y filtrar de que solo saque facturas que se hicieron en este negocio.
+            // Los recientes de primeros (DESC).
             String sql = "SELECT pp.id_pedido_base, pp.fecha_pedido, pp.fecha_entrega, " +
                          "pp.subtotal, pp.iva_pedido, pp.total_pedido, " +
                          "pp.id_proveedor, p.nombre_proveedor " +
@@ -134,29 +140,29 @@ public class PedidoDAO {
                          "INNER JOIN DATOS_PROVEEDOR p ON pp.id_proveedor = p.id_proveedor " +
                          "INNER JOIN INVENTARIO i ON pp.id_inventario = i.id_inventario " +
                          "WHERE i.id_negocio = ? " +
-                         "ORDER BY pp.fecha_pedido DESC";
+                         "ORDER BY pp.fecha_pedido DESC"; 
 
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, idNegocio);
-            rs = ps.executeQuery();
+            ps = con.prepareStatement(sql); // Manda el script
+            ps.setInt(1, idNegocio); // Le enchufa desde qué ID de negocio buscamos
+            rs = ps.executeQuery(); // Activa busqueda
 
-            while (rs.next()) {
-                PedidoProveedor pedido = new PedidoProveedor();
-                pedido.setIdPedidoBase(rs.getInt("id_pedido_base"));
-                pedido.setFechaPedido(rs.getDate("fecha_pedido"));
-                pedido.setFechaEntrega(rs.getDate("fecha_entrega"));
-                pedido.setSubtotal(rs.getDouble("subtotal")); 
-                pedido.setIvaPedido(rs.getDouble("iva_pedido")); 
-                pedido.setTotalPedido(rs.getDouble("total_pedido"));
-                pedido.setIdProveedor(rs.getInt("id_proveedor"));
-                pedido.setNombreProveedor(rs.getString("nombre_proveedor"));
-                lista.add(pedido);
+            while (rs.next()) { // Recorre renglones resultantes
+                PedidoProveedor pedido = new PedidoProveedor(); // Crear la cajita PedidoProveedor
+                pedido.setIdPedidoBase(rs.getInt("id_pedido_base")); // Guardamos su cod
+                pedido.setFechaPedido(rs.getDate("fecha_pedido")); // Su fecha realizada
+                pedido.setFechaEntrega(rs.getDate("fecha_entrega")); // Fecha límite para que llegue el camión
+                pedido.setSubtotal(rs.getDouble("subtotal"));  // El dinero que no tiene Iva del global de lo comprado
+                pedido.setIvaPedido(rs.getDouble("iva_pedido")); // La carga del IVA de la factura
+                pedido.setTotalPedido(rs.getDouble("total_pedido")); // Total
+                pedido.setIdProveedor(rs.getInt("id_proveedor")); // El codigo de la empresa vendedora
+                pedido.setNombreProveedor(rs.getString("nombre_proveedor")); // El nombre real comercial que se lo trajo con el JOIN arriba 
+                lista.add(pedido); // Lo insertamos como nueva celda a nuestra variable Lista para rebotarla a la Web
             }
 
-        } catch (SQLException e) {
-            System.err.println("Error loops constraint lengths: " + e.getMessage());
+        } catch (SQLException e) { // Atrapar SQL 
+            System.err.println("Error al listar pedidos: " + e.getMessage());
             e.printStackTrace();
-        } finally {
+        } finally { // Suicidio de recursos
             try {
                 if (rs != null) rs.close();
                 if (ps != null) ps.close();
@@ -165,6 +171,6 @@ public class PedidoDAO {
                 e.printStackTrace();
             }
         }
-        return lista;
+        return lista; // Final
     }
 }

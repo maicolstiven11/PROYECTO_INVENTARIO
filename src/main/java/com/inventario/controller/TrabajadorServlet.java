@@ -14,137 +14,155 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- * Controlador Transaccional Orquestador: TrabajadorServlet.
+ * Controlador TrabajadorServlet.
  * 
- * Fachada encapsuladora encargada de la inyección de dependencias de negocio y seguridad de empleados.
- * Gestiona el ciclo vital y vinculación de Actores Sistema instanciando y asignando objetos Relacionales mediante el patrón DAO Model.
+ * Es el módulo de Recursos Humanos del dueño. Le permite al Administrador 
+ * ver sus esclavos/cajeros, botarlos, reasignarles un bar distinto o cambiarles claves si las olvidan.
  */
-@WebServlet(name = "TrabajadorServlet", urlPatterns = {"/TrabajadorServlet"}) // Binding decorativo asíncrono instanciando la ruta de la factoría Servlet Http nativa.
-public class TrabajadorServlet extends HttpServlet { // Polimorfismo hereditario del Framework Java EE base HTTP Rest.
+@WebServlet(name = "TrabajadorServlet", urlPatterns = {"/TrabajadorServlet"}) 
+public class TrabajadorServlet extends HttpServlet { 
 
     /**
-     * Rescritura Genérica evaluadora HTTP Get.
-     * Funciona como método de inicialización o passthrough de lectura (Read Context). Generando listas pasivas iterando colecciones de Objetos Model para in-memory display de datos Frontales en capa de Interfaz (JSP).
+     * El doGet en este controlador solo sirve para "Listar" a tus trabajadores 
+     * en pantalla, cruzando también qué locales tienes para las etiquetas del HTML
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Amparo catch frame object
+            throws ServletException, IOException { 
         
-        String action = request.getParameter("action"); // Lector string iterativo bandera de limitación
-        if (action == null) action = "listar"; // Cast in memory base constructor null protection.
+        String action = request.getParameter("action"); // Lee "action" por si es algo en especial
+        if (action == null) action = "listar"; // Si entró desnudo a la URL, asume que quería listar
 
-        if ("listar".equals(action)) { // String equals validation guard .
-            // Instanciador Recolector de Colección Masiva de Objetos Entidad Tipo Trabajador 
-            UsuarioDAO usuarioDAO = new UsuarioDAO(); // Constructor Factoría Gestora Object Relation Model de capa lógica SQL DAO.
-            List<Usuario> listaTrabajadores = usuarioDAO.listarTrabajadores(); // Envoltorio iterativo pointer in-memory Heap collections list of entities models type Usuario.
+        if ("listar".equals(action)) { 
+            // =====================================================================
+            // TRAER LAS 2 LISTAS PARA EMPAREJAR (Bares y Hombres)
+            // =====================================================================
+            UsuarioDAO usuarioDAO = new UsuarioDAO(); 
+            List<Usuario> listaTrabajadores = usuarioDAO.listarTrabajadores(); // Tráeme a todos mis esclavos Cajeros disponibles a un arreglo array
             
-            // Factory getter iterativo PK Inyección context base pool session framework HTTP pointer auth session live checker.
-            HttpSession session = request.getSession(); // Getter constructor.
-            Usuario admin = (Usuario) session.getAttribute("usuarioLogueado"); // Wrapper setter instanciador de Entidad Autenticada Polimórfico object cast as type Usuario context Alive JVM.
+            // Averiguo quién soy yo (El admin dueño) para traer MIS BARES PROPIOS, no los del mundo.
+            HttpSession session = request.getSession(); 
+            Usuario admin = (Usuario) session.getAttribute("usuarioLogueado"); 
 
-            if (admin != null) { // Validation Boolean limit alive security Session state .
-                NegocioDAO negocioDAO = new NegocioDAO(); // Constructor instance Object Dao transaction
-                List<Negocio> listaNegocios = negocioDAO.listarNegocios(admin.getIdUsuario()); // Method delegador List Wrapper instance Array Model Collection entity type Negocio.
+            if (admin != null) { // Por si no ha caducado la sesión
+                NegocioDAO negocioDAO = new NegocioDAO(); 
+                List<Negocio> listaNegocios = negocioDAO.listarNegocios(admin.getIdUsuario()); // Tráeme Mis Bares "Bar de Juan" etc...
                 
-                request.setAttribute("listaTrabajadores", listaTrabajadores); // Bind context alive parameter object property Array list to local context HTTP var param.
-                request.setAttribute("listaNegocios", listaNegocios); // Binding POJO collection as param framework rendering attribute.
-                request.getRequestDispatcher("view/gestion_trabajadores.jsp").forward(request, response); // Despacho delegación o passthrough síncrono bypassing routing framework motor to JVM local JSP Render Engine scope.
-            } else { // Abort log off .
-                response.sendRedirect("view/Inicio_sesion.html"); // Cleanup URL param clean reload page logic flag error redirect string.
+                // Pegar ambos Arreglos o Colecciones directamente a la pantalla gráfica (JSP)
+                request.setAttribute("listaTrabajadores", listaTrabajadores); 
+                request.setAttribute("listaNegocios", listaNegocios); 
+                request.getRequestDispatcher("view/gestion_trabajadores.jsp").forward(request, response); // Desata la pantalla .jsp
+            } else { 
+                response.sendRedirect("view/Inicio_sesion.html"); // ¡Expiró login!
             }
         }
     }
 
     /**
-     * Rescritura Genérica evaluadora HTTP Post.
-     * Orquesta el Mutador Mutacional en base a Sub-Estructuras switch iterativas: Action Flag string parameters para Disparo Síncrono de Inserción Atómica o Update Transacciones Mutadoras Delegadas a Persistencia SQL Factory connection Manager DAO Logic.
+     * El doPost maneja los diferentes Botones con acciones de choque y castigo como:
+     * Asignar local, desasignarlo, despedirlo del sistema o castigarle su clave temporal
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Capturador exception
+            throws ServletException, IOException { 
         
-        String action = request.getParameter("action"); // Capturador metadata url o form param Action.
-
-        if ("asignar".equals(action)) { // Loop condicional Action setter math target .
-            try { // Valida casteos param format String int exception catch IO.
-                int idUsuario = Integer.parseInt(request.getParameter("id_usuario")); // Primitive instanciador PK setter
-                int idNegocio = Integer.parseInt(request.getParameter("id_negocio")); // Primitive PK math instantiator.
+        String action = request.getParameter("action"); // Leemos la clave del botón rojo
+        
+        // =====================================================================
+        // ACCIÓN 1: PONERLO A TRABAJAR EN UN BAR ESPECÍFICO
+        // =====================================================================
+        if ("asignar".equals(action)) { 
+            try { 
+                int idUsuario = Integer.parseInt(request.getParameter("id_usuario")); // ID Empleado Jose
+                int idNegocio = Integer.parseInt(request.getParameter("id_negocio")); // Bar de Moe ID
                 
-                UsuarioDAO dao = new UsuarioDAO(); // Wrapper Object Relation method transaccional builder
+                UsuarioDAO dao = new UsuarioDAO(); 
                 
-                // Guard constraint Logic Sub-rutina Matemática Booleana Inyección Dependency validation param 
-                if (dao.negocioTieneTrabajador(idNegocio)) { // Delegate method return Boolean if model exist relation validator 
-                    response.sendRedirect("TrabajadorServlet?action=listar&error=bar_ocupado"); // UI exception flag log abort action in session. 
-                    return; // Nullifies logic flow stack interruptor destruction memory execution stack exit 
+                // Primero miramos si el Bar de Moe ya tiene un cajero trabajando, no permitimos dos juntos.
+                if (dao.negocioTieneTrabajador(idNegocio)) { 
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=bar_ocupado"); // Chocó, abortar con error
+                    return; 
                 }
                 
-                boolean exito = dao.asignarNegocio(idUsuario, idNegocio); // Atomico Multiple parameters setter execution method method bool return status boolean getter flag log.
+                boolean exito = dao.asignarNegocio(idUsuario, idNegocio); // Sentencia SQL Inyectando Update
                 
-                if (exito) { // Validation true return .
-                    response.sendRedirect("TrabajadorServlet?action=listar&msg=asignado"); // Redir Clean statu log OK Boolean 
-                } else { // Check fail logic no object changes 
-                    response.sendRedirect("TrabajadorServlet?action=listar&error=fallo_asignar"); // Loop Error Boolean Flag False 
+                if (exito) { 
+                    response.sendRedirect("TrabajadorServlet?action=listar&msg=asignado"); // Re-lista limpiamente
+                } else {  
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=fallo_asignar"); // Error genérico SQL false
                 }
-            } catch (Exception e) { // Suciedad framework Exception catch
-                e.printStackTrace(); // Dump memory JVM trace object err console log output CLI silent failure .
-                response.sendRedirect("TrabajadorServlet?action=listar&error=datos_invalidos"); // Flag logger.
+            } catch (Exception e) { 
+                e.printStackTrace(); 
+                response.sendRedirect("TrabajadorServlet?action=listar&error=datos_invalidos"); // Catch Exception Error cast number Formats primitives.
             }
-        } else if ("desasignar".equals(action)) { // Second sub-switch bool equals iter loop flag String.
-            try { // Exception trap framework runtime .
-                int idUsuario = Integer.parseInt(request.getParameter("id_usuario")); // Variable setter getter URL string target primitivo .
-                UsuarioDAO dao = new UsuarioDAO(); // Instanciador generatriz Model Persistence Factory 
-                boolean exito = dao.desasignarNegocio(idUsuario); // Destructor referencial SQL Atomic update Boolean execution .
+            
+        // =====================================================================
+        // ACCIÓN 2: DEJARLO SIN BAR O SIN EMPLEO TEMPORALMENTE
+        // =====================================================================
+        } else if ("desasignar".equals(action)) { 
+            try { 
+                int idUsuario = Integer.parseInt(request.getParameter("id_usuario")); // Target ID Jose .
+                UsuarioDAO dao = new UsuarioDAO(); 
+                boolean exito = dao.desasignarNegocio(idUsuario); // Le rompe su relación a Nulo "NULL" en bd a sus FK's .
                 
-                if (exito) { // Validation loop Boolean True flag .
-                    response.sendRedirect("TrabajadorServlet?action=listar&msg=desasignado"); // OK URL Loop return 
+                if (exito) {  
+                    response.sendRedirect("TrabajadorServlet?action=listar&msg=desasignado"); // Listo, devuelto pantalla normal OK
                 } else {
-                    response.sendRedirect("TrabajadorServlet?action=listar&error=fallo_desasignar"); // Log Fall boolean setter param
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=fallo_desasignar"); // Error null limit 
                 }
-            } catch (Exception e) { // exception base frame error param log
+            } catch (Exception e) { 
                 response.sendRedirect("TrabajadorServlet?action=listar&error=datos_invalidos");
             }
-        } else if ("eliminar".equals(action)) { // Action Flag Third string equality validator
-            try { // Guard condition .
-                int idUsuario = Integer.parseInt(request.getParameter("id_usuario")); // Primitive number object integer extraction .
-                UsuarioDAO dao = new UsuarioDAO(); // Factory Model Relation.
-                boolean exito = dao.eliminarTrabajador(idUsuario); // Mutable destruction target SQL row relational object property destructor return state var flag Boolean check.
+            
+        // =====================================================================
+        // ACCIÓN 3: ELIMINARLO DEL PROGRAMA PARA SIEMPRE (DESTERRARLO)
+        // =====================================================================
+        } else if ("eliminar".equals(action)) { 
+            try { 
+                int idUsuario = Integer.parseInt(request.getParameter("id_usuario")); // Target Obj User parameter .
+                UsuarioDAO dao = new UsuarioDAO(); 
+                boolean exito = dao.eliminarTrabajador(idUsuario); // Destructor booleano transaccional Delete CASCADE.
                 
-                if (exito) { // Check Success execution status Boolean state wrapper .
-                    response.sendRedirect("TrabajadorServlet?action=listar&msg=eliminado"); // Ok loop 
-                } else { // fail execution Boolean destructor
-                    response.sendRedirect("TrabajadorServlet?action=listar&error=fallo_eliminar"); // UI fail .
+                if (exito) { // Confirmación OK 
+                    response.sendRedirect("TrabajadorServlet?action=listar&msg=eliminado"); 
+                } else { 
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=fallo_eliminar"); 
                 }
-            } catch (Exception e) { // exception handler
-                response.sendRedirect("TrabajadorServlet?action=listar&error=datos_invalidos"); // dirty catch
+            } catch (Exception e) { 
+                response.sendRedirect("TrabajadorServlet?action=listar&error=datos_invalidos"); 
             }
-        } else if ("resetPassword".equals(action)) { // Action Flag Switch Boolean target String parameter.
-            // Privileged Administrator Method Delegation Factory Pattern sub-rutine mutator parameter boolean object setter properties context validation logic string.
-            try { // catch base format primitives object errors parameters query string exception handler execution .
-                int idUsuario = Integer.parseInt(request.getParameter("id_usuario")); // param primitive cast string math int reference.
-                String nuevaPassword = request.getParameter("nueva_password"); // String property parameter logic payload injection object model 
-                String confirmarPassword = request.getParameter("confirmar_password"); // Validator validation string flag .
+            
+        // =====================================================================
+        // ACCIÓN 4: RESETEAR CONTRASEÑA EN CASO DE EMERGENCIA QUE OLVIDÓ
+        // =====================================================================
+        } else if ("resetPassword".equals(action)) { 
+            try { 
+                int idUsuario = Integer.parseInt(request.getParameter("id_usuario")); // ID obj José
+                String nuevaPassword = request.getParameter("nueva_password"); // La 1234
+                String confirmarPassword = request.getParameter("confirmar_password"); // De nuevo a 1234 para asegurar 
                 
-                // Algoritmo Verificador String property Validation Limits Bounds logic.
-                if (nuevaPassword == null || nuevaPassword.length() < 6) { // Math limiter boundary Boolean Condition flag Check logic fail bounds limits sizes property Array strings limit.
-                    response.sendRedirect("TrabajadorServlet?action=listar&error=password_corta"); // Return fail execution Bounds validation constraint Exception
-                    return; // Nullifies Stack loop exit return clean memory execution .
+                // Chequeo pre-bd
+                if (nuevaPassword == null || nuevaPassword.length() < 6) { 
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=password_corta"); // Exige más texto largo.
+                    return; 
                 }
-                if (!nuevaPassword.equals(confirmarPassword)) { // Equality Constraint limiter object validator Boolean loop .
-                    response.sendRedirect("TrabajadorServlet?action=listar&error=password_no_coincide"); // Redirect Return String error format property limits
-                    return; // Destroy stack 
+                if (!nuevaPassword.equals(confirmarPassword)) { 
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=password_no_coincide"); // No coinciden cajas texto format validation constraint  
+                    return; 
                 }
                 
-                UsuarioDAO dao = new UsuarioDAO(); // constructor wrapper Factory Manager Relational class .
-                boolean exito = dao.actualizarPassword(idUsuario, nuevaPassword); // Setter Object Update model param attribute mutative query relation db object framework response Flag log Boolean return validation check status true false check logic .
+                // Manda hash final para reemplazar antigua
+                UsuarioDAO dao = new UsuarioDAO(); 
+                boolean exito = dao.actualizarPassword(idUsuario, nuevaPassword); // Envía flag transaccional bool .
                 
-                if (exito) { // Math Flag Validator bool ok property limit .
-                    response.sendRedirect("TrabajadorServlet?action=listar&msg=password_reseteada"); // Response Return Loop 
+                if (exito) {  
+                    response.sendRedirect("TrabajadorServlet?action=listar&msg=password_reseteada"); // Se devolvió correcto con verde log 
                 } else {
-                    response.sendRedirect("TrabajadorServlet?action=listar&error=fallo_reset"); // Response Error Flag Return UI parameter bounds checks error execution bool fail update sql 
+                    response.sendRedirect("TrabajadorServlet?action=listar&error=fallo_reset"); 
                 }
-            } catch (Exception e) { // Exception Trap Trace exception execution base JVM model errors framework primitive formats
-                e.printStackTrace(); // dump buffer .
-                response.sendRedirect("TrabajadorServlet?action=listar&error=datos_invalidos"); // logger exception fallback format primitive constraint checks boolean false.
+            } catch (Exception e) { 
+                e.printStackTrace(); 
+                response.sendRedirect("TrabajadorServlet?action=listar&error=datos_invalidos"); 
             }
         }
     }

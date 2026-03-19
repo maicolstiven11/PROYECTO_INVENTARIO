@@ -1,4 +1,4 @@
-package com.inventario.controller; // Enrutamiento lógico y declarativo estructural 
+package com.inventario.controller;
 
 import com.inventario.dao.InformeDAO;
 import com.inventario.dao.InventarioDAO;
@@ -12,108 +12,107 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- * Controlador de Flujo Operativo: InformeServlet.
+ * Controlador InformeServlet.
  * 
- * Clase estructurada bajo principios MVC enfocada en pre-procesar cálculos aritméticos complejos,
- * orquestar lecturas desde distintas fuentes (DAO) y construir subentidades (Attributes) que se pasarán a vistas en Dashboard.
- * Hereda de HttpServlet permitiendo control escalar sobre los verbos (HTTP methods) nativos.
+ * Se encarga de mostrar los informes contables. Pide al DAO la lista de inventarios 
+ * y usa operaciones matemáticas para calcular ganancias brutas, netas y promedios 
+ * dependiendo de lo que el cliente gastó y vendió.
  */
-@WebServlet(name = "InformeServlet", urlPatterns = {"/InformeServlet"}) // Anotación de mapeo directo al despachador general (Tomcat)
-public class InformeServlet extends HttpServlet { // Subclase orientada a comportamiento Servlet 
+@WebServlet(name = "InformeServlet", urlPatterns = {"/InformeServlet"}) // Mapeo de URL para que reconozca este archivo
+public class InformeServlet extends HttpServlet { 
 
     /**
-     * Sobrecarga del método iterador e interfaz consultivo GET.
-     * Evalúa estados y parámetros mutables provistos por URL, disparando selectores de lógica de negocio (Business Logic) 
-     * en capas persistentes subyacentes e interconectando resultados (Modelos y Primitivos) de regreso al front (Vista).
+     * Al recibir una petición tipo GET (desde un botón o enlace en la web), 
+     * arma la información financiera del inventario seleccionado.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Delegación forzada de errores de contexto al contenedor 
+            throws ServletException, IOException { 
 
-        HttpSession session = request.getSession(); // Generación o extracción de la bolsa de envoltura temporal del usuario navegante 
-        String idNegocioStr = request.getParameter("idNegocio"); // Selector literal o String temporal asimétrico 
-        String idInventarioStr = request.getParameter("idInventario"); // Selector literal de sub-recurso 
+        HttpSession session = request.getSession(); // Ingresa a la memoria viva de la sesión del usuario
+        String idNegocioStr = request.getParameter("idNegocio"); // Extrae un ID de negocio si vino por la URL
+        String idInventarioStr = request.getParameter("idInventario"); // Extrae un ID de inventario si vino por la URL
 
-        // Operador condicional (Ternario) que resuelve el polimorfismo o ausencia de variable.  Fallo en gracia acudiendo a memoria local de sesión
+        // Si llegó el idNegocio por URL lo convierte a número. Si no, lo extrae directamente de la memoria de la sesión (Atributo guardado)
         Integer idNegocio = (idNegocioStr != null) ? Integer.parseInt(idNegocioStr) : (Integer) session.getAttribute("idNegocioActual");
 
-        if (idNegocio == null) { // Punto restrictivo de anclaje base: si objeto Integer está huérfano (nulo) escapa el flujo.
-            response.sendRedirect("NegocioServlet"); // Redirecionamiento en cascada para sanear estado in-memory 
-            return; // Cierre de scope lógico inmediato abortando hilo transaccional.
+        if (idNegocio == null) { // Si resulta que no se encontró en qué negocio estamos parados
+            response.sendRedirect("NegocioServlet"); // Redirige al inicio de locales
+            return; // Detiene la ejecución aquí
         }
 
-        InventarioDAO invDao = new InventarioDAO(); // Constructor base inyectivo de clase lectora relacional persistencia.
+        InventarioDAO invDao = new InventarioDAO(); // Instanciamos la clase que manipula Inventarios en la BD
 
         // =====================================================================
-        // ALGORITMO SELECTOR 1: Orquestación y Listado Histórico Maestro Base
+        // OPCIÓN 1: MOSTRAR LISTA RESUMIDA DE TODOS LOS PERIODOS (INVENTARIOS)
         // =====================================================================
-        if (idInventarioStr == null || idInventarioStr.isEmpty()) { // Comprobación string nativo y nulidad
-            List<com.inventario.model.Inventario> listaInvs = invDao.listarInventariosPorNegocio(idNegocio); // Extracción con carga masiva Arraylist genérico tipado a modelo fuerte
-            request.setAttribute("listaInventarios", listaInvs); // Modificador contextual: Acopla data al objeto contenedor Request transiente 
-            request.setAttribute("nombreNegocio", session.getAttribute("nombreNegocioActual")); // Inyección simple de alias referencial String 
-            request.getRequestDispatcher("view/lista_informes.jsp").forward(request, response); // Despacho estático del Buffer procesado hacia el JSP (Template Engine)
-            return; // Termina el proceso encapsulado
+        if (idInventarioStr == null || idInventarioStr.isEmpty()) { // Si en la URL NO especificaron un inventario concreto...
+            // Trae toda la colección o lista de periodos (inventarios) de este negocio
+            List<com.inventario.model.Inventario> listaInvs = invDao.listarInventariosPorNegocio(idNegocio); 
+            request.setAttribute("listaInventarios", listaInvs); // Pega la lista a la página
+            request.setAttribute("nombreNegocio", session.getAttribute("nombreNegocioActual")); // Pega el nombre del bar
+            request.getRequestDispatcher("view/lista_informes.jsp").forward(request, response); // Manda a pintar el JSP de lista de informes
+            return; // Corta la ejecución
         }
 
         // =====================================================================
-        // ALGORITMO SELECTOR 2: Reporte Analítico e Inter-cruzamiento de Registros y Descuadres (Afectaciones Numéricas)
+        // OPCIÓN 2: MOSTRAR EL REPORTE MATEMÁTICO DETALLADO DE UN INVENTARIO ESPECÍFICO
         // =====================================================================
-        try { // Bloque vigilante de integridad paramétrica general (Ate un crash numérico)
-            int idInventario = Integer.parseInt(idInventarioStr); // Parsificación de cadena a escalar puro Int
+        try { 
+            int idInventario = Integer.parseInt(idInventarioStr); // Convertimos a número entero el ID del inventario que le dimos click
             
-            // Sub-condicionamiento lógico extraído a partir del discriminador action 
-            String action = request.getParameter("action"); // Localizador semántico asimétrico
-            if ("ver_descuadre".equals(action)) { // Instancia eval in-memory
-                com.inventario.dao.DetalleInventarioDAO detalleDao = new com.inventario.dao.DetalleInventarioDAO(); // Generación de interactor directo a capa inferior
-                java.util.List<com.inventario.model.DetalleInventario> detallesFinales = detalleDao.listarDetallesConPrecio(idInventario); // Extracción relacional profunda estructurada
-                request.setAttribute("listaDescuadre", detallesFinales); // Binding dinámico list a JSP
-                request.setAttribute("modoHistorial", true); // Binding booleano de bandera visual condicional
-                request.getRequestDispatcher("view/reporte_descuadre.jsp").forward(request, response); // Direccionamiento final hacia la plantilla reactiva 
-                return; // Corta flujo actual
+            // Si el cliente pide ver qué productos NO cuadraron
+            String action = request.getParameter("action"); 
+            if ("ver_descuadre".equals(action)) { 
+                com.inventario.dao.DetalleInventarioDAO detalleDao = new com.inventario.dao.DetalleInventarioDAO(); 
+                // Sacamos todos los productos (papás, cervezas) con su precio del inventario
+                java.util.List<com.inventario.model.DetalleInventario> detallesFinales = detalleDao.listarDetallesConPrecio(idInventario); 
+                request.setAttribute("listaDescuadre", detallesFinales); // Se lo adjuntamos a la vista
+                request.setAttribute("modoHistorial", true); // Activamos una bandera para que el JSP sepa que es lectura vieja
+                request.getRequestDispatcher("view/reporte_descuadre.jsp").forward(request, response); // Pintamos pantalla
+                return; // Fin
             }
 
-            InformeDAO dao = new InformeDAO(); // Constructor lógico de orquestación analítica profunda inter-tabla.
+            InformeDAO dao = new InformeDAO(); // Si no es descuadre, vamos a matematicas analiticas, instanciamos DAO de informes
 
-            // =====================================================================
-            // COMPUTACIÓN DE CLASE CERRADA (Extractor Múltiple de Cargas Acumuladas)
-            // =====================================================================
-            double totalVentas = dao.obtenerTotalVentas(idInventario); // Llamada resolutiva de carga doble 
-            double totalGastos = dao.obtenerTotalGastos(idInventario); // Invocación a subrutinas independientes numéricas
-            double totalPedidos = dao.obtenerTotalPedidos(idInventario); // Operador extractivo foráneo.
-            int cantidadVentas = dao.obtenerCantidadVentas(idInventario); // Extractor sumatorio de cardinalidad Int
+            // Extraemos los consolidados pidiendo ayuda a las subrutinas de la Base de datos
+            double totalVentas = dao.obtenerTotalVentas(idInventario); // Cuanta plata entró por compras clientes
+            double totalGastos = dao.obtenerTotalGastos(idInventario); // Cuanta plata se gastó en trapeadores
+            double totalPedidos = dao.obtenerTotalPedidos(idInventario); // Cuanta plata se invirtió en comprar a Cervecería
+            int cantidadVentas = dao.obtenerCantidadVentas(idInventario); // Cuántos tickets o recibos diferentes se originaron
 
-            // =====================================================================
-            // POLIMORFISMO ARITMÉTICO LÓGICO Y CÁLCULOS 
-            // =====================================================================
-            double gananciaNeta = totalVentas - totalGastos - totalPedidos; // Reestructuracion mutativa en RAM (Ecuacion Financiera)
+            // 1. Cálculo de ganancia libre o Neta (Plata Bruta - Gastos Locales - Proveedores)
+            double gananciaNeta = totalVentas - totalGastos - totalPedidos; 
 
-            // Extracción proporcional iterada matemáticamente
-            double maxReferencia = Math.max(totalVentas, Math.max(totalGastos, totalPedidos)); // Operación estática abstracta utilitaria base de Math
-            int porcentajeVentas = 0, porcentajeGastos = 0, porcentajePedidos = 0; // Inicializador escalar inicializado preventivamente para impedir crash Null.
+            // 2. Cálculo para barras de porcentajes UI
+            double maxReferencia = Math.max(totalVentas, Math.max(totalGastos, totalPedidos)); // Encuentra cuál es el valor más grande de los 3 
+            int porcentajeVentas = 0, porcentajeGastos = 0, porcentajePedidos = 0; // Prepara variables en cero
 
-            if (maxReferencia > 0) { // Limitante preventivo de divisiones por cero abstractas 
-                porcentajeVentas = (int) ((totalVentas / maxReferencia) * 100); // Polimorfismo cast forzado (Double to Int) reductor
-                porcentajeGastos = (int) ((totalGastos / maxReferencia) * 100); // Idem encapsulado anterior
-                porcentajePedidos = (int) ((totalPedidos / maxReferencia) * 100); // Disminución de coma flotante asimétrica a base
+            if (maxReferencia > 0) { // Matemática de regla de tres para obtener el porcentaje
+                porcentajeVentas = (int) ((totalVentas / maxReferencia) * 100); 
+                porcentajeGastos = (int) ((totalGastos / maxReferencia) * 100); 
+                porcentajePedidos = (int) ((totalPedidos / maxReferencia) * 100); 
             }
 
             // =====================================================================
-            // MUTACIÓN Y ENROLLADO EN CONTEXTO DE DESPACHO
+            // MANDAR TODAS ESTAS VARIABLES (ATRIBUTOS) A LA VISTA JSP PARA PINTAR
             // =====================================================================
-            request.setAttribute("idInventario", idInventario); // Añade atributos aislados al motor JSP
-            request.setAttribute("totalVentas", totalVentas); // Trasvasa float dobles puros a variables plantilla
-            request.setAttribute("totalGastos", totalGastos); // Idem Inserción 
-            request.setAttribute("totalPedidos", totalPedidos); // Idem acoplamiento estático 
-            request.setAttribute("gananciaNeta", gananciaNeta); // Despacha resultante atada 
-            request.setAttribute("cantidadVentas", cantidadVentas); // Amarra cardinal
-            request.setAttribute("porcentajeVentas", porcentajeVentas); // Adjunta enteros porcentuales calculados
-            request.setAttribute("porcentajeGastos", porcentajeGastos); // Agrega derivado temporal 
-            request.setAttribute("porcentajePedidos", porcentajePedidos); // Adjunta la variable computada final en memoria 
+            request.setAttribute("idInventario", idInventario); 
+            request.setAttribute("totalVentas", totalVentas); 
+            request.setAttribute("totalGastos", totalGastos); 
+            request.setAttribute("totalPedidos", totalPedidos); 
+            request.setAttribute("gananciaNeta", gananciaNeta); 
+            request.setAttribute("cantidadVentas", cantidadVentas); 
+            request.setAttribute("porcentajeVentas", porcentajeVentas); 
+            request.setAttribute("porcentajeGastos", porcentajeGastos); 
+            request.setAttribute("porcentajePedidos", porcentajePedidos); 
 
-            request.getRequestDispatcher("view/visualizar_informes.jsp").forward(request, response); // Despacha el envoltorio cargado (Pipeline MVC).
+            // Se envía de forma silenciosa e interna para que pinte todo
+            request.getRequestDispatcher("view/visualizar_informes.jsp").forward(request, response); 
 
-        } catch (NumberFormatException e) { // Resolutor condicional a error de incompatibilidad cast 
-            response.sendRedirect("NegocioServlet?error=IdInventarioInvalido"); // Vaciado estático asíncrono preventivo redirigiendo error 
+        } catch (NumberFormatException e) { 
+            // Si estalló intentando convertir un ID de letras raras en vez de números, devuelve error.
+            response.sendRedirect("NegocioServlet?error=IdInventarioInvalido"); 
         }
     }
 }

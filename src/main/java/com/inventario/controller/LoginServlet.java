@@ -1,4 +1,4 @@
-package com.inventario.controller; // Regla de paquetería jerárquica y localizadora 
+package com.inventario.controller;
 
 import com.inventario.dao.UsuarioDAO;
 import com.inventario.model.Usuario;
@@ -11,126 +11,103 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- * Controlador de Identidad o Autenticador: LoginServlet.
+ * Controlador LoginServlet.
  * 
- * Clase de fachada y direccionamiento frontal (Front Controller Pattern approach).
- * Ejerce de núcleo iterativo captador en la capa Servlet, interconectando componentes DAO (Persistencia)
- * con la inyección de atributos de Sesión transientes para orquestar los estados duraderos pre-autorizados 
- * del conjunto de la estructura MVC a toda la plataforma.
+ * Es el portero o guardián de toda la web. Valida las contraseñas,
+ * crea la mochila general de sesión para cada persona y permite desconectar usuarios.
  */
 @WebServlet(name = "LoginServlet", urlPatterns = {"/LoginServlet"})
-// Decorador de compilación para apuntar automáticamente sin XML este endpoint a las reglas estipuladas. 
-// Aísla el patrón request-response acoplándolo como un observador estático visible ante envíos de formulario en View.
-public class LoginServlet extends HttpServlet { // Subclase que instancia un ciclo de vida web 
+public class LoginServlet extends HttpServlet { 
 
     /**
-     * Reescritura condicional posteo (HTTP POST Payload Catcher).
-     * Aísla credenciales brutas provistas en la web (Interfaz cliente),
-     * invocando las reglas internas lógicas encapsuladas en la clase DAO e introduciendo una jerarquía 
-     * en memoria para gobernar sesiones completas durante el tránsito local o en cascada.
-     * 
-     * @param request  Contenedor envoltorio de peticiones con hash interno key-value (formulario de origen)
-     * @param response Conector abstracto hacia flujos de salida o encabezados reactivos (redireccionamiento asíncrono o sincrónico)
+     * El método doPost es el que atrapa el intento del individuo 
+     * tratando de meter su correo y password.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Delegación forzada genérica de fallos runtime hacia Tomcat
+            throws ServletException, IOException { 
         
-        // =====================================================================
-        // PARSEO DE PAYLOAD O TEXTOS BRUTOS A MEMORIA LÓGICA
-        // Función interviniente: Mapea identificadores HTML contra String temporales en RAM local de este hilo
-        // =====================================================================
-        String email = request.getParameter("email");       // Adquisición de cadena literal a nivel red o de vista .
-        String password = request.getParameter("password"); // Extracción del String ocultado del formulario .
+        // 1. Extraer los datos brutos del texto ingresado 
+        String email = request.getParameter("email");       // Correo escrito
+        String password = request.getParameter("password"); // Contraseña digitada (Llegará como texto normal como "1234")
         
-        // =====================================================================
-        // DISPARO DE PROCESO DE INTEGRIDAD BASE DE DATOS (Delegado)
-        // Invoca subentidad o clase Data Access Object que esconde el framework relacional y
-        // evita fugas de lógica foránea en el controlador. 
-        // =====================================================================
-        UsuarioDAO dao = new UsuarioDAO();                        // Instanciación directa en rama viva referenciable conectora MVC.
-        Usuario usuario = dao.validarLogin(email, password);     // Ejecución resolutiva y de carga (Devuelve Entity Model fuerte encapsulado local o NULO total).
+        // 2. Pedirle al Gestor UsuarioDAO que cruce la información
+        UsuarioDAO dao = new UsuarioDAO();                       
+        Usuario usuario = dao.validarLogin(email, password); // Evaluar... Esto cifrará la password a SHA256 e irá a la tabla 
         
-        // =====================================================================
-        // ENRUTADOR CONDICIONAL DE RESOLUCIÓN BIFURCADA (Control Flujo Central)
-        // =====================================================================
-        if (usuario != null) { // Validador de existencia y confirmación lógica sobre el POJO resultante
-            // INSTANCIA POSITIVA - Objeto no nulo asimila credencial real y validada .
+        // 3. Resultado
+        if (usuario != null) { // Si devolvió al individuo empacado en un objeto Usuario (Es decir que sus datos eran verídicos)
             
-            // CONSTRUCCIÓN E INYECCIÓN AMBIENTAL DE SESSION
-            // Inicializa un canal transiente protegido que supervive en paralelo al transcurrir en la UI.
-            HttpSession session = request.getSession();                    // Instancia recolectora de metadato abstracto vinculante al hash cliente-servidor 
-            session.setAttribute("usuarioLogueado", usuario);              // Graba el perfil completo POJO de la DB dentro de un apuntador en vivo en el SessionScope
-            // (La arquitectura modelo ya incluye de por sí listas de variables privadas y funciones lógicas que actúan en cascada o pasivamente)
+            // CREACIÓN DE SESIÓN EN VIVO
+            HttpSession session = request.getSession(); // Le armamos una pequeña memoria privada entre la web y nuestra arquitectura
+            session.setAttribute("usuarioLogueado", usuario); // Pegamos SU PERFIL dentro de ella como una billetera 
             
             // =====================================================================
-            // ORQUESTACIÓN ADICIONAL PARAMÉTRICA Y CÁLCULOS (Dashboards y vistas accesorias)
-            // Pre-cargador (Eager loader) estático para complementar polimorfismo dinámico de interface antes de despachar visual .
+            // CARGA E INFORMACIÓN PREVENTIVA (Pequeños metadatos usados en pantallas de bienvenida Admins)
             // =====================================================================
-            try { // Envoltura asiladora frente a fallos analíticos que no deben colgar la matriz de seguridad .
-                com.inventario.dao.NegocioDAO negocioDao = new com.inventario.dao.NegocioDAO(); // Llama entidad generadora asociada
-                int cantBares = negocioDao.contarNegocios(usuario.getIdUsuario()); // Interroga y extrae iteración matemática base
+            try { 
+                com.inventario.dao.NegocioDAO negocioDao = new com.inventario.dao.NegocioDAO(); 
+                int cantBares = negocioDao.contarNegocios(usuario.getIdUsuario()); // Calcula cuantas tiendas tiene el admin
                 
-                UsuarioDAO usuarioDao = new UsuarioDAO(); // Generador asilado 
-                int cantTrabajadores = usuarioDao.contarTrabajadores();            // Resolución total contable asimétrica sobre registros locales
+                UsuarioDAO usuarioDao = new UsuarioDAO(); 
+                int cantTrabajadores = usuarioDao.contarTrabajadores(); // Suma el recuento global
                 
-                session.setAttribute("numBares", cantBares);                       // Pasa el flag contable al contexto scope de presentación
-                session.setAttribute("numTrabajadores", cantTrabajadores);         // Trasvasa resultante para manipulación y visual inter-app
+                session.setAttribute("numBares", cantBares); // Guarda estas cifras estáticas en los atributos         
+                session.setAttribute("numTrabajadores", cantTrabajadores);         
                 
-            } catch(Exception e) { // Atrapatodo encapsulador o protector pasivo sobre analíticas relacionales en runtime
-                System.out.println("Error cargando estadísticas en login: " + e.getMessage()); // Registro consola nativa 
-                // Omisión lógica para sostener polimorfismo resiliente (Fallback safety)
+            } catch(Exception e) { 
+                System.out.println("Error cargando estadísticas en login: " + e.getMessage()); 
             }
 
-            // APLICACIÓN LÓGICA INDUCIDA Y CARGA REFERENCIAL A ENTIDADES DÉBILES RELACIONADAS (Trabajador)
-            if (usuario.getIdRol() == 2) { // Verificador del campo relacional embebido numérico en POJO .
-                try { // Bloque vigilante y resolutor extra
-                    com.inventario.model.Negocio negAsignado = dao.obtenerNegocioAsignado(usuario.getIdUsuario()); // Interpelación con resultante polimórfico a modelo foráneo (POJO negocio dependiente).
-                    if (negAsignado != null) { // Test pasivo asilador 
-                        session.setAttribute("idNegocioActual", negAsignado.getIdNegocio()); // Disparo inyectivo contextual
-                        session.setAttribute("nombreNegocioActual", negAsignado.getNombre()); // Amarre de semántica literal asilada.
+            // =====================================================================
+            // CONDICIONAL: SI EN VEZ DE ADMIN (1), ES UN CAJERO (2)
+            // =====================================================================
+            if (usuario.getIdRol() == 2) { 
+                try { 
+                    com.inventario.model.Negocio negAsignado = dao.obtenerNegocioAsignado(usuario.getIdUsuario()); // Vamos asimilando para qué locación labora
+                    if (negAsignado != null) { 
+                        session.setAttribute("idNegocioActual", negAsignado.getIdNegocio()); // Le forzamos su tienda local
+                        session.setAttribute("nombreNegocioActual", negAsignado.getNombre()); 
                         
-                        // CARGA EN CASCADA INTERNA TRANSIENTE (Sub-entidad relacionada Inventario)
-                        com.inventario.dao.InventarioDAO invDao = new com.inventario.dao.InventarioDAO(); // Fabricación dinámica foránea DAO
-                        com.inventario.model.Inventario invActivo = invDao.obtenerInventarioActivo(negAsignado.getIdNegocio()); // Cae a otro modelo o POJO independiente validando 
-                        if (invActivo != null) { // Estricta nulidad evaluada transiente
-                            session.setAttribute("idInventarioActual", invActivo.getIdInventario()); // Disparo contextual al puntero inter-vivo relacional 
+                        // De una y automáticamente, también localizamos cuál es el periodo o Inventario vivo que tiene el bar ese mes activado 
+                        com.inventario.dao.InventarioDAO invDao = new com.inventario.dao.InventarioDAO(); 
+                        com.inventario.model.Inventario invActivo = invDao.obtenerInventarioActivo(negAsignado.getIdNegocio()); 
+                        if (invActivo != null) { 
+                            session.setAttribute("idInventarioActual", invActivo.getIdInventario()); // Le atamos a ese inventario general 
                         }
                     }
-                } catch (Exception e) { // Consola fallback 
-                    System.out.println("Error cargando negocio del trabajador: " + e.getMessage()); // Impresión encapsulada 
+                } catch (Exception e) { 
+                    System.out.println("Error cargando negocio del trabajador: " + e.getMessage());  
                 }
             }
 
-            // REDIRECCIONAMIENTO DIRECTO EXITOSO EN BIFURCACIÓN PRINCIPAL 
-            response.sendRedirect("view/Menu_sistema.jsp"); // Corta la subrutina devolviendo cabecera de enlace nuevo 
+            // Manda todo contento al Panel Integrador
+            response.sendRedirect("view/Menu_sistema.jsp"); 
             
         } else {
-            // INSTANCIA NEGATIVA O FALSA - POJO sin acoplar o fallo de inyección iterativa (Error Credencial)
-            // Resolución asíncrona reactiva para enviar al buffer la rearmadura local
-            response.sendRedirect("view/Inicio_sesion.html?error=1"); // Redirecciona inyectando flag temporal parametrizado restrictivo.
+            // INSTANCIA FALLIDA O HACKER. Si "usuario" es Nulo, osea que el cruce fue erróneo
+            response.sendRedirect("view/Inicio_sesion.html?error=1"); // Echamos a la cara un mensaje que vuelva a revisar letras 
         }
     }
 
     /**
-     * Sobrecarga del extractor polimórfico descriptivo simple GET.
-     * En este scope, asume o intercepta una acción lógica aislada (Logout), interrumpiendo, 
-     * purificando la memoria temporal viva y borrando todo su arbolaje session antes del renderizado de salida final.
+     * El método doGet atiende las URL simples directas. En este caso se usa para
+     * destruir el sistema y generar el "DESCONECTARSE".
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException { // Capturador forzado local error I/O framework Web 
+            throws ServletException, IOException { 
 
-        String action = request.getParameter("action"); // Extrae un discriminador transaccional puro.
+        String action = request.getParameter("action"); // Lee qué quisimos 
 
-        if ("logout".equals(action)) { // Disparador condicionado o puente evaluador lógico.
-            HttpSession session = request.getSession(false); // Refiere el objeto contexto sin inicializar o abrir espacios redundantes vacíos ("False").
-            if (session != null) { // Observador no nulo temporal
-                session.invalidate(); // Llamado de subrutina destructora integral sobre la UI y envoltorio inter-comunicador
+        if ("logout".equals(action)) { // Si le dimos al botón Cerrar Sesión
+            HttpSession session = request.getSession(false); // Pedimos al navegador su envoltorio
+            if (session != null) { // Si hay envoltorio de memoria en este hilo local
+                session.invalidate(); // DESTRUCTURADOR: Cierra, rompe y vacía todo en la sesión, forzándolo a la nada abstracta
             }
-            response.sendRedirect("view/Inicio_sesion.html"); // Vuelta hacia página base renderizada sin persistencia local .
-        } else { // Fallback alterno 
-            response.sendRedirect("view/Inicio_sesion.html"); // Evita loopings redirigiendo forzado a ruta sana originaria del Login general .
+            response.sendRedirect("view/Inicio_sesion.html"); // Volvemos sin llaves al Login UI
+        } else { 
+            response.sendRedirect("view/Inicio_sesion.html"); 
         }
     }
 }
