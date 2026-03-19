@@ -9,6 +9,7 @@
             <title>Editar Productos</title>
             <link rel="stylesheet" href="../css/editar_productos.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         </head>
 
         <body>
@@ -64,7 +65,7 @@
                                             <!-- Botón Eliminar -->
                                             <a href="../ProductoServlet?action=eliminar&id=${p.idProducto}"
                                                 style="color: #e74c3c; margin-left: 10px; font-size: 1.2rem;"
-                                                onclick="return confirm('¿Estás seguro de eliminar este producto?');"
+                                                onclick="confirmarEliminarProducto(event, this.href);"
                                                 title="Eliminar">
                                                 <i class="fa-solid fa-trash"></i>
                                             </a>
@@ -109,6 +110,25 @@
 
             <footer>
             </footer>
+            <script>
+                function confirmarEliminarProducto(e, url) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Eliminar Producto',
+                        text: '¿Estás seguro de eliminar este producto?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e74c3c',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                }
+            </script>
         </body>
 
         </html>

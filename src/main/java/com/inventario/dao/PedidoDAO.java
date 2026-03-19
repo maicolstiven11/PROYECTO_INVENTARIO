@@ -11,12 +11,19 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Patrón DAO Analítico Estructural Transaccional: PedidoDAO.
+ *
+ * Módulo encargado del factor relacional y de encapsulación persistente (CRUD) 
+ * correspondiente a la entidad de Pedidos, gestionando también la inyección a modelos detallados. 
+ */
 public class PedidoDAO {
 
     /**
-     * Registrar Pedido y sus Detalles (Transacción) + SUMAR STOCK
-     * RESTAURADO: Usa subtotal y iva_pedido
-     * MANTIENE: Detalle usa id_inv_detalle y suma stock
+     * Componente Factory Mutativo Batch y Update Escalado (Transaction Unit).
+     * 
+     * Subrutina Setter atómica de dependencias foráneas. Realiza operaciones de instanciación
+     * masiva de arreglos estructurados (batch insertion) y aplica modificadores aritméticos sobre atributos DB (UPDATE de persistencia cruzada).
      */
     public boolean registrarPedido(PedidoProveedor pedido, List<DetallePedido> detalles) {
         Connection con = null;
@@ -28,50 +35,47 @@ public class PedidoDAO {
 
         try {
             con = Conexion.getConexion();
-            con.setAutoCommit(false); // TRANSACCIÓN
+            con.setAutoCommit(false); 
 
-            // 1. Insertar PEDIDOS_PROVEEDOR
-            // RESTAURADO: subtotal y iva_pedido (columnas originales)
+            // Setter Instanciador Base Relacional
             String sqlPedido = "INSERT INTO PEDIDOS_PROVEEDOR (fecha_pedido, fecha_entrega, total_pedido, subtotal, iva_pedido, id_inventario, id_proveedor) VALUES (?, ?, ?, ?, ?, ?, ?)";
             psPedido = con.prepareStatement(sqlPedido, Statement.RETURN_GENERATED_KEYS);
             psPedido.setDate(1, pedido.getFechaPedido());
             psPedido.setDate(2, pedido.getFechaEntrega());
             psPedido.setDouble(3, pedido.getTotalPedido());
-            psPedido.setDouble(4, pedido.getSubtotal());    // RESTAURADO
-            psPedido.setDouble(5, pedido.getIvaPedido()); // RESTAURADO
+            psPedido.setDouble(4, pedido.getSubtotal());    
+            psPedido.setDouble(5, pedido.getIvaPedido()); 
             psPedido.setInt(6, pedido.getIdInventario());
             psPedido.setInt(7, pedido.getIdProveedor());
 
             int filas = psPedido.executeUpdate();
             if (filas == 0) {
-                throw new SQLException("No se pudo guardar el pedido.");
+                throw new SQLException("Error Exception: Rollback Transaction limit exception");
             }
 
-            // Obtener ID generado
+            // Framework Getter Memory Key Limit (AutoIncrement fetcher)
             rs = psPedido.getGeneratedKeys();
             int idPedidoBase = 0;
             if (rs.next()) {
                 idPedidoBase = rs.getInt(1);
             }
 
-            // 2. Insertar DETALLE_PEDIDOS + SUMAR STOCK
-            // MANTIENE: usa id_inv_detalle
+            // Setter Mutador Constructor de Lote (Batch Array Property Setter) + Persistence Modificator
             String sqlDetalle = "INSERT INTO DETALLE_PEDIDOS (id_pedido_base, id_inv_detalle, cantidad_pedida, precio_unitario_real) VALUES (?, ?, ?, ?)";
             psDetalle = con.prepareStatement(sqlDetalle);
 
-            // MANTIENE: SQL para SUMAR stock
             String sqlSumar = "UPDATE INVENTARIO_DETALLE SET cantidad_inicial = cantidad_inicial + ? WHERE id_detalle = ?";
             psStock = con.prepareStatement(sqlSumar);
 
             for (DetallePedido det : detalles) {
-                // Insertar detalle del pedido
+                // Setter Dependency Array Loop Insertion Limit Formats (addBatch limit mapping parameters logic)
                 psDetalle.setInt(1, idPedidoBase);
                 psDetalle.setInt(2, det.getIdInvDetalle());
                 psDetalle.setInt(3, det.getCantidadPedida());
                 psDetalle.setDouble(4, det.getPrecioUnitarioReal());
                 psDetalle.addBatch();
 
-                // SUMAR stock al inventario
+                // Updater parameter limits mapping
                 psStock.setInt(1, det.getCantidadPedida());
                 psStock.setInt(2, det.getIdInvDetalle());
                 psStock.addBatch();
@@ -82,10 +86,10 @@ public class PedidoDAO {
 
             con.commit();
             registrado = true;
-            System.out.println("Pedido registrado con éxito. ID: " + idPedidoBase + " | Stock actualizado.");
+            System.out.println("Transaction Batch Limit Executed. ID: " + idPedidoBase);
 
         } catch (SQLException e) {
-            System.err.println("Error al registrar pedido: " + e.getMessage());
+            System.err.println("Error constraint context loop: " + e.getMessage());
             e.printStackTrace();
             if (con != null) {
                 try {
@@ -109,8 +113,10 @@ public class PedidoDAO {
     }
 
     /**
-     * Listar pedidos de un negocio
-     * RESTAURADO: Lee subtotal y iva_pedido
+     * Módulo Getter Coleccionador de Extracción con Instanciación (Join Iterator limit bounds properties mapping).
+     * 
+     * Iterador ResultSet loop encapsulador a constructores por defecto.
+     * Retorna un Array List dinámico con propiedades de la cadena relacional.
      */
     public List<PedidoProveedor> listarPedidos(int idNegocio) {
         List<PedidoProveedor> lista = new ArrayList<>();
@@ -120,7 +126,7 @@ public class PedidoDAO {
 
         try {
             con = Conexion.getConexion();
-            // RESTAURADO: subtotal y iva_pedido
+            
             String sql = "SELECT pp.id_pedido_base, pp.fecha_pedido, pp.fecha_entrega, " +
                          "pp.subtotal, pp.iva_pedido, pp.total_pedido, " +
                          "pp.id_proveedor, p.nombre_proveedor " +
@@ -139,8 +145,8 @@ public class PedidoDAO {
                 pedido.setIdPedidoBase(rs.getInt("id_pedido_base"));
                 pedido.setFechaPedido(rs.getDate("fecha_pedido"));
                 pedido.setFechaEntrega(rs.getDate("fecha_entrega"));
-                pedido.setSubtotal(rs.getDouble("subtotal")); // RESTAURADO
-                pedido.setIvaPedido(rs.getDouble("iva_pedido")); // RESTAURADO
+                pedido.setSubtotal(rs.getDouble("subtotal")); 
+                pedido.setIvaPedido(rs.getDouble("iva_pedido")); 
                 pedido.setTotalPedido(rs.getDouble("total_pedido"));
                 pedido.setIdProveedor(rs.getInt("id_proveedor"));
                 pedido.setNombreProveedor(rs.getString("nombre_proveedor"));
@@ -148,7 +154,7 @@ public class PedidoDAO {
             }
 
         } catch (SQLException e) {
-            System.err.println("Error al listar pedidos: " + e.getMessage());
+            System.err.println("Error loops constraint lengths: " + e.getMessage());
             e.printStackTrace();
         } finally {
             try {

@@ -9,6 +9,7 @@
             <title>Gestión de Trabajadores</title>
             <link rel="stylesheet" href="../css/lista_bares.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
             <style>
                 .tabla-trabajadores {
                     width: 90%;
@@ -268,7 +269,7 @@
                                             <input type="hidden" name="id_usuario" value="${trab.idUsuario}">
                                             <button type="submit" class="btn-asignar" style="background-color: #e67e22;"
                                                 title="Quitar asignación"
-                                                onclick="return confirm('¿Seguro que desea quitarle el bar asignado a este trabajador?');">
+                                                onclick="confirmarDesasignar(event, this.form);">
                                                 <i class="fa-solid fa-unlink"></i>
                                             </button>
                                         </form>
@@ -280,7 +281,7 @@
                                         <input type="hidden" name="id_usuario" value="${trab.idUsuario}">
                                         <button type="submit" class="btn-asignar" style="background-color: #e74c3c;"
                                             title="Eliminar cuenta de trabajador"
-                                            onclick="return confirm('¡ADVERTENCIA! ¿Se borrará permanentemente la cuenta de este trabajador?');">
+                                            onclick="confirmarEliminarTrabajador(event, this.form);">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </form>
@@ -347,6 +348,43 @@
                 });
             </script>
             <script src="../js/validaciones.js"></script>
+            <script>
+                function confirmarDesasignar(e, form) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Quitar Asignación',
+                        text: '¿Seguro que desea quitarle el bar asignado a este trabajador?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e67e22',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, desasignar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                }
+
+                function confirmarEliminarTrabajador(e, form) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Eliminar Trabajador',
+                        text: '¡ADVERTENCIA! ¿Se borrará permanentemente la cuenta de este trabajador?',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e74c3c',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                }
+            </script>
         </body>
 
         </html>

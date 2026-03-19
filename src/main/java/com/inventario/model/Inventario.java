@@ -1,111 +1,107 @@
-package com.inventario.model;
+package com.inventario.model; // Instrucción que declara la ubicación lógica jerárquica de la clase dentro del modelo
 
-import java.sql.Date; // Importación para manejar fechas de la BD MySQL (fecha_inicio del inventario)
+import java.sql.Date; // Invocación de componente base que encapsula funcionalidades de temporización SQL
 
 /**
- * MODELO: Clase Inventario (Entidad/POJO)
+ * Modelo de datos: Clase Inventario (Entidad o POJO - Plain Old Java Object).
  * 
- * Representa la tabla INVENTARIO de la base de datos MySQL.
- * Un Inventario es un periodo de control contable de un bar (negocio).
- * Solo puede haber UN inventario activo por negocio a la vez.
- * 
- * FLUJO DE DATOS:
- * - CREACIÓN:    Inicio_inv.html → InventarioServlet?action=iniciar → InventarioDAO.iniciarInventario() → INSERT en tabla INVENTARIO
- * - LECTURA:     InventarioDAO.obtenerInventarioActivo(idNegocio) → InventarioServlet?action=entrar → menu_inventario.jsp
- * - CIERRE:      inventario_cierre.jsp → InventarioServlet?action=cerrar → InventarioDAO.cerrarInventario() → UPDATE estado='inactivo'
- * - EN LOGIN:    LoginServlet → InventarioDAO.obtenerInventarioActivo() → Carga idInventarioActual en sesión para trabajadores
- * 
- * TABLAS RELACIONADAS:
- * - NEGOCIO: Cada inventario pertenece a un negocio (FK: id_negocio)
- * - INVENTARIO_DETALLE: Los productos con su stock inicial (FK: id_inventario)
- * - VENTA: Las ventas se registran contra este inventario (FK: id_inventario vía sesión)
- * - GASTO_DIARIO: Los gastos se vinculan al inventario activo (FK: id_inventario)
- * - PEDIDOS_PROVEEDOR: Los pedidos se vinculan al inventario activo
+ * Interfaz orientada a objetos que rige la tabla controladora global 'inventario'.
+ * Funciona como macro-objeto contenedor, esqueleto transaccional estricto 
+ * dentro de cuyos límites se subordina todo el conjunto persistente hijo de Gastos, Entradas y Ventas 
+ * atado lógicamente por un marco cronológico ('abierto/activo' vs 'inactivo').
  */
-public class Inventario {
+public class Inventario { // Definición central de clase principal con ámbito público
 
     // =====================================================================
-    // ATRIBUTOS PRIVADOS - Corresponden a columnas de la tabla INVENTARIO
+    // ATRIBUTOS ENCAPSULADOS PRINCIPALES MATEADOS (Persistencia)
+    // Reservas de variables abstractas modeladas estructuralmente para espejo con el diagrama MER subyacente.
     // =====================================================================
 
-    private int idInventario;   // PK: id_inventario (INT, AUTO_INCREMENT). Se genera al crear nuevo inventario.
-    private int idNegocio;      // FK: id_negocio (INT). Referencia a la tabla NEGOCIO. Viene de: Inicio_inv.html → input hidden name="idNegocio"
-    private Date fechaInicio;   // fecha_inicio (DATE). Fecha de apertura del inventario. Viene de: Inicio_inv.html → input name="fecha" (type="date")
-    private String tipoControl; // tipo_control (VARCHAR). Tipo de control: 'semanal' o 'mensual'. Viene de: Inicio_inv.html → select name="tipo"
-    private String estado;      // estado (ENUM: 'activo','inactivo'). Se crea como 'activo', cambia a 'inactivo' al cerrar.
+    private int idInventario;   // Tipo primitivo de dato entero; llave primaria aislada que identifica este macro-periodo contable y estátus.
+    private int idNegocio;      // Llave foránea resolutiva (FK) que confina y adscribe jerárquicamente a este conjunto de atributos abstractos dentro de un paraguas padre 'Negocio'.
+    private Date fechaInicio;   // Envoltorio de objeto Date de nivel SQL requerido para referenciar el hito de apertura y temporalidad de la tupla principal generada.
+    private String tipoControl; // Carga de memoria RAM de tipo char array / string responsable de especificar un nivel limitante pre-parametrizado de seguimiento en el log lógico (ej. Semanal, Mensual).
+    private String estado;      // Atributo string polimórfico de carácter bandera (enum simulado) que orquesta externamente el flujo operativo inter-capas cortando dependientes sobre lógicas "Activas" o cerrando en "Inactivos".
 
     /**
-     * CONSTRUCTOR VACÍO
-     * Usado por: InventarioDAO.obtenerInventarioActivo() cuando crea el objeto y lo llena con setters.
-     * Usado por: LoginServlet al buscar el inventario activo del trabajador.
+     * CONSTRUCTOR POR DEFECTO
+     * Método inicializador de sobrecarga que responde proactivamente a llamadas en reflection limitadas (new Object()).
+     * Constituye la base paramétrica nula útil antes de someter y propagar cambios de setters masivos.
      */
-    public Inventario() {
+    public Inventario() { // Instanciador basal pasivo base estricta de las reglas POJO 
     }
 
     /**
-     * CONSTRUCTOR COMPLETO
-     * Permite crear un Inventario con todos los datos de una sola vez.
-     * Usado por: InventarioDAO al leer datos de un ResultSet.
+     * CONSTRUCTOR DE LLENADO RÁPIDO O SOBRECARGADO
+     * Función paramétrica que agiliza y reduce costos de verbosidad e hidratación POJO integrándolo a la vez con estados concretos de BD.
+     * 
+     * @param idInventario ID maestro o folio del periodo
+     * @param idNegocio ID foráneo o ancla superior física sobre cual actúa el bloque
+     * @param fechaInicio Sello de apertura del contenedor intertemporal en objetos Time
+     * @param tipoControl Estructura String de catalogación modular de alcance temporal
+     * @param estado String bandera que activa o apaga las validaciones lógicas concurrentes en Vistas
      */
-    public Inventario(int idInventario, int idNegocio, Date fechaInicio, String tipoControl, String estado) {
-        this.idInventario = idInventario; // Viene de: rs.getInt("id_inventario")
-        this.idNegocio = idNegocio;       // Viene de: rs.getInt("id_negocio")
-        this.fechaInicio = fechaInicio;   // Viene de: rs.getDate("fecha_inicio")
-        this.tipoControl = tipoControl;   // Viene de: rs.getString("tipo_control")
-        this.estado = estado;             // Viene de: rs.getString("estado")
+    public Inventario(int idInventario, int idNegocio, Date fechaInicio, String tipoControl, String estado) { // Configuración constructiva pesada en una rutina atómica
+        this.idInventario = idInventario; // Puntero instanciado directo para propiedad nativa
+        this.idNegocio = idNegocio;       // Ajuste estructural de enlace padre en objeto
+        this.fechaInicio = fechaInicio;   // Inyección referencial y paso de parámetro en cascada de objeto clase complejo externo
+        this.tipoControl = tipoControl;   // Volcado de memoria a la configuración transaccional límite
+        this.estado = estado;             // Adopta el perfil de estado booleano enmascarado recibido a instancia
     }
 
     // =====================================================================
-    // GETTERS Y SETTERS
+    // BLOQUE DE COMPORTAMIENTO BASAL: GETTERS / SETTERS
+    // Subrutinas o Métodos Funcionales expuestos orientados únicamente a permitir 
+    // y gobernar la alteración de estado de las variables miembro protegiendo el Scope de Clase.
     // =====================================================================
 
-    /** Retorna el ID del inventario. Se guarda en sesión como: session.setAttribute("idInventarioActual", inv.getIdInventario()) */
-    public int getIdInventario() {
-        return idInventario;
+    /** Método accesor: Dispone y extrae externamente el acceso restrictivo al número de folio interno transaccional principal */
+    public int getIdInventario() { // Retorno entero puro primitivo por sobrecarga del encapsulado
+        return idInventario; // Retorno posicional inercial de valor real
     }
 
-    /** Asigna el ID. Llamado desde: InventarioDAO con rs.getInt("id_inventario") */
-    public void setIdInventario(int idInventario) {
-        this.idInventario = idInventario;
+    /** Método mutador: Reevaluación forzosa del identificador único atómico recuperado mediante ResultSets o forjado de capa control */
+    public void setIdInventario(int idInventario) { // Inyecciones estructuradas por flujos DAO
+        this.idInventario = idInventario; // Seteo de atributo local con mutabilidad
     }
 
-    /** Retorna el ID del negocio al que pertenece. Se guarda en sesión como: session.setAttribute("idNegocioActual", idNegocio) */
-    public int getIdNegocio() {
-        return idNegocio;
+    /** Acceso relacional: Recupera el alias primitivo entero referencial sobre el objeto matriz raíz en jerarquía 'Negocio' */
+    public int getIdNegocio() { // Entrega indexada foránea relacional
+        return idNegocio; // Desacopla y retorna a flujos superiores
     }
 
-    /** Asigna el ID del negocio. Viene de: InventarioServlet → Integer.parseInt(request.getParameter("idNegocio")) */
-    public void setIdNegocio(int idNegocio) {
-        this.idNegocio = idNegocio;
+    /** Mutador estructural inter-objetos: Transfiere a la memoria temporal un nodo o pointer clave para aislar la consulta hacia variables controladas puramente de una sucursal física. */
+    public void setIdNegocio(int idNegocio) { // Acepta la orden integradora hacia constructo 'Negocios' general 
+        this.idNegocio = idNegocio; // Firma local a la variable
     }
 
-    /** Retorna la fecha de inicio. Usada en: reporte_descuadre.jsp y lista_informes.jsp */
-    public Date getFechaInicio() {
-        return fechaInicio;
+    /** Accesor temporal: Genera como respuesta externa en capa de presentación el objeto Date que sella el cronograma de encendido de este módulo */
+    public Date getFechaInicio() { // Invocación a librería empaquetada Java.SQL devolviendo interfaz base conformada Date
+        return fechaInicio; // Expide de memoria referencial hacia un destino superior
     }
 
-    /** Asigna la fecha. Viene de: InventarioServlet → Date.valueOf(request.getParameter("fecha")) */
-    public void setFechaInicio(Date fechaInicio) {
-        this.fechaInicio = fechaInicio;
+    /** Mutador temporal: Intercepta y ajusta el campo apuntador estableciendo al registro origen un dimensionamiento paramétrico fechado. */
+    public void setFechaInicio(Date fechaInicio) { // Recibe instanciación empaquetadora con los valores estáticos pre-procesados en Servlet 
+        this.fechaInicio = fechaInicio; // Seteador de parámetro principal complejo 
     }
 
-    /** Retorna el tipo de control ('semanal'/'mensual'). Usado en vistas de información */
-    public String getTipoControl() {
-        return tipoControl;
+    /** Acceso clasificatorio: Facilita métricas textuales que categorizan un filtro condicional o reglas preformadas de evaluación. */
+    public String getTipoControl() { // String genérico estandarizado de respuesta funcional
+        return tipoControl; // Liberación del buffer encapsulado temporal
     }
 
-    /** Asigna el tipo. Viene de: InventarioServlet → request.getParameter("tipo") */
-    public void setTipoControl(String tipoControl) {
-        this.tipoControl = tipoControl;
+    /** Mutador cualitativo: Anula o impone explícitamente cadenas semánticas (Semanal, Mensual) orientadoras dentro de esta partición referida del control iterativo de un negocio */
+    public void setTipoControl(String tipoControl) { // Operador con un String inyectante
+        this.tipoControl = tipoControl; // Modifica apuntador dinámicamente o por poblamiento inicial
     }
 
-    /** Retorna el estado ('activo'/'inactivo'). Usado para determinar si se puede operar en el inventario */
-    public String getEstado() {
-        return estado;
+    /** Consulta bandera contextual: Infiere y emite el perfil funcional (texto evaluable) por flujos lógicos MVC que deciden accionar sobre o ignorar a la agrupación total abstracta y concreta (activo vs apagado). */
+    public String getEstado() { // Entrega literal semántico condicionador 
+        return estado; // Output procesable en lógica simple de presentación 
     }
 
-    /** Asigna el estado. Modificado en: InventarioDAO.cerrarInventario() cuando cambia a 'inactivo' */
-    public void setEstado(String estado) {
-        this.estado = estado;
+    /** Modificación de máquina de estados: Afecta en memoria viva el parámetro o switch textual determinista (inactivo/activo) previo a transaciones DAO. */
+    public void setEstado(String estado) { // Receptor que trunca y sustituye estados nominales globales del objeto
+        this.estado = estado; // Reescritura paramétrica directa de nivel bajo
     }
 }

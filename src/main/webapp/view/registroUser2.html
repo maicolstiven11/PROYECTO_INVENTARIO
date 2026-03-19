@@ -7,7 +7,7 @@
     <title>Registro 2</title>
     <link rel="stylesheet" href="../css/registro2.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -101,8 +101,15 @@
 
             // Validación rápida para no dejar entrar si faltan datos
             if (!rol || !nombre) {
-                alert("Faltan datos de la página anterior. Redirigiendo...");
-                window.location.href = "registroUser.html";
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Faltan datos',
+                    text: 'Faltan datos de la página anterior. Redirigiendo...',
+                    timer: 2500,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = "registroUser.html";
+                });
             }
         };
     </script>

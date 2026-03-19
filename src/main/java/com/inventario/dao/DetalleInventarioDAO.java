@@ -6,10 +6,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Clase DetalleInventarioDAO.
+ *
+ * Implementa el patrón estructural DAO (Data Access Object).
+ * Módulo encargado de gestionar la persistencia y operaciones DML bidireccionales 
+ * entre la Aplicación y la Entidad Base de Datos INVENTARIO_DETALLE.
+ */
 public class DetalleInventarioDAO {
 
     /**
-     * Registra el stock inicial de un producto en un inventario específico.
+     * Instancia un nuevo registro de detalle en la tabla INVENTARIO_DETALLE.
+     * Funciona como un mutador (Setter) al inyectar parámetros relacionales a la base de datos.
      */
     public boolean insertarDetalle(int idInventario, int idProducto, double cantidadInicial) {
         Connection con = null;
@@ -39,7 +47,9 @@ public class DetalleInventarioDAO {
     }
 
     /**
-     * Lista todos los registros de detalle para un inventario específico.
+     * Módulo de Consulta y Extracción Iterativa (Getter).
+     * Ejecuta una consulta sobre la persistencia SQL y mapea un ResultSet 
+     * hacia una Colección (java.util.List) de objetos del Modelo DetalleInventario.
      */
     public java.util.List<com.inventario.model.DetalleInventario> listarDetalles(int idInventario) {
         java.util.List<com.inventario.model.DetalleInventario> lista = new java.util.ArrayList<>();
@@ -79,7 +89,8 @@ public class DetalleInventarioDAO {
     }
 
     /**
-     * Actualiza la cantidad física final de un producto al cerrar el inventario.
+     * Mutador transaccional (Setter) que actualiza el atributo cantidad_final 
+     * en la persistencia de datos. Ejecuta una operación de actualización (UPDATE).
      */
     public boolean actualizarCantidadFinal(int idInventario, int idProducto, double cantidadFinal) {
         Connection con = null;
@@ -109,7 +120,8 @@ public class DetalleInventarioDAO {
     }
 
     /**
-     * Obtiene el stock actual (cantidad_inicial) de un producto en un inventario específico.
+     * Sub-rutina de tipo Getter. 
+     * Extrae y retorna el valor de tipo double correspondiente a la propiedad cantidad_inicial de un producto.
      */
     public double obtenerStockActual(int idInventario, int idProducto) {
         double stock = 0;
@@ -141,8 +153,9 @@ public class DetalleInventarioDAO {
     }
 
     /**
-     * Lista detalles de inventario con precio unitario del producto.
-     * Se usa para calcular el descuadre monetario al cerrar inventario.
+     * Modulo de abstracción Getter. Extensión del método abstracto de lista,
+     * incorporando atributos de tipo join relacional para inyectar propiedades adicionales (precio)
+     * al Modelo de Colección resultante.
      */
     public java.util.List<com.inventario.model.DetalleInventario> listarDetallesConPrecio(int idInventario) {
         java.util.List<com.inventario.model.DetalleInventario> lista = new java.util.ArrayList<>();
@@ -184,8 +197,9 @@ public class DetalleInventarioDAO {
     }
 
     /**
-     * Obtiene el ID del detalle de inventario para un producto. 
-     * Si el producto no existe en el inventario actual, lo inserta con cantidad 0,0 y devuelve el nuevo ID.
+     * Módulo transaccional compuesto: Funciona como un algoritmo Getter verificador que muta
+     * internamente a un Instanciador (Setter Transaccional) si la pre-condición evaluada 
+     * indica ausencia de datos en la entidad base relacional.
      */
     public int obtenerOCrearDetalle(int idInventario, int idProducto) {
         int idDetalle = -1;
@@ -195,7 +209,7 @@ public class DetalleInventarioDAO {
         try {
             con = Conexion.getConexion();
             
-            // 1. Intentar buscar
+            // Sub-rutina Lectura SQL Verificadora
             String sqlBusqueda = "SELECT id_detalle FROM INVENTARIO_DETALLE WHERE id_inventario = ? AND id_producto = ?";
             ps = con.prepareStatement(sqlBusqueda);
             ps.setInt(1, idInventario);
@@ -205,7 +219,7 @@ public class DetalleInventarioDAO {
             if (rs.next()) {
                 idDetalle = rs.getInt("id_detalle");
             } else {
-                // 2. Si no existe, insertarlo con cantidad 0
+                // Instanciador Mutable Zero Default Logic Inserter
                 String sqlInsert = "INSERT INTO INVENTARIO_DETALLE (id_inventario, id_producto, cantidad_inicial, cantidad_final) VALUES (?, ?, 0, 0)";
                 PreparedStatement psInsert = con.prepareStatement(sqlInsert, java.sql.Statement.RETURN_GENERATED_KEYS);
                 psInsert.setInt(1, idInventario);

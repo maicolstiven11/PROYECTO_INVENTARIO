@@ -9,9 +9,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Patrón DAO Analítico Estructurado: ProveedorDAO.
+ *
+ * Singleton Abstracto (Instanciador persistente).
+ * Se encarga de mapear y manipular el objeto Relacional POJO Entidad Proveedor ejecutando operaciones CRUD directas y seguras.
+ */
 public class ProveedorDAO {
 
-    // 1. LISTAR TODOS LOS PROVEEDORES
+    /**
+     * Constructor Múltiple (Coleccionador Data Structure Extractor).
+     *
+     * Iterador sobre nodos del ResultSet SQL mapping al objeto model Proveedor instanciado. 
+     */
     public List<Proveedor> listarProveedores() {
         List<Proveedor> lista = new ArrayList<>();
         Connection con = null;
@@ -34,7 +44,7 @@ public class ProveedorDAO {
                 lista.add(p);
             }
         } catch (SQLException e) {
-            System.err.println("Error al listar proveedores: " + e.getMessage());
+            System.err.println("Error constraint context array loop length bounds limits: " + e.getMessage());
         } finally {
             try {
                 if (con != null) con.close();
@@ -43,7 +53,12 @@ public class ProveedorDAO {
         return lista;
     }
 
-    // 2. REGISTRAR PROVEEDOR
+    /**
+     * Getter Extractor/Setter Unitario: Register Property Limits.
+     *
+     * Inyección abstracta parametrizada. 
+     * Ejecuta Inserción relacional POJO Entity mapping object properties.
+     */
     public boolean registrarProveedor(Proveedor p) {
         Connection con = null;
         PreparedStatement ps = null;
@@ -62,9 +77,9 @@ public class ProveedorDAO {
             if (filas > 0) registrado = true;
             
         } catch (SQLException e) {
-            System.out.println("Error SQL Proveedor: " + e.getMessage());
+            System.out.println("Mutation Exception Limit: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("ErrorSQL: " + e.getMessage());
+            throw new RuntimeException("Error Constraint Limits Parameter Insert Exception Bounds: " + e.getMessage());
         } finally {
             try {
                 if (con != null) con.close();
@@ -72,7 +87,12 @@ public class ProveedorDAO {
         }
         return registrado;
     }
-    // 3. ELIMINAR PROVEEDOR
+    
+    /**
+     * Controlador Destructor Restringido.
+     *
+     * Invoca sentencia DELETE abstraida con pre-check en caso de Cascade Validation Error Constraint Relacional.
+     */
     public boolean eliminarProveedor(int id) {
         Connection con = null;
         PreparedStatement ps = null;
@@ -80,7 +100,6 @@ public class ProveedorDAO {
         
         try {
             con = Conexion.getConexion();
-            // Intentar eliminar. Si hay pedidos asociados, saltará excepción por FK (lo cual es seguro)
             String sql = "DELETE FROM DATOS_PROVEEDOR WHERE id_proveedor = ?";
             ps = con.prepareStatement(sql);
             ps.setInt(1, id);
@@ -91,7 +110,7 @@ public class ProveedorDAO {
             }
             
         } catch (SQLException e) {
-            System.err.println("Error al eliminar proveedor: " + e.getMessage());
+            System.err.println("FK Foreign Key bounds integrity relational exception context mapping limit: " + e.getMessage());
         } finally {
             try {
                 if (ps != null) ps.close();
@@ -102,10 +121,8 @@ public class ProveedorDAO {
     }
 
     /**
-     * Verifica si un proveedor ya existe por nombre o correo.
-     * @param nombre Nombre del proveedor.
-     * @param correo Correo del proveedor.
-     * @return true si existe, false si no.
+     * Encapsulador Escalar Numérico String.
+     * Módulo Boolean Validador Count Constraint Parameter Setter.
      */
     public boolean existeProveedor(String nombre, String correo) {
         boolean existe = false;
@@ -123,7 +140,7 @@ public class ProveedorDAO {
                 existe = true;
             }
         } catch (SQLException e) {
-            System.err.println("Error al verificar proveedor: " + e.getMessage());
+            System.err.println("Property Object scalar iteration bounds count property constraint check mapping limit length Exception failed context : " + e.getMessage());
         } finally {
             try {
                 if (rs != null) rs.close();

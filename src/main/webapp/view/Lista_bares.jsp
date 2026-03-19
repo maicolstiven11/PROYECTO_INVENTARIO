@@ -34,6 +34,7 @@
                     <link rel="stylesheet" href="../css/lista_bares.css">
                     <link rel="stylesheet"
                         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                 </head>
 
                 <body>
@@ -128,7 +129,7 @@
                                                                                 eliminar --%>
                                                                                 <a href="../NegocioServlet?action=eliminar&id=${bar.idNegocio}"
                                                                                     class="borrar-bar"
-                                                                                    onclick="return confirm('¿Estás seguro de eliminar este bar?');">
+                                                                                    onclick="confirmarEliminarBar(event, this.href);">
                                                                                     <h3>borrar-bar</h3>
                                                                                     <img src="../assets/img/icono_borrar_bar.png"
                                                                                         alt="borrar-bar">
@@ -188,6 +189,25 @@
                     </main>
 
                     <footer></footer>
+                    <script>
+                        function confirmarEliminarBar(e, url) {
+                            e.preventDefault();
+                            Swal.fire({
+                                title: 'Eliminar Bar',
+                                text: '¿Estás seguro de eliminar este bar?',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#e74c3c',
+                                cancelButtonColor: '#3085d6',
+                                confirmButtonText: 'Sí, eliminar',
+                                cancelButtonText: 'Cancelar'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = url;
+                                }
+                            });
+                        }
+                    </script>
                 </body>
 
                 </html>

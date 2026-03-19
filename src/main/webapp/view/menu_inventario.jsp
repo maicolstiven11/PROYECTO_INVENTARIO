@@ -83,6 +83,16 @@
                 <section class="content">
 
                     <div class="content__inicio">
+                        <c:if test="${not empty param.error_tiempo}">
+                            <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; border: 1px solid #f5c6cb;">
+                                <i class="fa-solid fa-triangle-exclamation"></i> <strong>Aviso:</strong> ${param.error_tiempo}
+                            </div>
+                        </c:if>
+                        <c:if test="${not empty param.msg_exito}">
+                            <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; border: 1px solid #c3e6cb; font-size: 16px;">
+                                <i class="fa-solid fa-circle-check"></i> <strong>${param.msg_exito}</strong>
+                            </div>
+                        </c:if>
                         <h1 class="content__title">Inventario de</h1>
                         <h2 class="content__subtitle">el bar: ${sessionScope.nombreNegocioActual}</h2>
                         <hr class="content__divider">

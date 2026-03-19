@@ -1,4 +1,4 @@
-package com.inventario.controller;
+package com.inventario.controller; // Declaración de espacio de nombres organizativo de artefactos de red 
 
 import com.inventario.dao.ProveedorDAO;
 import com.inventario.model.Proveedor;
@@ -11,90 +11,85 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * CONTROLADOR: Servlet encargado de gestionar los Proveedores.
+ * Controlador Orquestador Independiente: ProveedorServlet.
  * 
- * Implementa: RF-22 (Registrar Proveedor), RF-23 (Listar Proveedores), RF-24 (Eliminar Proveedor)
- * Cumple: RNF-02 (Protección SQL Injection - delega en DAO con PreparedStatement)
- *         RNF-08 (Mensajes de Error - redirige con parámetros de error descriptivos)
- *         RNF-13 (Arquitectura MVC - Capa Controlador)
+ * Clase de abstracción web MVC que opera como delegado de las Entidades Foráneas Proveedor (Actores externos en la BD).
+ * Recibe, procesa y sirve instanciación en memoria y peticiones transaccionales lógicas para CRUD sobre dichas colecciones.
  */
-@WebServlet(name = "ProveedorServlet", urlPatterns = {"/ProveedorServlet"})
-public class ProveedorServlet extends HttpServlet {
+@WebServlet(name = "ProveedorServlet", urlPatterns = {"/ProveedorServlet"}) // Metadato anotacional inyectando la ruta local a nivel Servlet Container JVM
+public class ProveedorServlet extends HttpServlet { // Capa controladora extendiendo la serialización nativa de peticiones web asíncronas
 
     /**
-     * RF-23, RF-24: Método doGet - Lista proveedores y maneja eliminación.
-     * Si recibe action=eliminar, elimina el proveedor (RF-24).
-     * Siempre lista los proveedores al final (RF-23).
-     * RF-23 Restricción 1: La lista se muestra en lista_proveedores.jsp.
+     * Rescritura de método pasivo HTTP Get.
+     * Funciona como evaluador asimétrico principal del orquestador: Si hay String flag de acción en la query URL delega comportamientos mutativos como la eliminación en cascada controlada; sino, revuelve el Arreglo List puro a Vista JSP.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException { // Amparo de marco Java .
         
-        ProveedorDAO dao = new ProveedorDAO();
-        String action = request.getParameter("action");
+        ProveedorDAO dao = new ProveedorDAO(); // Setter o generador instanciador del orquestador de persistencia .
+        String action = request.getParameter("action"); // Capturador semántico de petición
         
         // =====================================================================
-        // RF-24: ELIMINAR PROVEEDOR
-        // Se ejecuta cuando la URL contiene ?action=eliminar&id=X
+        // ALGORITMO ORTOGONAL DE DESTRUCCIÓN PREVENTIVA (Protección FK Constraint)
         // =====================================================================
-        if (action != null && action.equalsIgnoreCase("eliminar")) {
-            int id = Integer.parseInt(request.getParameter("id")); // RF-24: Obtener ID del proveedor a eliminar
-            dao.eliminarProveedor(id);                             // RF-24: Eliminar de la BD
+        if (action != null && action.equalsIgnoreCase("eliminar")) { // Estructura sub lógica string checker 
+            int id = Integer.parseInt(request.getParameter("id")); // Lector cast de ID param as Integer primitive.
+            boolean eliminado = dao.eliminarProveedor(id);         // Setter disparador DAO de subrutina de destrucción .
+            if (!eliminado) { // Si check flag falla o falso .
+                // Excepción funcional in - memory (No abort control sino flag string) para prever Integrity constraint Foreign keys FK asociadas al objeto . 
+                request.setAttribute("errorEliminar", "No se puede eliminar porque tiene asociaciones dependientes o FKs restrictivas vinculadas (Pedidos Activos)."); // Envío string .
+            }
         }
         
         // =====================================================================
-        // RF-23: LISTAR TODOS LOS PROVEEDORES (siempre se ejecuta)
+        // DISPARADOR ACUMULADOR DE VISTA TABLA GLOBAL (Manejo general default Object Lists)
         // =====================================================================
-        List<Proveedor> lista = dao.listarProveedores();           // RF-23: Obtener todos los proveedores de la BD
+        List<Proveedor> lista = dao.listarProveedores();           // Envoltura factory Array Dinámico POJO asimétrica iterando query.
         
-        request.setAttribute("listaProveedores", lista);           // RF-23: Pasar la lista al JSP
-        request.getRequestDispatcher("view/lista_proveedores.jsp").forward(request, response); // RF-23 Restricción 1: Vista JSP
+        request.setAttribute("listaProveedores", lista);           // Atadura de puntero de List Relacional al request Buffer Scope vivo .
+        request.getRequestDispatcher("view/lista_proveedores.jsp").forward(request, response); // Passthrough o despachador delegando in memory al Motor gráfico Template (Render Bypass).
     }
 
     /**
-     * RF-22: Método doPost - Registra un nuevo proveedor.
-     * Recibe los datos del formulario de registro de proveedores.
-     * RF-22 Restricción 2: Todos los campos son obligatorios.
+     * Rescritura de método Transaccional mutacional POST.
+     * Toma String fields binarios HTML forms y los transforma iterativamente a atributos set en un POJO base asilado de Modelo para dispararlo mediante persistencia SQL Atómica de Inserción delegada via Gestor DAO.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException { // Captura catch frame .
         
-        // RF-22 PASO 1: Recibir datos del formulario
-        // RF-30: Campos obligatorios validados con "required" en el HTML
-        String nombre = request.getParameter("nombre_proveedor"); // RF-22: Nombre del proveedor (obligatorio)
-        String contacto = request.getParameter("contacto");       // RF-22: Persona de contacto (obligatorio)
-        String telefono = request.getParameter("telefono");       // RF-22: Teléfono (obligatorio)
-        String correo = request.getParameter("correo");           // RF-22: Correo electrónico (obligatorio)
+        // ALGORITMO OBTENEDOR DATA TRAMADO HTML SÍNCRONO .
+        String nombre = request.getParameter("nombre_proveedor"); // Asimila descriptor text plano nombre.
+        String contacto = request.getParameter("contacto");       // Asimila text name persona form.
+        String telefono = request.getParameter("telefono");       // Extracción cardinal param text format number form.
+        String correo = request.getParameter("correo");           // Extracción metadato uri mail form string.
         
-        // RF-22 PASO 2: Crear objeto Modelo (Proveedor) y llenarlo
-        Proveedor p = new Proveedor();
-        p.setNombreProveedor(nombre);
-        p.setContacto(contacto);
-        p.setTelefono(telefono);
-        p.setCorreo(correo);
+        // CÚPULA CONSTRUCTORA DE ENTIDAD O POJO WRAPPER
+        Proveedor p = new Proveedor(); // Instancia nuevo en Stack Heap Object Entity
+        p.setNombreProveedor(nombre); // Método mutador o setter en variable abstracta privada capa encapsulada Oop.
+        p.setContacto(contacto); // ..
+        p.setTelefono(telefono); // ..
+        p.setCorreo(correo);     // Setter Oop.
         
-        // RF-22 PASO 3: Llamar al DAO para guardar en la BD
-        ProveedorDAO dao = new ProveedorDAO();
+        // ORQUESTACIÓN DISPARADOR DAO (Transaction manager inyector SQL).
+        ProveedorDAO dao = new ProveedorDAO(); // Generador factory .
         
-        // VALIDACIÓN DE UNICIDAD: Verificar si el proveedor ya existe
-        if (dao.existeProveedor(nombre, correo)) {
-            response.sendRedirect("view/Registro_datos_prv.html?error=proveedor_duplicado");
-            return; // Detener flujo
+        // PRE - CONDICIONAL ALGORÍTMICO VERIFICADOR DUPLICIDAD Booleana and String params.
+        if (dao.existeProveedor(nombre, correo)) { // Invoca chequeador pasivo de constraint lógicos boolean flag string params .
+            response.sendRedirect("view/Registro_datos_prv.html?error=proveedor_duplicado"); // Clean escape log URL param append error flag .
+            return; // Corta flujo lógico asíncrono para invalidar el POJO vivo e insertion process.
         }
 
-        try {
-            boolean exito = dao.registrarProveedor(p);  // RF-22: Inserta el proveedor en la tabla PROVEEDOR
-            if (exito) {
-                response.sendRedirect("view/Proveedor_registrado.html");  // RF-22: Redirigir a confirmación
-            } else {
-                // RNF-08: Redirigir con error
-                response.sendRedirect("view/Registro_datos_prv.html?error=FalloRegistro");
+        try { // Trata insert exception .
+            boolean exito = dao.registrarProveedor(p);  // Método síncrono setter delegativo enviando Wrapper Entity in memory completa al objeto Factory DAO de conexión .
+            if (exito) { // Control check 
+                response.sendRedirect("view/Proveedor_registrado.html");  // Concluye flujo UI en pantalla afirmativo statics frontend.
+            } else { // Fallo atómico no runtime sino bool flag sql error false 
+                response.sendRedirect("view/Registro_datos_prv.html?error=FalloRegistro"); // Devuelve print error url param redir .
             }
-        } catch (Exception e) {
-            // RNF-08: Redirigir con mensaje de error descriptivo
-            response.sendRedirect("view/Registro_datos_prv.html?error=" + e.getMessage().replace(" ", "_"));
+        } catch (Exception e) { // Suciedad framework error runtime Exception Trace  
+            response.sendRedirect("view/Registro_datos_prv.html?error=" + e.getMessage().replace(" ", "_")); // Envuelve JVM Error msg in append string UI Error Redirect log.
         }
     }
 }

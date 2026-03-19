@@ -17,254 +17,248 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- * CONTROLADOR: Servlet encargado de gestionar las Ventas.
+ * Controlador Transaccional Orquestador: VentaServlet.
  * 
- * Implementa: RF-16 (Agregar Producto al Carrito), RF-17 (Quitar Producto del Carrito),
- *             RF-18 (Finalizar Venta), RF-19 (Listar Ventas), RF-20 (Ver Detalle Venta),
- *             RF-21 (Cancelar Venta en Proceso)
- * Cumple: RNF-02 (Protección SQL Injection - delega en DAO)
- *         RNF-03 (Gestión de Sesiones - carrito en sesión, idInventarioActual)
- *         RNF-07 (Proceso de Venta Rápida - flujo optimizado con carrito en sesión)
- *         RNF-08 (Mensajes de Error - redirige con parámetros descriptivos)
- *         RNF-13 (Arquitectura MVC - Capa Controlador)
+ * Fachada encapsuladora que extiende abstracción HttpServlet. Controla y dirige el ciclo de vida mutativo (CRUD dinámico in-memory param HTTP Session) del carrito de ventas y persiste el POJO contenedor al sistema Gestor relacional de Base de Datos apoyándose en su delegativo Data Access Object.
  */
-@WebServlet(name = "VentaServlet", urlPatterns = {"/VentaServlet"})
-public class VentaServlet extends HttpServlet {
+@WebServlet(name = "VentaServlet", urlPatterns = {"/VentaServlet"}) // Atributo decorativo enrutador instanciando la clase subyacente al Servlet container JVM
+public class VentaServlet extends HttpServlet { // Polimorfismo hereditario del Framework Java EE base asíncrono.
 
+    /**
+     * Rescritura Genérica evaluadora HTTP Get.
+     * Funciona como método de passthrough encadenando peticiones directas de URL (Query string parameters) al procesador central de Orquestación o switch.
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);  // Delega al método principal
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);  // Delega al método principal
+            throws ServletException, IOException { // Capturador delegativo .
+        processRequest(request, response);  // Invoca Sub-rutina asilada delegando scope del contexto buffer HTTP actual vivo.
     }
 
     /**
-     * Método principal que procesa TODAS las acciones de ventas según el parámetro "action".
-     * Usa un switch para decidir qué hacer: mostrar, agregar, quitar, finalizar, listar, ver detalle o cancelar.
+     * Rescritura Genérica evaluadora HTTP Post.
+     * Funciona como método de passthrough encadenando peticiones de Payload asíncronos FormData.
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException { // Amparo catch frame object
+        processRequest(request, response);  // Delega in-memory a método central unificado encapsulado .
+    }
+
+    /**
+     * Algoritmo Principal de Orquestación y Enrutamiento Funcional (Router).
+     * Subrutina central que actúa como Switch Statement sobre la variable flag asimétrica (Action). Analiza el param String y decide en base a flujos condicionales de tipo Árbol de Ejecución el método a invocar, manipulando las Interacciones asíncronas de in-memory object List Arrays en Sesión viva.
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException { // Frame buffer error catch .
         
-        String action = request.getParameter("action");
-        if (action == null) action = "mostrar";  // Acción por defecto
+        String action = request.getParameter("action"); // Capturador de metadato param evaluativo lógico restrictivo o Flag .
+        if (action == null) action = "mostrar";  // Inyección protectora Null fall-back (Default switch loop behavior)
         
-        HttpSession session = request.getSession();
+        HttpSession session = request.getSession(); // Getter constructor asilando Factory Pattern u originando Object Container HTTP Scope Persistence State Session Vivo de framework .
         
         // =====================================================================
-        // RF-16 Restricción 2: RECUPERAR O INICIALIZAR CARRITO DE COMPRAS
-        // El carrito es una Lista de DetalleVenta almacenada en la sesión HTTP.
-        // RNF-03: Se mantiene vivo mientras dure la sesión del usuario.
+        // ALGORITMO ACUMULADOR MEMORIA VIVA (Instanciación Carrito Dinámico Buffer Session Object Arrays)
         // =====================================================================
-        List<DetalleVenta> carrito = (List<DetalleVenta>) session.getAttribute("carrito");
-        if (carrito == null) {
-            carrito = new ArrayList<>();                // Crear carrito vacío si no existe
-            session.setAttribute("carrito", carrito);   // Guardarlo en sesión
+        List<DetalleVenta> carrito = (List<DetalleVenta>) session.getAttribute("carrito"); // Recuperador In Memory Pointer Cast Object .
+        if (carrito == null) { // Validador limitante Boolean Array Size Initialization Checker .
+            carrito = new ArrayList<>();                // Invoca constructor vacío Array POJO Object list memory heap allocation factoría de colecciones (Estructura dinámica .
+            session.setAttribute("carrito", carrito);   // Binding atómico Inyectando referencial pointer array al Pool Singleton user JVM context session persistente .
         }
         
-        // RF-18 Restricción 1: Obtener inventario activo de la sesión
-        Integer idInventario = (Integer) session.getAttribute("idInventarioActual");
+        // Extracción In Memory flag activo id de contexto relacional inventario 
+        Integer idInventario = (Integer) session.getAttribute("idInventarioActual"); // Cast referencial object wrapper primitivo PK base scope Vivo Session.
         
-        switch (action) {
+        switch (action) { // Ciclo comparador literal Iterativo switch boolean param flag strings .
             case "mostrar":
-                // RF-16: Mostrar formulario de ventas con lista de productos y carrito actual
-                cargarProductos(request);                                       // Carga lista de productos desde BD
-                double totalActual = calcularTotal(carrito);                    // Calcula total del carrito
-                request.setAttribute("totalVenta", totalActual);               // Pasa el total a la vista
-                request.getRequestDispatcher("view/agregar_venta.jsp").forward(request, response);
+                // Algoritmo de inicialización base y acumulación matemática sumatoría Front UI View.
+                cargarProductos(request);                                       // Disparador a helper subrutina para bind de POJO arr lists general
+                double totalActual = calcularTotal(carrito);                    // Función matemática constructora getter total param.
+                request.setAttribute("totalVenta", totalActual);               // Passthrough Setter In memory de motor View renderizador 
+                request.getRequestDispatcher("view/agregar_venta.jsp").forward(request, response); // Despachador asíncrono o forward local .
                 break;
                 
             case "agregar":
-                // RF-16: Agregar producto al carrito
-                agregarProducto(request, session, carrito);
-                response.sendRedirect("VentaServlet?action=mostrar");           // Recargar la vista
+                // Inyector lógico mutativo transitorio en in-memory arrays model details.
+                agregarProducto(request, session, carrito); // Helper Passthrough encapsulando param context framework variables e Instancias Arrays locales.
+                response.sendRedirect("VentaServlet?action=mostrar");           // Redirect Asíncrono Refresh Buffer HTTP ciclo Request.
                 break;
                 
             case "quitar":
-                // RF-17: Quitar producto del carrito por índice
-                quitarProducto(request, carrito);
-                response.sendRedirect("VentaServlet?action=mostrar");
+                // Destructor lógico remove() en array Collection Collection utils memory target
+                quitarProducto(request, carrito); // Helpers encapsulados POO destructors.
+                response.sendRedirect("VentaServlet?action=mostrar"); // Clear UI UI render update redirect web param framework.
                 break;
                 
             case "finalizar":
-                // RF-18: Finalizar la venta (guardar en BD)
-                // RF-18 Restricción 1: Debe existir un inventario activo
-                if (idInventario == null) {
-                    response.sendRedirect("NegocioServlet?error=SinInventarioActivo");
-                    return;
+                // Disparo Atómico delegador Final Persistencia In Memoriam arrays object to Database DAO transactions.
+                if (idInventario == null) { // Guard checking param flag FK .
+                    response.sendRedirect("NegocioServlet?error=SinInventarioActivo"); // Clean log UI redirect fail abort.
+                    return; // Nullifies logic flow stack .
                 }
-                finalizarVenta(session, carrito, idInventario, response);
+                finalizarVenta(session, carrito, idInventario, response); // Helper Method Subrutina Construct wrapper model .
                 break;
                 
             case "listar":
-                // RF-19: Listar historial de ventas del negocio actual
-                // RF-19 Restricción 1: Filtra por idNegocioActual de la sesión
-                Integer idNegocio = (Integer) session.getAttribute("idNegocioActual");
-                if (idNegocio != null) {
-                    VentaDAO vDao = new VentaDAO();
-                    List<Venta> listaVentas = vDao.listarVentas(idNegocio);    // RF-19: Consulta ventas de este negocio
-                    request.setAttribute("listaVentas", listaVentas);          // Pasa la lista al JSP
-                    request.getRequestDispatcher("view/visualizar_ventas.jsp").forward(request, response);
-                } else {
-                    response.sendRedirect("index.jsp");                        // Sesión perdida
+                // Gestor visual iterador pasivo arrays Object Models DAO getters arrays list collection 
+                Integer idNegocio = (Integer) session.getAttribute("idNegocioActual"); // Instancia cast pointer PK referencial
+                if (idNegocio != null) { // Guardian Boolean restrictivo flag variable error protector null Exception.
+                    VentaDAO vDao = new VentaDAO(); // Instanciador generatriz DAO
+                    List<Venta> listaVentas = vDao.listarVentas(idNegocio);    // Extracción encapsulando a Array Objeto envolvente Entity
+                    request.setAttribute("listaVentas", listaVentas);          // Context Injector Object variables List reference UI Web layer.
+                    request.getRequestDispatcher("view/visualizar_ventas.jsp").forward(request, response); // Delegate Rendering bypass .
+                } else { // Abort fall back exception Null check .
+                    response.sendRedirect("index.jsp");                        // Log Off Refresh clean
                 }
                 break;
                 
             case "ver_detalle":
-                // RF-20: Ver detalle de una venta específica
+                // Visualizador Analítico secundario Arrays Hijos details FK models collections
                 try {
-                    int idVenta = Integer.parseInt(request.getParameter("id_venta"));
-                    VentaDAO vDaoDet = new VentaDAO();
-                    List<DetalleVenta> listaDetalles = vDaoDet.listarDetalleVenta(idVenta); // RF-20: Obtiene productos de la venta
-                    request.setAttribute("listaDetalles", listaDetalles);
-                    request.setAttribute("idVenta", idVenta);
-                    request.getRequestDispatcher("view/detalle_venta.jsp").forward(request, response);
-                } catch (Exception e) {
-                    response.sendRedirect("VentaServlet?action=listar&error=ErrorAlVerDetalle");
+                    int idVenta = Integer.parseInt(request.getParameter("id_venta")); // Parse primitive getter url String query params .
+                    VentaDAO vDaoDet = new VentaDAO(); // Constructor instance Object Factory Transaction relation
+                    List<DetalleVenta> listaDetalles = vDaoDet.listarDetalleVenta(idVenta); // Constructor delegador query DAO getters array object details POJOs Entities models.
+                    request.setAttribute("listaDetalles", listaDetalles); // Setter Framework object variables 
+                    request.setAttribute("idVenta", idVenta); // Setter primitives variables
+                    request.getRequestDispatcher("view/detalle_venta.jsp").forward(request, response); // Despacho síncrono Framework .
+                } catch (Exception e) { // Trata param dirty exception
+                    response.sendRedirect("VentaServlet?action=listar&error=ErrorAlVerDetalle"); // Web error Redirect Log  .
                 }
                 break;
                 
             case "cancelar":
-                // RF-21: Cancelar venta en proceso
-                // RF-21 Restricción 1: Solo limpia el carrito en sesión, no afecta ventas ya guardadas
-                session.removeAttribute("carrito");                             // Elimina el carrito de la sesión
-                response.sendRedirect("view/menu_inventario.html");
+                // Destructor Abstracto JVM memory object referencial Session attribute.
+                session.removeAttribute("carrito");                             // Mutador framework JVM memory free destructor collection reference.
+                response.sendRedirect("view/menu_inventario.html"); // Refresh flow View UI
                 break;
                 
-            default:
+            default: // Guard genérico preventivo fallbacks 
                 response.sendRedirect("view/menu_inventario.html");
         }
     }
 
     /**
-     * RF-10, RF-16: Carga la lista de productos desde la BD para mostrar en el formulario de ventas.
+     * Módulo Auxiliar Setter Pasivo de Objetos.
+     * Carga array list dinámico factory de modelos de entidad base producto invocando delegación abstracta read query del Data Access object y lo setea in memory binding the servlet container contexts.
      */
-    private void cargarProductos(HttpServletRequest request) {
-        ProductoDAO pDao = new ProductoDAO();
-        List<Producto> lista = pDao.listarProductos();      // RF-10: Usa ProductoDAO.listarProductos()
-        request.setAttribute("listaProductos", lista);
+    private void cargarProductos(HttpServletRequest request) { // Scope Method helper POO subrutina private asilada abstraction.
+        ProductoDAO pDao = new ProductoDAO(); // Constructor instanciador
+        List<Producto> lista = pDao.listarProductos();      // Getter array factoría iterativa Entity Models collection polimorfa List .
+        request.setAttribute("listaProductos", lista); // Binding pointer .
     }
 
     /**
-     * RF-16: Agrega un producto al carrito de ventas.
-     * RF-16 Restricción 1: La cantidad debe ser mayor a 0.
-     * RF-16 Restricción 3: Si el producto ya existe en el carrito, suma cantidades y recalcula subtotal.
+     * Algoritmo Inyector / Modificador de Array In-memory Session.
+     * Generador factoría iterativo que lee variables input param y, comparador condicional loop for-each buscando repetidos in array (acumulación int sumar cantidad), y/o instanciación Zero constructor object Array list Append inyección Elemento Nuevo Array of Details object.
      */
-    private void agregarProducto(HttpServletRequest request, HttpSession session, List<DetalleVenta> carrito) {
-        try {
-            int idProd = Integer.parseInt(request.getParameter("id_producto")); // RF-16: ID del producto seleccionado
-            int cantidad = Integer.parseInt(request.getParameter("cantidad")); // RF-16: Cantidad a agregar
+    private void agregarProducto(HttpServletRequest request, HttpSession session, List<DetalleVenta> carrito) { // Dependency Inyection method POO Helper.
+        try { // Vigila String Parses format int errors 
+            int idProd = Integer.parseInt(request.getParameter("id_producto")); // Cast primitivo getter 
+            int cantidad = Integer.parseInt(request.getParameter("cantidad")); // Cast param .
             
-            if (cantidad <= 0) return;  // RF-16 Restricción 1: Validar cantidad > 0
+            if (cantidad <= 0) return;  // Nullifies loop restriction flag control.
             
-            // RF-16: Buscar el producto en la BD para obtener su precio
-            ProductoDAO pDao = new ProductoDAO();
-            Producto p = pDao.obtenerProducto(idProd);
+            // Consultor instanciador singular Getter Delegative DAO abstract connection inyección 1 obj model .
+            ProductoDAO pDao = new ProductoDAO(); // Constructor delegativo 
+            Producto p = pDao.obtenerProducto(idProd); // Invoca Setter POJO Base reference 
             
-            if (p != null) {
-                // VALIDACIÓN DE STOCK REAL
-                com.inventario.dao.DetalleInventarioDAO detDao = new com.inventario.dao.DetalleInventarioDAO();
-                Integer idInventario = (Integer) session.getAttribute("idInventarioActual");
-                double stockDisponible = detDao.obtenerStockActual(idInventario, idProd);
+            if (p != null) { // Guardian Exception obj .
+                // SUB-ALGORITMO ESTRICTO GUARDIA LOGICA MATEMÁTICO DISPONIBILIDAD DAO CHECK 
+                com.inventario.dao.DetalleInventarioDAO detDao = new com.inventario.dao.DetalleInventarioDAO(); // Factory constructor .
+                Integer idInventario = (Integer) session.getAttribute("idInventarioActual"); // Pointer PK 
+                double stockDisponible = detDao.obtenerStockActual(idInventario, idProd); // Delegative Getter Math .
                 
-                // Calcular cuánto hay YA en el carrito para este producto
-                int cantidadEnCarrito = 0;
-                for (DetalleVenta d : carrito) {
-                    if (d.getIdProducto() == idProd) {
-                        cantidadEnCarrito = d.getCantidad();
-                        break;
+                // Módulo analítico loop sumatoria iterador para validar en memoria vs base de datos stock amount
+                int cantidadEnCarrito = 0; // Setter default math sum array vars base.
+                for (DetalleVenta d : carrito) { // Iterator POO Objects collection List model items in abstract collection .
+                    if (d.getIdProducto() == idProd) { // Condicional POJO Getter id Math int eq comparator target .
+                        cantidadEnCarrito = d.getCantidad(); // Math getter variable extraction scope limited pointer int.
+                        break; // Loop optimizado destructor return
                     }
                 }
                 
-                if (cantidad + cantidadEnCarrito > stockDisponible) {
-                    session.setAttribute("error_stock", "Stock insuficiente: " + p.getNombre() + " (Disponible: " + (int)stockDisponible + ")");
-                    return;
+                if (cantidad + cantidadEnCarrito > stockDisponible) { // Logic Math Boolean checker constraint
+                    session.setAttribute("error_stock", "Stock insuficiente: " + p.getNombre() + " (Disponible: " + (int)stockDisponible + ")"); // UI flag setter String message error validation log error bind attribute context var param in JVM frame .
+                    return; // Aborts Append cycle process validation Error exception
                 }
 
-                // RF-16 Restricción 3: Verificar si ya existe en el carrito para sumar cantidades
-                boolean existe = false;
-                for (DetalleVenta d : carrito) {
-                    if (d.getIdProducto() == idProd) {
-                        d.setCantidad(d.getCantidad() + cantidad);                 // Sumar cantidades
-                        d.setSubtotal(d.getCantidad() * d.getPrecioUnitario());    // Recalcular subtotal
-                        existe = true;
-                        break;
+                // SUB ALGORITMO ACUMULADOR INCREMENTAL UPDATER OR INSERT ARRAY FACTORY APPEN 
+                boolean existe = false; // Flag Bool Iterador comparator boolean.
+                for (DetalleVenta d : carrito) { // Iterador Iterator collection List de model pojos Array object 
+                    if (d.getIdProducto() == idProd) { // Comparator
+                        d.setCantidad(d.getCantidad() + cantidad);                 // Mutable Setter In Memory Update model logic sum math property
+                        d.setSubtotal(d.getCantidad() * p.getPrecioUnitario());    // Math Float property Set update logic.
+                        existe = true; // Boolean Mutator State updater condition check
+                        break; // Break optimizar speed memory
                     }
                 }
                 
-                if (!existe) {
-                    // RF-16: Crear nuevo detalle de venta y agregarlo al carrito
-                    DetalleVenta det = new DetalleVenta();
-                    det.setIdProducto(idProd);
-                    det.setNombreProducto(p.getNombre());                          // RF-16 Restricción 3: Nombre para mostrar en tabla
-                    det.setCantidad(cantidad);
-                    det.setPrecioUnitario(p.getPrecioUnitario());                  // RF-16: Precio unitario del producto
-                    det.setSubtotal(cantidad * p.getPrecioUnitario());             // RF-16: subtotal = cantidad × precio unitario
-                    carrito.add(det);                                              // Agregar al carrito
+                if (!existe) { // Mutador Check constructor instanciación Zero Fall-back condition
+                    // Factoría de Nuevo Entidad POJO Detalle Construct Model 
+                    DetalleVenta det = new DetalleVenta(); // Inyection Constructor vacío de Objeto Instanciador Memory Object Allocation heap ram space.
+                    det.setIdProducto(idProd); // Setter Mutador Primitive attribute POJO Abstract object reference
+                    det.setNombreProducto(p.getNombre());                          // Setter mutator POO object.
+                    det.setCantidad(cantidad); // ...
+                    det.setSubtotal(cantidad * p.getPrecioUnitario());             // ...
+                    carrito.add(det);                                              // Collection In Memory Append Method Setter pointer array buffer mutador.
                 }
             }
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
+        } catch (NumberFormatException e) { // framework IO primitive Cast exception error check protection scope
+            e.printStackTrace(); // dump buffer trace error console log dirty string .
         }
     }
     
     /**
-     * RF-17: Quita un producto del carrito por su índice en la lista.
-     * RF-17 Restricción 1: El índice debe ser válido (>= 0 y < tamaño del carrito).
+     * Módulo Privado Sub-Estructural Destructor de Colecciones in-Memory.
+     * Auxiliar utilitario encapsulado encapsulando API nativa de List Objects Collections framework method .remove(int) eliminando de heap variable de Instanciación un POJO Detail vivo .
      */
-    private void quitarProducto(HttpServletRequest request, List<DetalleVenta> carrito) {
-        try {
-            int index = Integer.parseInt(request.getParameter("index")); // RF-17: Índice del producto a quitar
-            if (index >= 0 && index < carrito.size()) {                  // RF-17 Restricción 1: Validar índice
-                carrito.remove(index);                                   // RF-17: Eliminar de la lista
+    private void quitarProducto(HttpServletRequest request, List<DetalleVenta> carrito) { // Dependency Inyection list pointer collection helper module private asilado abstract .
+        try { // Trata cast error params .
+            int index = Integer.parseInt(request.getParameter("index")); // Instancia pointer get as integer 
+            if (index >= 0 && index < carrito.size()) {                  // Guardian Array Index Boolean bounds limitator protector restrictivo limits bounds size
+                carrito.remove(index);                                   // Setter JVM object destruct collection In-Memory Mutator.
             }
-        } catch (NumberFormatException e) {}
+        } catch (NumberFormatException e) {} // Framework Empty Catch exception handler exception silent destructor.
     }
 
     /**
-     * Método auxiliar: Calcula el total de la venta sumando todos los subtotales del carrito.
+     * Subrutina Matemática Iteradora Exclusiva Retorno Getter Sumatoria Dinámica Array Properties getter Collection Models in memoty.
      */
-    private double calcularTotal(List<DetalleVenta> carrito) {
-        double total = 0;
-        for (DetalleVenta d : carrito) {
-            total += d.getSubtotal();
+    private double calcularTotal(List<DetalleVenta> carrito) { // Argument pointer pass-through collection.
+        double total = 0; // Instanciación Math Default variable local var Float wrapper.
+        for (DetalleVenta d : carrito) { // OOP loop Iterator collection of entity model objects Detalle.
+            total += d.getSubtotal(); // Expresión sumatoria param get math property return float number primitivo sum loop.
         }
-        return total;
+        return total; // Devuelve num float primitive sum limit math property
     }
     
     /**
-     * RF-18: Finaliza la venta guardándola en la base de datos.
-     * RF-18 Restricción 2: El carrito no puede estar vacío.
-     * RF-18 Restricción 3: La operación es transaccional (todo o nada) - implementado en VentaDAO.
+     * Módulo Factory Subrutina Mutativa delegadora de Disparo Persistencia Relacional a Model Factory.
+     * Cierra el ciclo encapsulando el array de Instancias Objeto List DetalleVenta en memoria RAM Context Server alive JVM session array objects a una capa Dao Generatriz y Limpia Object references Destroying the Object Session Attribute Collections List Array alive memory.
      */
-    private void finalizarVenta(HttpSession session, List<DetalleVenta> carrito, int idInventario, HttpServletResponse response) throws IOException {
-        // RF-18 Restricción 2: Validar que el carrito no esté vacío
-        if (carrito.isEmpty()) {
-            response.sendRedirect("VentaServlet?action=mostrar&error=CarritoVacio");
-            return;
+    private void finalizarVenta(HttpSession session, List<DetalleVenta> carrito, int idInventario, HttpServletResponse response) throws IOException { // Helper Scope Asilado Delegatiion parameters IO error catching exceptions object model inyección dependency.
+        // Limitador de seguridad para protección Check Null Sizes List Empty validation.
+        if (carrito.isEmpty()) { // Getter size limit boolean condition list abstract evaluator api.
+            response.sendRedirect("VentaServlet?action=mostrar&error=CarritoVacio"); // Delegate error loop response HTTP log param URL .
+            return; // Destroy Method stack recursion context abort exit flow logic limit.
         }
         
-        // RF-18: Crear objeto Venta (Modelo) con los datos necesarios
-        VentaDAO vDao = new VentaDAO();
-        Venta venta = new Venta();
-        venta.setIdInventario(idInventario);                           // RF-18: Vincular al inventario activo
-        venta.setFechaVenta(new Date(System.currentTimeMillis()));     // RF-18: Fecha actual del sistema
-        venta.setTotalVenta(calcularTotal(carrito));                    // RF-18: Total = suma de subtotales
+        // Constructor ORQUESTADOR POJO Principal Contenedor Entity Transaccional Builder Pattern Instanciation wrapper object constructor Base logic.
+        VentaDAO vDao = new VentaDAO(); // Heap Allocation Method instance class memory base manager query relacional object framework.
+        Venta venta = new Venta(); // Heap Allocation Class Model wrapper instance constructor null .
+        venta.setIdInventario(idInventario);                           // Setter POO attribute FK Object pointer dependency injection PK 
+        venta.setFechaVenta(new Date(System.currentTimeMillis()));     // Constructor Time Date setter POO metadato Object model Date util .
+        venta.setTotalVenta(calcularTotal(carrito));                    // Math method float Getter setter delegando total acumulador number float.
         
-        // RF-18 Restricción 3: registrarVenta usa transacción en el DAO (commit/rollback)
-        boolean resultado = vDao.registrarVenta(venta, carrito);
+        // Disparo Síncrono Atómico Booleano de Transaction DAO Factory Commit SQL Logic Multiple inserts.
+        boolean resultado = vDao.registrarVenta(venta, carrito); // Metodo delegativo DAO method send params arrays POJO and Wrapper Entytis for relation sql model generation asinc connection pool transaction check state getter logic return.
         
-        if (resultado) {
-            // RF-18: Éxito - Limpiar el carrito de la sesión
-            session.removeAttribute("carrito");
-            response.sendRedirect("view/venta_finalizada.html");
-        } else {
-            // RNF-08: Error al guardar
-            response.sendRedirect("VentaServlet?action=mostrar&error=ErrorAlGuardar");
+        if (resultado) { // Comparator boolean true ok validation constraint transaction if true successful flag check ok.
+            // Destructor In Memory Framework object target Session context cleaning pointer Heap object
+            session.removeAttribute("carrito"); // Eliminador recolector pointer array object model reference HTTP pool.
+            response.sendRedirect("view/venta_finalizada.html"); // Frame URL Param UI Success View Dispatcher Asynchronous Refresh Cycle Response log ok flag success UI statics update loop user notification flow success conclusion action process ok flag
+        } else { // Validation abort Check false validation check no changes or insert.
+            // Log UI HTTP exception
+            response.sendRedirect("VentaServlet?action=mostrar&error=ErrorAlGuardar"); // Asíncrona Log Update framework Web Response .
         }
     }
 }

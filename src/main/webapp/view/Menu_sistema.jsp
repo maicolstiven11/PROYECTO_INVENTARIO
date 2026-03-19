@@ -28,6 +28,7 @@
                             <link rel="stylesheet" href="../css/menu_sistema.css">
                             <link rel="stylesheet"
                                 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+                            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                         </head>
 
                         <body>
@@ -192,7 +193,7 @@
                                                     <div style="text-align: center; margin-top: 30px;">
                                                         <a href="../LoginServlet?action=logout" style="display: inline-block; background-color: #e74c3c; color: white; padding: 12px 30px; 
                               text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px;"
-                                                            onclick="return confirm('¿Estás seguro de cerrar sesión?');">
+                                                            onclick="confirmarCerrarSesion(event, this.href);">
                                                             <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
                                                         </a>
                                                     </div>
@@ -201,6 +202,25 @@
                             <footer>
 
                             </footer>
+                            <script>
+                                function confirmarCerrarSesion(e, url) {
+                                    e.preventDefault();
+                                    Swal.fire({
+                                        title: 'Cerrar Sesión',
+                                        text: '¿Estás seguro de que deseas cerrar sesión?',
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#e74c3c',
+                                        cancelButtonColor: '#3085d6',
+                                        confirmButtonText: 'Sí, salir',
+                                        cancelButtonText: 'Cancelar'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            window.location.href = url;
+                                        }
+                                    });
+                                }
+                            </script>
                         </body>
 
                         </html>

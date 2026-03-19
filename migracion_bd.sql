@@ -44,6 +44,11 @@ FOREIGN KEY (id_inv_detalle) REFERENCES inventario_detalle(id_detalle);
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
+-- PASO 3: ELIMINAR PRECIO UNITARIO DE DETALLE_VENTA
+-- ============================================================
+ALTER TABLE detalle_venta DROP COLUMN precio_unitario;
+
+-- ============================================================
 -- VERIFICACIÓN
 -- ============================================================
 DESCRIBE detalle_venta;

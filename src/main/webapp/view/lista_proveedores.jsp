@@ -9,6 +9,7 @@
             <title>Lista de Proveedores</title>
             <link rel="stylesheet" href="../css/lista_proveedores.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         </head>
 
         <body>
@@ -19,6 +20,12 @@
             </header>
             <main>
                 <h2>GESTIÓN DE PROVEEDORES</h2>
+
+                <c:if test="${not empty errorEliminar}">
+                    <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; border: 1px solid #f5c6cb;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> <strong>${errorEliminar}</strong>
+                    </div>
+                </c:if>
 
                 <div class="table-container">
                     <table class="data-table">
@@ -43,7 +50,7 @@
 
                                         <a href="../ProveedorServlet?action=eliminar&id=${prv.idProveedor}"
                                             class="button button--delete"
-                                            onclick="return confirm('¿Estás seguro de que deseas eliminar este proveedor?');"
+                                            onclick="confirmarEliminacion(event, this.href, '¿Estás seguro de que deseas eliminar este proveedor?');"
                                             style="background-color: #e74c3c; color: white; margin-left: 5px;">
                                             <i class="fa-solid fa-trash"></i> Eliminar
                                         </a>
@@ -74,6 +81,25 @@
 
             <!-- Modales, Footer, etc -->
             <footer></footer>
+            <script>
+                function confirmarEliminacion(e, url, mensaje) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Confirmación',
+                        text: mensaje,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e74c3c',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                }
+            </script>
         </body>
 
         </html>

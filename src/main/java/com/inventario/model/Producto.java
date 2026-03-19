@@ -1,143 +1,146 @@
-package com.inventario.model;
+package com.inventario.model; // Define el paquete lógico donde reside esta clase de modelo
 
-import java.sql.Date; // Importación de java.sql.Date para manejar fechas de la BD MySQL
+import java.sql.Date; // Importa la clase de fecha de Java específica para mapear campos DATE de la base de datos MySQL
 
 /**
- * MODELO: Clase Producto (Entidad/POJO)
+ * Modelo de datos: Clase Producto (Entidad o POJO - Plain Old Java Object).
  * 
- * Representa la tabla PRODUCTO de la base de datos MySQL.
- * Un Producto es un artículo de venta registrado por el Administrador.
- * 
- * FLUJO DE DATOS:
- * - CREACIÓN:    Registro_produc.html → ProductoServlet (doPost) → ProductoDAO.registrarProducto() → INSERT en tabla PRODUCTO
- * - LECTURA:     ProductoDAO.listarProductos() → ProductoServlet (doGet) → editar_productos.jsp (se muestra con ${prod.nombre})
- * - EDICIÓN:     formulario_editar_producto.jsp → ProductoServlet?action=actualizar → ProductoDAO.actualizarProducto()
- * - EN VENTAS:   VentaServlet → ProductoDAO.listarProductos() → agregar_venta.jsp (en el select de productos)
- * - EN PEDIDOS:  DetalleInventarioDAO → agregar_pedido.jsp (en el select de productos del inventario)
- * 
- * TABLAS RELACIONADAS:
- * - INVENTARIO_DETALLE: Vincula producto con inventario (FK: id_producto). Controla stock.
- * - DETALLE_VENTA: Cada venta registra qué producto se vendió (FK: id_inv_detalle → INVENTARIO_DETALLE)
+ * Esta clase es la representación en la Programación Orientada a Objetos 
+ * de la tabla física 'producto' alojada en la base de datos relacional.
+ * Actúa como una estructura de transporte de datos entre diferentes capas arquitectónicas.
  */
-public class Producto {
+public class Producto { // Definición de la clase pública Producto
 
     // =====================================================================
-    // ATRIBUTOS PRIVADOS - Corresponden a columnas de la tabla PRODUCTO
+    // ATRIBUTOS PRIVADOS (Encapsulamiento de los estados de la entidad)
+    // Cada atributo tiene una correlación directa funcional con una columna de la tabla.
     // =====================================================================
 
-    private int idProducto;        // PK: id_producto (INT, AUTO_INCREMENT). Identificador único del producto.
-    private String nombre;         // nombre (VARCHAR 100). Nombre del producto. Viene de: Registro_produc.html → input name="nombre"
-    private String marca;          // marca (VARCHAR 100). Marca del producto. Viene de: Registro_produc.html → input name="marca"
-    private double precioUnitario; // precio_unitario (DECIMAL). Precio de venta. Viene de: Registro_produc.html → input name="precio"
-    private String tipo;           // tipo (ENUM: 'bebida','snack','dulce','cigarro'). Viene de: Registro_produc.html → select name="tipo"
-    private String imagen;         // imagen (VARCHAR). Ruta o nombre del archivo de imagen. Viene de: input name="imagen" (type="file")
-    private Date fechaVencimiento; // fecha_vencimiento (DATE). Viene de: Registro_produc.html → input name="fecha_vencimiento" (type="date")
-    private String cantidadMedida; // cantidad_medida (VARCHAR). Ej: "750ml", "500gr". Viene de: input name="cantidad_medida"
+    private int idProducto;        // Atributo de tipo primitivo entero, mapea la Clave Primaria (PK) autogenerada del producto.
+    private String nombre;         // Atributo de tipo objeto String, almacena la cadena de caracteres del nombre del producto.
+    private String marca;          // Atributo de tipo objeto String, representa la marca comercial del producto.
+    private double precioUnitario; // Atributo primitivo de doble precisión para representar el valor económico fraccionario (precio).
+    private String tipo;           // Atributo de tipo String para almacenar la clasificación o categoría del producto.
+    private String imagen;         // Atributo de tipo String que guarda la ruta simbólica o el de referencia del archivo de imagen.
+    private Date fechaVencimiento; // Atributo instanciado con la clase Date (java.sql.Date) para representar el vencimiento del producto.
+    private String cantidadMedida; // Atributo String empleado para definir descripciones de volumen o peso (p.ej: "750ml").
 
     /**
-     * CONSTRUCTOR VACÍO
-     * Usado por: ProductoDAO.listarProductos() cuando crea objetos con new Producto() y llena con setters desde ResultSet.
+     * CONSTRUCTOR POR DEFECTO
+     * Método de instanciación fundamental que permite asignar espacio en memoria dinámica 
+     * a un objeto Producto en estado vacío, previo a la inyección de sus atributos mediante Setters.
      */
-    public Producto() {
+    public Producto() { // Declaración del constructor vacío
     }
 
     /**
-     * CONSTRUCTOR COMPLETO
-     * Permite crear un Producto con todos los datos de una sola vez.
-     * Usado por: ProductoDAO al leer todos los campos de un ResultSet.
+     * CONSTRUCTOR SOBRECARGADO (Parametrizado)
+     * Constructor avanzado que facilita inicializar la instancia de Producto con todos
+     * sus estados cargados de forma inmediata en una sola instrucción de código.
+     * 
+     * @param idProducto Identificador principal numérico
+     * @param nombre Cadena de texto correspondiente al nombre
+     * @param marca Cadena representativa de la marca
+     * @param precioUnitario Valor numérico decimal del precio
+     * @param tipo Clasificación del artículo
+     * @param imagen Cadena de ruta al archivo multimedia
+     * @param fechaVencimiento Instancia de Date señalando la validéz del producto
+     * @param cantidadMedida Descripción técnica de porción o medida
      */
-    public Producto(int idProducto, String nombre, String marca, double precioUnitario, String tipo, String imagen, Date fechaVencimiento, String cantidadMedida) {
-        this.idProducto = idProducto;           // Viene de: rs.getInt("id_producto")
-        this.nombre = nombre;                   // Viene de: rs.getString("nombre")
-        this.marca = marca;                     // Viene de: rs.getString("marca")
-        this.precioUnitario = precioUnitario;   // Viene de: rs.getDouble("precio_unitario")
-        this.tipo = tipo;                       // Viene de: rs.getString("tipo")
-        this.imagen = imagen;                   // Viene de: rs.getString("imagen")
-        this.fechaVencimiento = fechaVencimiento; // Viene de: rs.getDate("fecha_vencimiento")
-        this.cantidadMedida = cantidadMedida;   // Viene de: rs.getString("cantidad_medida")
+    public Producto(int idProducto, String nombre, String marca, double precioUnitario, String tipo, String imagen, Date fechaVencimiento, String cantidadMedida) { // Implementación del constructor con firma extensa
+        this.idProducto = idProducto;           // Resuelve ambigüedad y asocia el ID recibido al atributo propio de la instancia
+        this.nombre = nombre;                   // Asigna la cadena recibida al atributo privado correspondiente
+        this.marca = marca;                     // Asocia la marca inyectada por el invocador al miembro de la clase
+        this.precioUnitario = precioUnitario;   // Inicializa el estado primitivo del atributo precio de esta instancia
+        this.tipo = tipo;                       // Establece el atributo interno 'tipo' con la referencia proporcionada
+        this.imagen = imagen;                   // Sobrescribe la referencia a la ruta multimedia en estado interno
+        this.fechaVencimiento = fechaVencimiento; // Establece un puntero hacia la instancia de Date recibida en tiempo de ejecución
+        this.cantidadMedida = cantidadMedida;   // Inyecta el texto descriptivo de proporción en el objeto actual
     }
 
     // =====================================================================
-    // GETTERS Y SETTERS
+    // MÉTODOS ACCESORES (Getters) Y MUTADORES (Setters)
+    // Constituyen la interfaz pública única admisible para inspeccionar (get) o alterar (set)
+    // el estado de la información contenida en la clase protegida por el paradigma de encapsulamiento.
     // =====================================================================
 
-    /** Retorna el ID del producto. Usado en JSP como: ${prod.idProducto} o ${p.idProducto} en selects */
-    public int getIdProducto() {
-        return idProducto;
+    /** Accesor: Devuelve el identificador de tipo entero del producto */
+    public int getIdProducto() { // Método público de lectura de la propiedad ID
+        return idProducto; // Instrucción de retorno del miembro privado
     }
 
-    /** Asigna el ID. Llamado desde: ProductoDAO con rs.getInt("id_producto") */
-    public void setIdProducto(int idProducto) {
-        this.idProducto = idProducto;
+    /** Mutador: Establece un nuevo estado entero en la propiedad ID del producto */
+    public void setIdProducto(int idProducto) { // Método público de inyección void (sin retorno)
+        this.idProducto = idProducto; // Reemplazo condicional sin validación del identificador
     }
 
-    /** Retorna el nombre. Usado en JSP como: ${prod.nombre} en editar_productos.jsp y ${p.nombre} en agregar_venta.jsp */
-    public String getNombre() {
-        return nombre;
+    /** Accesor: Obtiene la cadena de texto con el nombre configurado en instancia */
+    public String getNombre() { // Método público de lectura de la propiedad Nombre
+        return nombre; // Retorna la referencia al objeto String en memoria
     }
 
-    /** Asigna el nombre. Viene de: ProductoServlet → request.getParameter("nombre") */
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    /** Mutador: Define o reescribe el nombre descriptivo apuntado por el objeto actual */
+    public void setNombre(String nombre) { // Método sin retorno, toma un String como inyector
+        this.nombre = nombre; // Reemplaza la referencia local actual
     }
 
-    /** Retorna la marca. Usado en JSP como: ${prod.marca} y ${p.marca} */
-    public String getMarca() {
-        return marca;
+    /** Accesor: Retorna el nombre comercial de la marca asociada al objeto instanciado */
+    public String getMarca() { // Declaración de método público
+        return marca; // Retorna el miembro almacenado marca
     }
 
-    /** Asigna la marca. Viene de: ProductoServlet → request.getParameter("marca") */
-    public void setMarca(String marca) {
-        this.marca = marca;
+    /** Mutador: Reasigna el valor en texto sobre la marca vinculada a este producto */
+    public void setMarca(String marca) { // Se provee función que recibe String
+        this.marca = marca; // Setea en memoria la referencia
     }
 
-    /** Retorna el precio unitario. Usado en JSP como: ${prod.precioUnitario} y ${p.precioUnitario} */
-    public double getPrecioUnitario() {
-        return precioUnitario;
+    /** Accesor: Lee el escalar de punto flotante de doble abstracción matemática correspondiente al precio */
+    public double getPrecioUnitario() { // Retorno de tipo primitivo de máquina
+        return precioUnitario; // Expone exteriormente el valor
     }
 
-    /** Asigna el precio. Viene de: ProductoServlet → Double.parseDouble(request.getParameter("precio")) */
-    public void setPrecioUnitario(double precioUnitario) {
-        this.precioUnitario = precioUnitario;
+    /** Mutador: Inicializa con un valor puramente numérico el estado primitivo del precio */
+    public void setPrecioUnitario(double precioUnitario) { // Inyecta double recibido
+        this.precioUnitario = precioUnitario; // Modifica registro lógico con el dato formal
     }
 
-    /** Retorna el tipo de producto. Usado en JSP como: ${prod.tipo} (para marcar selected en el select de editar) */
-    public String getTipo() {
-        return tipo;
+    /** Accesor: Consulta la semántica o categorización de la cadena de tipo */
+    public String getTipo() { // Función pública con retorno en abstracción String
+        return tipo; // Libera contexto sobre el dato encapsulado "tipo"
     }
 
-    /** Asigna el tipo. Viene de: ProductoServlet → request.getParameter("tipo") */
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
+    /** Mutador: Cambia el criterio de clasificación apuntando la memoria a nueva cadena String asignada */
+    public void setTipo(String tipo) { // Toma parámetro lógico desde el llamador
+        this.tipo = tipo; // Efectiviza el cambio asignando variable miembro
     }
 
-    /** Retorna la ruta de la imagen. Usado en JSP como: ${prod.imagen} */
-    public String getImagen() {
-        return imagen;
+    /** Accesor: Muestra la ubicación referenciada de recursos iconográficos como String */
+    public String getImagen() { // Lectura desde exterior limitando mutabilidad directa
+        return imagen; // Extrae atributo local
     }
 
-    /** Asigna la imagen. Viene de: ProductoServlet → request.getParameter("imagen") */
-    public void setImagen(String imagen) {
-        this.imagen = imagen;
+    /** Mutador: Cambia el puntero local al camino (Path) del archivo de imagen procesado */
+    public void setImagen(String imagen) { // Toma texto del path relativo multimedia
+        this.imagen = imagen; // Sobrescritura en la asignación orientada
     }
 
-    /** Retorna la fecha de vencimiento. Usado en JSP con fmt:formatDate para formato legible */
-    public Date getFechaVencimiento() {
-        return fechaVencimiento;
+    /** Accesor: Retorna la instancia de un objeto Date complejo contenido dentro del objeto global actual */
+    public Date getFechaVencimiento() { // Expone variable tipo Date relacional
+        return fechaVencimiento; // Retorna referencia
     }
 
-    /** Asigna la fecha. Viene de: ProductoServlet → Date.valueOf(request.getParameter("fecha_vencimiento")) */
-    public void setFechaVencimiento(Date fechaVencimiento) {
-        this.fechaVencimiento = fechaVencimiento;
+    /** Mutador: Enlaza una nueva instancia de un objeto Date al registro temporal del producto */
+    public void setFechaVencimiento(Date fechaVencimiento) { // Adopta argumento estructurado y no primitivo
+        this.fechaVencimiento = fechaVencimiento; // Enlace del puntero en el atributo miembro actual
     }
 
-    /** Retorna la cantidad/medida. Usado en JSP como: ${prod.cantidadMedida} */
-    public String getCantidadMedida() {
-        return cantidadMedida;
+    /** Accesor: Describe textualmente cualquier métrica dimensionada física (gramaje, volumetría) */
+    public String getCantidadMedida() { // Devuelve puntero de Cadena de Caracteres
+        return cantidadMedida; // Retorno base
     }
 
-    /** Asigna la cantidad/medida. Viene de: ProductoServlet → request.getParameter("cantidad_medida") */
-    public void setCantidadMedida(String cantidadMedida) {
-        this.cantidadMedida = cantidadMedida;
+    /** Mutador: Acepta y sustituye texto detallando la magnitud métrica del elemento */
+    public void setCantidadMedida(String cantidadMedida) { // Toma literal textual dimensionado
+        this.cantidadMedida = cantidadMedida; // Ajuste directo del miembro paramétrico
     }
 }

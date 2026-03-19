@@ -1,5 +1,5 @@
 
-package com.inventario.controller;
+package com.inventario.controller; // Empaquetamiento estructural arquitectónico para los controladores de la aplicación
 
 import com.inventario.dao.GastoDao;
 import com.inventario.model.Gasto;
@@ -14,89 +14,97 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- * CONTROLADOR: Servlet encargado de gestionar los Gastos operativos.
+ * Controlador de Flujo: GastoServlet.
  * 
- * Implementa: RF-26 (Registrar Gasto), RF-27 (Listar Gastos)
- * Cumple: RNF-02 (Protección SQL Injection - delega en DAO con PreparedStatement)
- *         RNF-03 (Gestión de Sesiones - obtiene idInventarioActual de la sesión)
- *         RNF-08 (Mensajes de Error - redirige con ?error=1 si falla el registro)
- *         RNF-13 (Arquitectura MVC - Capa Controlador)
+ * Clase orquestadora (Controlador en patrón MVC) que intersecta las peticiones HTTP (Vistas) 
+ * delegando la persistencia y consulta de estado lógico de la entidad 'Gasto' a la capa DAO (Modelo).
+ * Hereda el comportamiento de procesamiento de servidor de la clase abstracta HttpServlet.
  */
-@WebServlet("/GastoServlet")
-public class GastoServlet extends HttpServlet{
+@WebServlet("/GastoServlet") // Decorador o anotación de enrutamiento que suscribe esta clase al manejador de peticiones URL.
+public class GastoServlet extends HttpServlet{ // Definición pública de clase con herencia fuerte de framework HTTP.
+    
     /**
-     * RF-26: Método doPost - Registra un nuevo gasto operativo.
-     * Recibe los datos del formulario agregar_gasto.html y los guarda en la BD
-     * vinculándolos al inventario activo.
+     * Sobreescritura del método transaccional HTTP POST.
+     * Intercepta las inyecciones de formularios (payloads) para inicializar entidades POJO 
+     * en memoria y dirigir su encapsulamiento hacia almacenaje persistente.
+     * 
+     * @param request Objeto encapsulador del estado y parámetros de la petición entrante.
+     * @param response Objeto inyector para formular una salida resolutiva asíncrona o sincrónica.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException { // Firma de método amparada contra manejo de excepciones de I/O y procesamiento Web.
         
-        // RF-26 PASO 1: Recibir datos del formulario HTML
-        // RF-30: Campos obligatorios validados con "required" en el HTML
-        String descripcion = request.getParameter("descripcion");   // RF-26: Descripción del gasto (obligatorio)
+        // =====================================================================
+        // EXTRACCIÓN Y MAPEO DEL ESTADO (Binding de parámetros HTTP a variables RAM)
+        // =====================================================================
+        String descripcion = request.getParameter("descripcion");   // Extrae la cadena descriptiva de origen cliente.
         
-        String fechaStr = request.getParameter("fecha");            // RF-26: Fecha del gasto (obligatorio, formato YYYY-MM-DD)
+        String fechaStr = request.getParameter("fecha");            // Extrae el literal cronológico para ser casteado posteriormente.
         
-        int cantidad = Integer.parseInt(request.getParameter("cantidad"));      // RF-26: Cantidad (obligatorio, entero > 0)
+        int cantidad = Integer.parseInt(request.getParameter("cantidad"));      // Extrae y transforma escalarmente a tipo primitivo Int.
         
-        double subtotal = Double.parseDouble(request.getParameter("subtotal")); // RF-26: Subtotal (obligatorio, numérico > 0)
+        double subtotal = Double.parseDouble(request.getParameter("subtotal")); // Extrae y transforma escalarmente a tipo mutante Double.
         
-        // RF-26 PASO 2: Crear objeto Modelo (Gasto) y llenarlo con los datos
-        Gasto g = new Gasto();
-        g.setDescripcion(descripcion);
-        g.setFecha(Date.valueOf(fechaStr));
-        g.setCantidad(cantidad);
-        g.setSubtotal(subtotal);
+        // =====================================================================
+        // INSTANCIACIÓN DE ENTIDAD MODELO (Transferencia de estado inter-capas)
+        // =====================================================================
+        Gasto g = new Gasto(); // Genera un envoltorio atómico o POJO vacío en memoria.
+        g.setDescripcion(descripcion); // Inyecta el estado alfanumérico al encapsulamiento interno.
+        g.setFecha(Date.valueOf(fechaStr)); // Aplica Factory pattern sobre Date para parseo literal y setea la propiedad temporal.
+        g.setCantidad(cantidad); // Aplica mutador inyectando el cardinal.
+        g.setSubtotal(subtotal); // Aplica mutador inyectando la fracción computable.
         
-        // RESTAURADO: Obtener el inventario actual de la sesión (antes era negocio)
-        HttpSession session = request.getSession();
-        Integer idInventario = (Integer) session.getAttribute("idInventarioActual");
-        g.setId_inventario(idInventario); // RESTAURADO: Vincular gasto con el inventario
+        // RECUPERACIÓN DE CONTEXTO O AMBIENTE (Lectura de Sesión)
+        HttpSession session = request.getSession(); // Llama al proveedor de sesión transiente.
+        Integer idInventario = (Integer) session.getAttribute("idInventarioActual"); // Invoca en polimorfismo o cast al envoltorio local temporal.
+        g.setId_inventario(idInventario); // Amarre de relación transitiva o cardinal in memory.
         
-        // RF-26 PASO 3: Llamar al DAO para guardar en la BD
-        GastoDao dao = new GastoDao();
+        // =====================================================================
+        // ORQUESTACIÓN DE CAPA DE DATOS (Data Access Object - DAO pattern)
+        // =====================================================================
+        GastoDao dao = new GastoDao(); // Crea una nueva instancia utilitaria constructiva inter BD.
         try{
-            boolean ok = dao.registrarGasto(g);      // RF-26: Inserta el gasto en la tabla GASTO
-            if (ok){
-                response.sendRedirect("view/gasto_finalizado.html");  // RF-26: Redirigir a confirmación
+            boolean ok = dao.registrarGasto(g);      // Delega el estado del objeto en cascada al motor transaccional. Retorna comprobación booleana de éxito.
+            if (ok){ // Bifurcación en flujo regular.
+                response.sendRedirect("view/gasto_finalizado.html");  // Cierre de hilo de ejecución ordenando al navegador una redirección a capa vista.
                
             }
             else{
-                // RNF-08: Redirigir con error
-                response.sendRedirect("view/agregar_gasto.html?error=1");
+                // Flujo alternativo si falla el motor transaccional pero no arroja excepción controlada
+                response.sendRedirect("view/agregar_gasto.html?error=1"); // Redirige inyectando query param restrictivo
             }
-        }catch (Exception e){
-            e.printStackTrace();
-            // RNF-08: Redirigir con error
-            response.sendRedirect("view/agregar_gasto.html?error=1");
+        }catch (Exception e){ // Bloque atrapador de excepciones base operacionales inter-servicio.
+            e.printStackTrace(); // Salida sucia o print logueable genérica del error apilable de la JVM.
+            // Redireccionamiento forzado reactivo debido a volcado o null-pointer relacional.
+            response.sendRedirect("view/agregar_gasto.html?error=1"); // Devuelve el hilo operando con param semántico
         }
                
     }
 
     /**
-     * RF-27: Método doGet - Lista el historial de gastos del negocio actual.
-     * RF-27 Restricción 1: Filtra los gastos por el idNegocioActual almacenado en sesión.
+     * Sobreescritura del método consultivo HTTP GET.
+     * Actúa como filtro lector, instanciando consultas masivas desde DAO para luego inyectar colecciones 
+     * como atributos transientes en la petición actual que será re-despachada (forwarded) a una Vista JSP.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException { // Captura de subrutinas fallidas
 
-        String action = request.getParameter("action");
-        HttpSession session = request.getSession();
+        String action = request.getParameter("action"); // Extrae un discriminador lógico de flujo
+        HttpSession session = request.getSession(); // Accesor a la capa temporal pre-autenticada o abstracta del usuario en memoria compartida
 
-        if ("listar".equals(action)) {
-            // RF-27: Listar gastos del negocio actual
-            Integer idNegocio = (Integer) session.getAttribute("idNegocioActual"); // RF-27 Restricción 1: Filtrar por negocio
+        if ("listar".equals(action)) { // Inicia filtro controlador de acción
+            // Acceso relacional transiente (Atributo de sesión tipo envoltura)
+            Integer idNegocio = (Integer) session.getAttribute("idNegocioActual"); // Instancia el filtrador base a través de un cast implícito.
 
-            if (idNegocio != null) {
-                GastoDao dao = new GastoDao();
-                List<Gasto> listaGastos = dao.listarGastos(idNegocio);      // RF-27: Consulta gastos de este negocio
-                request.setAttribute("listaGastos", listaGastos);           // Pasa la lista al JSP
-                request.getRequestDispatcher("view/visualizar_gastos.jsp").forward(request, response); // RF-27: Muestra la vista
+            if (idNegocio != null) { // Validador de existencia en memoria, para eludir Null-Pointer
+                GastoDao dao = new GastoDao(); // Creación e inyección de generador lector relacional de capa de datos
+                List<Gasto> listaGastos = dao.listarGastos(idNegocio);      // Disparo sincrónico del listado, retorna una Collection tipo List de objetos modelo.
+                request.setAttribute("listaGastos", listaGastos);           // Amarra dinámicamente o acopla el Array extraído como metadato foráneo en la respuesta viva.
+                request.getRequestDispatcher("view/visualizar_gastos.jsp").forward(request, response); // Despacha ortogonal o re-direcciona la request al template engine (JSP) internamente.
             } else {
-                response.sendRedirect("index.jsp");  // Sesión perdida
+                response.sendRedirect("index.jsp");  // Salida rápida en caso de pérdida de envoltura en memoria 
             }
         }
     }

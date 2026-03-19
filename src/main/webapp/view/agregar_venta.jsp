@@ -224,7 +224,7 @@
                                                                                     <tr>
                                                                                         <th>Producto</th>
                                                                                         <th>Cant.</th>
-                                                                                        <th>Precio Unit.</th>
+
                                                                                         <th>Subtotal</th>
                                                                                         <th>Acción</th>
                                                                                     </tr>
@@ -276,21 +276,6 @@
                                                                                                                     --%>
                                                                                                                     <td>${item.cantidad}
                                                                                                                     </td>
-                                                                                                                    <%-- ${item.precioUnitario}
-                                                                                                                        →
-                                                                                                                        Viene
-                                                                                                                        de:
-                                                                                                                        Producto.getPrecioUnitario()
-                                                                                                                        ←
-                                                                                                                        BD
-                                                                                                                        tabla
-                                                                                                                        PRODUCTO
-                                                                                                                        --%>
-                                                                                                                        <td>$
-                                                                                                                            <fmt:formatNumber
-                                                                                                                                value="${item.precioUnitario}"
-                                                                                                                                pattern="#,##0" />
-                                                                                                                        </td>
                                                                                                                         <%-- ${item.subtotal}
                                                                                                                             →
                                                                                                                             Calculado

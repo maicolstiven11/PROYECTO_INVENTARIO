@@ -79,9 +79,17 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="iva">IVA ($):</label>
-                            <input type="number" name="iva" id="iva" min="0" step="0.01" placeholder="Ej: 19000"
-                                required>
+                            <label for="porcentaje_iva">IVA (%):</label>
+                            <select id="porcentaje_iva" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; background-color: white;">
+                                <option value="0" selected>0% (Sin IVA)</option>
+                                <option value="5">5%</option>
+                                <option value="8">8% (Impoconsumo)</option>
+                                <option value="19">19%</option>
+                            </select>
+                            <!-- Input oculto para enviar el valor calculado al servlet -->
+                            <input type="hidden" name="iva" id="iva_calculado" value="0">
+                            <!-- Mostramos al usuario el valor calculado en pesos -->
+                            <input type="text" id="iva_mostrar" readonly class="input-readonly" style="margin-top: 5px;" placeholder="Valor del IVA ($0.00)">
                         </div>
 
                         <!-- Campos Calculados (Readonly) -->
@@ -112,24 +120,31 @@
 
             <footer></footer>
 
-            <!-- Script para cálculos automáticos -->
+            <!-- Script para cálculos automáticos y validaciones -->
             <script>
                 const cantidadInput = document.getElementById('cantidad');
                 const subtotalInput = document.getElementById('subtotal');
-                const ivaInput = document.getElementById('iva');
+                const porcentajeIvaSelect = document.getElementById('porcentaje_iva');
+                const ivaCalculadoInput = document.getElementById('iva_calculado');
+                const ivaMostrarInput = document.getElementById('iva_mostrar');
                 const totalInput = document.getElementById('total_pedido');
                 const precioUnitarioInput = document.getElementById('precio_unitario');
 
                 function calcularValores() {
                     const cantidad = parseFloat(cantidadInput.value) || 0;
                     const subtotal = parseFloat(subtotalInput.value) || 0;
-                    const iva = parseFloat(ivaInput.value) || 0;
+                    const porcentajeIva = parseFloat(porcentajeIvaSelect.value) || 0;
 
-                    // 1. Calcular Total Pedido
-                    const total = subtotal + iva;
+                    // 1. Calcular IVA en pesos
+                    const ivaEnPesos = subtotal * (porcentajeIva / 100);
+                    ivaCalculadoInput.value = ivaEnPesos.toFixed(2);
+                    ivaMostrarInput.value = "$ " + ivaEnPesos.toFixed(2);
+
+                    // 2. Calcular Total Pedido
+                    const total = subtotal + ivaEnPesos;
                     totalInput.value = total.toFixed(2);
 
-                    // 2. Calcular Precio Unitario Real
+                    // 3. Calcular Precio Unitario Real
                     if (cantidad > 0) {
                         const precioUnitario = total / cantidad;
                         precioUnitarioInput.value = precioUnitario.toFixed(2);
@@ -138,10 +153,30 @@
                     }
                 }
 
-                // Escuchar eventos
+                // Escuchar eventos para el cálculo
                 cantidadInput.addEventListener('input', calcularValores);
                 subtotalInput.addEventListener('input', calcularValores);
-                ivaInput.addEventListener('input', calcularValores);
+                porcentajeIvaSelect.addEventListener('change', calcularValores);
+                
+                // Configurar límites de fecha al cargar la página (solo restringir al año actual)
+                document.addEventListener('DOMContentLoaded', function() {
+                    const yearActual = new Date().getFullYear();
+                    // Limitar entre el primero de enero y el 31 de diciembre del año actual
+                    const minDate = yearActual + "-01-01";
+                    const maxDate = yearActual + "-12-31";
+                    
+                    const elFechaPedido = document.getElementById('fecha_pedido');
+                    const elFechaEntrega = document.getElementById('fecha_entrega');
+                    
+                    if(elFechaPedido) {
+                        elFechaPedido.setAttribute("min", minDate);
+                        elFechaPedido.setAttribute("max", maxDate);
+                    }
+                    if(elFechaEntrega) {
+                        elFechaEntrega.setAttribute("min", minDate);
+                        elFechaEntrega.setAttribute("max", maxDate);
+                    }
+                });
             </script>
             <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

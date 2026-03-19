@@ -1,4 +1,4 @@
-package com.inventario.controller;
+package com.inventario.controller; // Declaración de espacio de nombres organizativo de artefactos de red 
 
 import com.inventario.dao.ProductoDAO;
 import com.inventario.model.Producto;
@@ -18,290 +18,283 @@ import java.nio.file.StandardCopyOption;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.Part;
 /**
- * CONTROLADOR: Servlet encargado de gestionar los Productos.
+ * Controlador Orquestador Integrador: ProductoServlet.
  * 
- * Implementa: RF-09 (Registrar Producto), RF-10 (Listar Productos), RF-11 (Editar Producto), RF-12 (Eliminar Producto)
- * Cumple: RNF-02 (Protección SQL Injection - delega en DAO con PreparedStatement)
- *         RNF-08 (Mensajes de Error - redirige con parámetros de error descriptivos)
- *         RNF-13 (Arquitectura MVC - Capa Controlador)
+ * Fachada interceptora delegativa enfocada en el Modelo base dependiente (Producto).
+ * Extiende la funcionalidad nativa de Servlet manejando I/O asíncrono e integrado con soporte Multipart/Form-Data para subida de binarios (imágenes).
+ * Resuelve interacciones orquestando un Data Access Object propio.
  */
-@WebServlet(name = "ProductoServlet", urlPatterns = {"/ProductoServlet"})
-@MultipartConfig(
-    fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
-    maxFileSize = 1024 * 1024 * 10,      // 10 MB
-    maxRequestSize = 1024 * 1024 * 100   // 100 MB
+@WebServlet(name = "ProductoServlet", urlPatterns = {"/ProductoServlet"}) // Decorador instanciador asimétrico Web .
+@MultipartConfig( // Metadata restrictiva relacional sobre payload binario
+    fileSizeThreshold = 1024 * 1024 * 1, // 1 MB (Umbral en memoria RAM)
+    maxFileSize = 1024 * 1024 * 10,      // 10 MB (Techo de entidad binaria simple)
+    maxRequestSize = 1024 * 1024 * 100   // 100 MB (Techo total payload HTTP)
 )
-public class ProductoServlet extends HttpServlet {
+public class ProductoServlet extends HttpServlet { // Polimorfismo sub-tipo base protocolo Web Framework HTTP .
 
-    private String subirImagen(Part part, HttpServletRequest request) throws IOException {
-        String fileName = null;
-        if (part != null && part.getSize() > 0) {
-            String contentDisp = part.getHeader("content-disposition");
-            String[] items = contentDisp.split(";");
-            for (String s : items) {
-                if (s.trim().startsWith("filename")) {
-                    fileName = s.substring(s.indexOf("=") + 2, s.length() - 1);
+    /**
+     * Subrutina utilitaria IO de abstracción binaria.
+     * Recibe una Part o Entidad Binaria Multipart encapsulándola para su persistencia en el filesystem Host de la JVM,
+     * y genera una cadena alfanumérica persistible en BD de la URI o name del fichero.
+     */
+    private String subirImagen(Part part, HttpServletRequest request) throws IOException { // Declaración que acusa fallo potencial base IO .
+        String fileName = null; // Instancia temporal string pointer nulo .
+        if (part != null && part.getSize() > 0) { // Limitador boolean comprobador objeto payload 
+            String contentDisp = part.getHeader("content-disposition"); // Busca metadata de capa HTTP .
+            String[] items = contentDisp.split(";"); // Splitter divisor en Arrays para extraer parametrización de headers .
+            for (String s : items) { // Iterador recursivo index simple
+                if (s.trim().startsWith("filename")) { // String utils validador
+                    fileName = s.substring(s.indexOf("=") + 2, s.length() - 1); // Mutador extractor String puro.
                 }
             }
-            if (fileName != null && !fileName.isEmpty()) {
-                fileName = System.currentTimeMillis() + "_" + new File(fileName).getName();
+            if (fileName != null && !fileName.isEmpty()) { // Comprueba flag .
+                fileName = System.currentTimeMillis() + "_" + new File(fileName).getName(); // Factoría concatenadora asegurando llave única pseudo-random (Timestamp) y nombre original validado.
                 
-                String uploadPath = request.getServletContext().getRealPath("") + File.separator + "assets" + File.separator + "img";
-                String sourcePath = "c:\\adso\\2994281\\PROYECTO_INVENTARIO\\src\\main\\webapp\\assets\\img";
+                String uploadPath = request.getServletContext().getRealPath("") + File.separator + "assets" + File.separator + "img"; // Orquestador armador String ruta Absoluta Host compilado
+                String sourcePath = "c:\\adso\\2994281\\PROYECTO_INVENTARIO\\src\\main\\webapp\\assets\\img"; // Orquestador ruta absoluta hardcoded Host estático .
                 
-                File uploadDir = new File(uploadPath);
-                if (!uploadDir.exists()) uploadDir.mkdirs();
+                File uploadDir = new File(uploadPath); // Envuelve y genera Modelación Objeto File Directory API .
+                if (!uploadDir.exists()) uploadDir.mkdirs(); // Disparador constructor comando subyacente mkdirs .
                 
-                File sourceDir = new File(sourcePath);
-                if (!sourceDir.exists()) sourceDir.mkdirs();
+                File sourceDir = new File(sourcePath); // Ídem source.
+                if (!sourceDir.exists()) sourceDir.mkdirs(); // Ídem create .
                 
-                // Guardar en el directorio de despliegue
-                part.write(uploadPath + File.separator + fileName);
+                // Traspaso de buffers IO del stream a memoria estática disco .
+                part.write(uploadPath + File.separator + fileName); // Method writer framework envuelto .
                 
-                // Copiar también al código fuente
+                // Traspaso asimétrico síncrono reflejando copia a carpeta Dev
                 try {
-                    Files.copy(Paths.get(uploadPath + File.separator + fileName), 
+                    Files.copy(Paths.get(uploadPath + File.separator + fileName), // Java NIO API Object param .
                                Paths.get(sourcePath + File.separator + fileName), 
-                               StandardCopyOption.REPLACE_EXISTING);
+                               StandardCopyOption.REPLACE_EXISTING); // Flag sobreescribir.
                 } catch(Exception e) {
-                    System.out.println("Error copiando imagen a carpeta fuente: " + e.getMessage());
+                    System.out.println("Error copiando imagen a carpeta fuente: " + e.getMessage()); // Fail silencioso y purgado buffer trace.
                 }
             }
         }
-        return (fileName != null && !fileName.isEmpty()) ? fileName : null;
+        return (fileName != null && !fileName.isEmpty()) ? fileName : null; // Retorno de variable local (Ternario utilitario boolean).
     }
 
     /**
-     * RF-09, RF-11: Método doPost - Registra un nuevo producto o actualiza uno existente.
-     * Si recibe action=actualizar, ejecuta la actualización (RF-11).
-     * Si no recibe action, ejecuta el registro de nuevo producto (RF-09).
+     * Sobreescritura del método transaccional de posteo mutativo síncrono.
+     * Enruta flujos alternos: Instanciación/Creación Total de Entidad, o Actualización de Entidad Activa, discriminado semánticamente.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException { // Captura framework API
         
-        // RF-11: Verificar si es una actualización de producto existente
-        String action = request.getParameter("action");
-        if ("actualizar".equals(action)) {
-            procesarActualizacion(request, response);  // RF-11: Delega al método de actualización
-            return;
+        // Atrapa y filtra param semántico para subrutina update.
+        String action = request.getParameter("action"); // Binding Local
+        if ("actualizar".equals(action)) { // String Match restrictivo 
+            procesarActualizacion(request, response);  // Invoca Helper passthrough en la subclase local proxy .
+            return; // Nullifies current execution stack.
         }
         
         // =====================================================================
-        // RF-09: REGISTRAR NUEVO PRODUCTO
+        // ALGORITMO ORQUESTADOR DE CREACIÓN ZERO E INYECCIÓN CON BINDING MULTIPART
         // =====================================================================
         
-        // RF-09 PASO 1: Recibir datos del formulario
-        // RF-30: Los campos obligatorios se validan con "required" en el HTML
-        String nombre = request.getParameter("nombre");              // RF-09: Nombre (obligatorio)
-        String marca = request.getParameter("marca");                // RF-09: Marca (obligatorio)
-        String tipo = request.getParameter("tipo");                  // RF-09: Tipo/categoría (obligatorio)
+        // Recoge param string de forms frontend (Instanciación variable local asilada nulas si no manda el front)
+        String nombre = request.getParameter("nombre");              // Extractor literal primitivo .
+        String marca = request.getParameter("marca");                // Idem.
+        String tipo = request.getParameter("tipo");                  // Idem categorizado.
         
-        // Manejo de imagen con Multipart
-        String imagen = null;
+        // Delegación Binary File (Multipart) a método auxiliar .
+        String imagen = null; // Variable nula por defecto .
         try {
-            Part filePart = request.getPart("imagen");
-            if (filePart != null && filePart.getSize() > 0) {
-                imagen = subirImagen(filePart, request);
+            Part filePart = request.getPart("imagen"); // Atrapa el binario framework 
+            if (filePart != null && filePart.getSize() > 0) { // Limitador flag logic 
+                imagen = subirImagen(filePart, request); // Delega buffer Stream .
             }
-        } catch(Exception e) {
-            System.out.println("Error al procesar la imagen: " + e.getMessage());
+        } catch(Exception e) { // Suciedad null .
+            System.out.println("Error al procesar la imagen: " + e.getMessage()); // Print Trace asilado .
         }
         
-        String cantidadMedida = request.getParameter("cantidad_medida"); // RF-09: Cantidad/medida (ej: "1 Litro")
+        String cantidadMedida = request.getParameter("cantidad_medida"); // String relacional escalar semántico .
         
-        // RF-09 Restricción 1: El precio debe ser numérico positivo
-        // RF-09 Restricción 2: Si no se proporciona precio válido, se establece en 0.0
-        double precio = 0.0;
-        try {
-            precio = Double.parseDouble(request.getParameter("precio"));
+        // Constructor Float Decimal.
+        double precio = 0.0; // Base constructor primitivo.
+        try { // Trata conversión 
+            precio = Double.parseDouble(request.getParameter("precio")); // Matemáticas Float parsing cast .
         } catch (NumberFormatException e) {
-            precio = 0.0;  // RF-09 Restricción 2: Valor por defecto si el precio no es válido
+            precio = 0.0;  // Asilamiento fall-back o protector de Null .
         }
         
-        // RF-09 Restricción 3: La fecha de vencimiento es opcional y debe tener formato válido
-        Date fechaVencimiento = null;
+        // Constructor y parser SQL Entity time-model Date.
+        Date fechaVencimiento = null; // Nulo Base
         try {
-            String fechaStr = request.getParameter("fecha_vencimiento");
-            if(fechaStr != null && !fechaStr.isEmpty()){
-                fechaVencimiento = Date.valueOf(fechaStr);  // Convierte String "YYYY-MM-DD" a objeto Date
+            String fechaStr = request.getParameter("fecha_vencimiento"); // Cadena format param
+            if(fechaStr != null && !fechaStr.isEmpty()){ // Booleano .
+                fechaVencimiento = Date.valueOf(fechaStr);  // Polimorfismo o Factoría de instanciación tipo Date desde string param ISO.
             }
-        } catch (IllegalArgumentException e) {
-            fechaVencimiento = null;  // RF-09 Restricción 3: Si el formato es inválido, se establece en null
+        } catch (IllegalArgumentException e) { // Excepciones por format Date .
+            fechaVencimiento = null;  // Purifica setter protector base 
         }
 
-        // RF-09 PASO 2: Crear objeto Modelo (Producto) y llenarlo con los datos
-        Producto p = new Producto();
-        p.setNombre(nombre);
-        p.setMarca(marca);
-        p.setPrecioUnitario(precio);
-        p.setTipo(tipo);
-        p.setImagen(imagen);
-        p.setFechaVencimiento(fechaVencimiento);
-        p.setCantidadMedida(cantidadMedida);
+        // FÁBRICA CONSTRUCTIVA DEL POJO ENTIDAD MADRE .
+        Producto p = new Producto(); // Asigna HEAP RAM space vacío al wrapper Object Entity .
+        p.setNombre(nombre); // Método mutador o setter en instanciado de abstracción private object.
+        p.setMarca(marca); // Setter String .
+        p.setPrecioUnitario(precio); // Setter Floating point.
+        p.setTipo(tipo); // Setter Category string referencial .
+        p.setImagen(imagen); // Set URI pointer a filesystem Host BD abstracción string 
+        p.setFechaVencimiento(fechaVencimiento); // Setter capa modelo object instanciador o puntero .
+        p.setCantidadMedida(cantidadMedida); // Setter text-form float/unit abstraction .
 
-        // RF-09 PASO 3: Llamar al DAO para guardar en la BD
-        ProductoDAO dao = new ProductoDAO();
+        // INYECCIÓN MÚLTIPLE DE TRANSACCIÓN A CAPA BD
+        ProductoDAO dao = new ProductoDAO(); // Constructor del Orquestador Enrutador de Modelo DAO .
         
-        // VALIDACIÓN DE UNICIDAD: Verificar si el nombre del producto ya existe
-        if (dao.existeNombreProducto(nombre)) {
-            response.sendRedirect("view/Registro_produc.html?error=producto_duplicado");
-            return; // Detener el flujo
+        // Subrutina restrictiva condicional chequeando consistencia Booleana. 
+        if (dao.existeNombreProducto(nombre)) { // Llamada método comparador selectivo boolean retornado.
+            response.sendRedirect("view/Registro_produc.html?error=producto_duplicado"); // Resolutivo Web redirect y flag error .
+            return; // Corta flujo actual por integridad.
         }
 
         try {
-            boolean exito = dao.registrarProducto(p);  // RF-09: Inserta el producto en la tabla PRODUCTO
-            if (exito) {
-                response.sendRedirect("view/Produc_registrado.html");  // RF-09: Redirigir a confirmación
+            boolean exito = dao.registrarProducto(p);  // Instancia llamada principal insertando Object Entity completo en método asíncrono.
+            if (exito) { // Rama afirmativa bool
+                response.sendRedirect("view/Produc_registrado.html");  // Conclusión UI exitosa síncrona visual .
             } else {
-                // RNF-08: Redirigir con error descriptivo
-                response.sendRedirect("view/Registro_produc.html?error=NoSeGuardoEnBD");
+                // Caída lógica false boolean
+                response.sendRedirect("view/Registro_produc.html?error=NoSeGuardoEnBD"); // Param Error fallback logic .
             }
         } catch (Exception e) {
-            // RNF-08: Redirigir con mensaje de excepción
-             response.sendRedirect("view/Registro_produc.html?error=" + e.getMessage().replace(" ", "_"));
+            // Caída asíncrona error runtime SQL/Parse Exception 
+             response.sendRedirect("view/Registro_produc.html?error=" + e.getMessage().replace(" ", "_")); // Muta e inyecta log .
         }
     }
 
     /**
-     * RF-10, RF-11, RF-12: Método doGet - Lista, edita o elimina productos.
-     * action=eliminar → RF-12: Eliminar producto por ID
-     * action=editar   → RF-11: Cargar datos del producto para formulario de edición
-     * sin action      → RF-10: Listar todos los productos
+     * Sobreescritura evaluativa transitoria GET.
+     * Módulo switch iterativo analizando Strings para bifurcar el árbol asíncrono hacia subrutinas de Carga Inicial Frontal, Lista de Colección Modelo o Destructor.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException { // Capturador API Web .
         
-        String action = request.getParameter("action");
-        ProductoDAO dao = new ProductoDAO();
+        String action = request.getParameter("action"); // Extrae limitante y flag director String from HTTP Get query
+        ProductoDAO dao = new ProductoDAO(); // Generador Gestor Relacional
         
-        if (action != null && action.equals("eliminar")) {
+        if (action != null && action.equals("eliminar")) { // Limitador y Match boolean operator and String Equaliser.
             // =====================================================================
-            // RF-12: ELIMINAR PRODUCTO POR ID
-            // Se ejecuta cuando la URL contiene ?action=eliminar&id=X
+            // ALGORITMO ORTOGONAL DE DESTRUCCIÓN:
             // =====================================================================
             try {
-                int id = Integer.parseInt(request.getParameter("id"));  // RF-12: Obtener ID del producto
-                boolean eliminado = dao.eliminarProducto(id);           // RF-12: Eliminar de la BD
-                response.sendRedirect("ProductoServlet");               // RF-12: Redirigir a la lista actualizada
-            } catch (Exception e) {
-                e.printStackTrace();
-                // RNF-08: Redirigir con error
-                response.sendRedirect("ProductoServlet?error=ErrorEliminar");
+                int id = Integer.parseInt(request.getParameter("id"));  // Getter unívoco PK param casteo Primitivo numérico .
+                boolean eliminado = dao.eliminarProducto(id);           // Método Setter Disparador booleano destructor en Orquesta DAO .
+                response.sendRedirect("ProductoServlet");               // Retorna recursivo frontal purificando base view param o refresh cycle .
+            } catch (Exception e) { // Suciedad I/O .
+                e.printStackTrace(); // Consola trace .
+                // Exito no completado fallback
+                response.sendRedirect("ProductoServlet?error=ErrorEliminar"); // Salida param flag asíncrono
             }
-        } else if (action != null && action.equals("editar")) {
+        } else if (action != null && action.equals("editar")) { // Switch iterativo secundario string eq comparator
             // =====================================================================
-            // RF-11: CARGAR DATOS DEL PRODUCTO PARA EDICIÓN
-            // Obtiene el producto por ID y lo envía al formulario de edición (JSP).
-            // RF-11 Restricción 2: El producto debe existir en la BD.
+            // ALGORITMO INVERSO PREPARADOR EDICIÓN ENTIDAD:
             // =====================================================================
             try {
-                int id = Integer.parseInt(request.getParameter("id"));
-                Producto p = dao.obtenerProducto(id);                   // RF-11: Busca el producto en la BD por ID
+                int id = Integer.parseInt(request.getParameter("id")); // Lector PK asimétrica url query a Integer
+                Producto p = dao.obtenerProducto(id);                   // Método Getter delegativo y cargador instanciador asilado singular PK obj .
                 
-                if (p != null) {
-                    request.setAttribute("productoEditar", p);          // RF-11: Pasa el objeto Producto al JSP
-                    request.getRequestDispatcher("view/formulario_editar_producto.jsp").forward(request, response);
+                if (p != null) { // Instancia flag protectora null.
+                    request.setAttribute("productoEditar", p);          // Carga el encapsulado POJO activo referencial a param transitorio HTTP Context buffer del framework frontend.
+                    request.getRequestDispatcher("view/formulario_editar_producto.jsp").forward(request, response); // Render de passthrough server side directo para JSP.
                 } else {
-                    // RNF-08: Producto no encontrado
-                    response.sendRedirect("ProductoServlet?error=ProductoNoEncontrado");
+                    // Null checker error 
+                    response.sendRedirect("ProductoServlet?error=ProductoNoEncontrado"); // Flag log .
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                response.sendRedirect("ProductoServlet?error=ErrorCargarEdicion");
+            } catch (Exception e) { // Catch base object errors framework
+                e.printStackTrace(); // Suciedad logger JVM
+                response.sendRedirect("ProductoServlet?error=ErrorCargarEdicion"); // Clean param fallbacks .
             }
-        } else {
+        } else { // Switch Iterativo default genérico final 
             // =====================================================================
-            // RF-10: LISTAR TODOS LOS PRODUCTOS (Comportamiento por defecto del GET)
-            // RF-10 Restricción 1: La lista se carga mediante ProductoDAO.listarProductos()
-            // RF-10 Restricción 2: Se muestra en la vista editar_productos.jsp
+            // GENERADOR MATRIZ VISUAL LISTA ENTIDADES
             // =====================================================================
-            java.util.List<Producto> lista = dao.listarProductos();    // RF-10: Obtiene todos los productos de la BD
-            request.setAttribute("listaProductos", lista);             // RF-10: Pasa la lista al JSP
-            request.getRequestDispatcher("view/editar_productos.jsp").forward(request, response); // RF-10: Muestra la vista
+            java.util.List<Producto> lista = dao.listarProductos();    // Inicia fábrica recolectora masiva y agrupa en Array Dinámico estricto polimorfismo Entidad .
+            request.setAttribute("listaProductos", lista);             // Bind in-memory a variable literal referencial render .
+            request.getRequestDispatcher("view/editar_productos.jsp").forward(request, response); // Disparo final pasivo asilado para motor template local render (Server render bypass).
         }
     }
     
     /**
-     * RF-11: Método privado que procesa la actualización de un producto existente.
-     * Lee los datos del formulario de edición, crea el objeto Producto actualizado
-     * y llama al DAO para hacer el UPDATE en la BD.
-     * RF-11 Restricción 1: El id_producto no es modificable (se recibe como campo oculto).
+     * Módulo Privado Sub-Estructural Auxiliar (Helper encapsulado de Update).
+     * Secuencia repetitiva extraída que parsea un Payload FormData y un MultiPart, generando
+     * o conservando punteros de binarios previos, para recrear un Modelo modificado y sobreescribir atómicamente la capa DAO.
      */
     private void procesarActualizacion(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException { // Amparo Web Frame 
         
-        try {
-            // RF-11: Recibir todos los datos del formulario de edición
-            int idProducto = Integer.parseInt(request.getParameter("id_producto")); // RF-11 Restricción 1: ID no modificable
-            String nombre = request.getParameter("nombre");
-            String marca = request.getParameter("marca");
-            String tipo = request.getParameter("tipo");
+        try { // Vigila parseo num y MultiPart Array errors.
+            // Parseo primitivo a vars de capa base JVM y variables aisladas locale
+            int idProducto = Integer.parseInt(request.getParameter("id_producto")); // Cast clave inamovible .
+            String nombre = request.getParameter("nombre"); // Bind String 
+            String marca = request.getParameter("marca"); // Bind literal .
+            String tipo = request.getParameter("tipo"); // Bind semántico .
             
-            // Procesamiento de imagen en actualización
-            String imagen = null;
+            // Re-procesamiento iterativo para File Pointer stream
+            String imagen = null; // Instancia Nulo a priori .
             try {
-                Part filePart = request.getPart("imagen");
-                if (filePart != null && filePart.getSize() > 0) {
-                    imagen = subirImagen(filePart, request);
+                Part filePart = request.getPart("imagen"); // Captura Blob File param in framework .
+                if (filePart != null && filePart.getSize() > 0) { // Test check sizes .
+                    imagen = subirImagen(filePart, request); // Traspaso Stream delegativo a function custom subrutina binaria helper IO y devuelve pointer .
                 }
-            } catch(Exception e) {
-                System.out.println("Error al actualizar imagen: " + e.getMessage());
+            } catch(Exception e) { // Catch Stream .
+                System.out.println("Error al actualizar imagen: " + e.getMessage()); // System Buffer Print trace only.
             }
             
-            // Si no subió una nueva imagen, intentamos conservar la anterior
-            if (imagen == null) {
-                ProductoDAO tempDao = new ProductoDAO();
-                Producto original = tempDao.obtenerProducto(idProducto);
-                if (original != null) {
-                    imagen = original.getImagen();
+            // Subrutina auxiliar protectora u lógica asimétrica de conservación referencial: Si la part es nula, recarga el pointer string object Entity Old Base .
+            if (imagen == null) { // Lógica Null.
+                ProductoDAO tempDao = new ProductoDAO(); // Inicializa gestor transaccional iterativo corto .
+                Producto original = tempDao.obtenerProducto(idProducto); // Llama Factory generatriz y acopla objeto puro modelo previo .
+                if (original != null) { // Validador 
+                    imagen = original.getImagen(); // Extrae con getter string pointer previo in memory string variable param asilada mutable target.
                 }
             }
             
-            String cantidadMedida = request.getParameter("cantidad_medida");
+            String cantidadMedida = request.getParameter("cantidad_medida"); // Setter .
             
-            double precio = 0.0;
+            double precio = 0.0; // Constructor Default .
             try {
-                precio = Double.parseDouble(request.getParameter("precio"));
+                precio = Double.parseDouble(request.getParameter("precio")); // Matemáticas string Cast Float.
             } catch (NumberFormatException e) {
-                precio = 0.0;
+                precio = 0.0; // Fail 
             }
             
-            java.sql.Date fechaVencimiento = null;
+            java.sql.Date fechaVencimiento = null; // String setter param Date Base .
             try {
-                String fechaStr = request.getParameter("fecha_vencimiento");
-                if (fechaStr != null && !fechaStr.isEmpty()) {
-                    fechaVencimiento = java.sql.Date.valueOf(fechaStr);
+                String fechaStr = request.getParameter("fecha_vencimiento"); // Variable asilada .
+                if (fechaStr != null && !fechaStr.isEmpty()) { // Booleano .
+                    fechaVencimiento = java.sql.Date.valueOf(fechaStr); // Parsificador object Date base SQL construct object model .
                 }
             } catch (IllegalArgumentException e) {
-                fechaVencimiento = null;
+                fechaVencimiento = null; // Purgador format error Date param.
             }
             
-            // RF-11: Crear objeto Producto con los datos actualizados
-            Producto p = new Producto();
-            p.setIdProducto(idProducto);  // RF-11 Restricción 1: Mantener el ID original
-            p.setNombre(nombre);
-            p.setMarca(marca);
-            p.setPrecioUnitario(precio);
-            p.setTipo(tipo);
-            p.setImagen(imagen);
-            p.setFechaVencimiento(fechaVencimiento);
-            p.setCantidadMedida(cantidadMedida);
+            // FÁBRICA MUTATIVA COMPLETA POJO INSTANCIADO: Wrapper Builder completo de sobreescritura a memoria .
+            Producto p = new Producto(); // Asigna Heap vacío para contenedor modelo .
+            p.setIdProducto(idProducto);  // Setter Clave (Inamovible Update Condicional relacional where) .
+            p.setNombre(nombre); // Método encapsulado .
+            p.setMarca(marca); // ..
+            p.setPrecioUnitario(precio); // ..
+            p.setTipo(tipo); // ..
+            p.setImagen(imagen); // Inyección polimórfica (nuevo ó viejo link URI pointer local).
+            p.setFechaVencimiento(fechaVencimiento); // Metadato de time abstract model inyector.
+            p.setCantidadMedida(cantidadMedida); // Inyector genérico 
             
-            // RF-11: Llamar al DAO para hacer UPDATE en la BD
-            ProductoDAO dao = new ProductoDAO();
-            boolean exito = dao.actualizarProducto(p);  // RF-11: Ejecuta UPDATE en la tabla PRODUCTO
+            // DISPARO A BD FINALIZANDO
+            ProductoDAO dao = new ProductoDAO(); // Lector DB relacional base .
+            boolean exito = dao.actualizarProducto(p);  // Disparo método generatriz boolean afirmativo transaccional atómico delegativo .
             
-            if (exito) {
-                response.sendRedirect("ProductoServlet?msg=ProductoActualizado");  // RF-11: Éxito
-            } else {
-                response.sendRedirect("ProductoServlet?error=ErrorActualizar");    // RNF-08: Error
+            if (exito) { // Check true
+                response.sendRedirect("ProductoServlet?msg=ProductoActualizado");  // Redirect clean UI param msg success flag iterativo log .
+            } else { // Fail check 
+                response.sendRedirect("ProductoServlet?error=ErrorActualizar");    // Redirect log error boolean fail  .
             }
             
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendRedirect("ProductoServlet?error=" + e.getMessage());
+        } catch (Exception e) { // Suciedad Exception catch 
+            e.printStackTrace(); // Dump trace  CLI buffer
+            response.sendRedirect("ProductoServlet?error=" + e.getMessage()); // Redirect flag print exception .
         }
     }
 }

@@ -1,107 +1,114 @@
-package com.inventario.model;
+package com.inventario.model; // Declaración estricta de ruta lógica para empaquetamiento del artefacto POJO
 
 /**
- * MODELO: Clase Negocio (Entidad/POJO)
+ * Modelo de datos: Clase Negocio (Entidad o POJO - Plain Old Java Object).
  * 
- * Representa la tabla NEGOCIO de la base de datos MySQL.
- * Un Negocio es un "bar" registrado por un Administrador.
- * 
- * FLUJO DE DATOS:
- * - CREACIÓN:  registroBar.html → NegocioServlet (doPost) → NegocioDAO.registrarNegocio() → INSERT en tabla NEGOCIO
- * - LECTURA:   NegocioDAO.listarNegocios() → NegocioServlet (doGet) → lista_bares.jsp (se muestra con ${bar.nombre})
- * - ELIMINACIÓN: lista_bares.jsp (botón borrar) → NegocioServlet?action=eliminar → NegocioDAO.eliminarNegocio()
- * 
- * TABLAS RELACIONADAS:
- * - INVENTARIO: Un negocio puede tener UN inventario activo a la vez (FK: id_negocio)
- * - USUARIO_NEGOCIO: Vincula trabajadores con negocios (FK: id_negocio, id_usuario)
+ * Capa de abstracción Orientada a Objetos para la estructura matriz u originadora de la tabla 'negocio'.
+ * Se yergue como clase rectora principal top-level que sirve como pilar fundacional jerárquico. 
+ * Sin esta entidad (Negocio), los objetos iterativos descendentes como Inventarios o Usuarios 
+ * vinculados no sostienen validez referencial dentro de la arquitectura global.
  */
-public class Negocio {
+public class Negocio { // Se instancia la declaración de la clase como abstracción pública accesible.
 
     // =====================================================================
-    // ATRIBUTOS PRIVADOS - Corresponden a columnas de la tabla NEGOCIO
+    // ATRIBUTOS ENCAPSULADOS PRINCIPALES MATEADOS (Persistencia)
+    // Conforman los datos base crudos que transitan desde el núcleo al disco persistido.
     // =====================================================================
 
-    private int idNegocio;                   // PK: id_negocio (INT, AUTO_INCREMENT). Identificador único del bar.
-    private String nombre;                   // nombre (VARCHAR 150). Nombre del bar. Viene de: registroBar.html → input name="nombre"
-    private String direccion;                // direccion (VARCHAR 200). Dirección física. Viene de: registroBar.html → input name="direccion"
-    private String estado;                   // estado (ENUM: 'activo', 'inactivo'). Se cambia en InventarioDAO al iniciar/cerrar inventario.
-    private boolean tieneInventarioActivo;   // NO es columna de BD. Es un flag calculado en NegocioDAO.listarNegocios() para la vista lista_bares.jsp.
+    private int idNegocio;                   // Llave maestra autogenerada (PK) tipo int que asegura la trazabilidad atómica irrepetible global para esta instancia comercial física.
+    private String nombre;                   // Atributo estático textual String donde reposa la identificación referencial nominal visible del modelo a usuarios iterativos.
+    private String direccion;                // Objeto interno primitivo de caracteres que provee descripción técnica local abstracta o locación real del contenedor "negocio".
+    private String estado;                   // Componente string bandera preformada ('activo', 'inactivo') usado para deshabilitar en RAM un set masivo descendente sin borrados severos (soft logic).
+    
+    // =====================================================================
+    // ATRIBUTOS ESTRUCTURALES TRANSIENTES (No dependientes base a base)
+    // Variables bandera implementadas mediante inyección paramétrica extra de DAO para modelado GUI avanzado.
+    // =====================================================================
+    
+    private boolean tieneInventarioActivo;   // Booleano analítico calculado al vuelo in-situ, dictaminando en true o false la presencia dependiente referencial del set inferior activo en momento de render.
 
     /**
-     * CONSTRUCTOR VACÍO
-     * Usado por: NegocioDAO.listarNegocios() cuando crea objetos con new Negocio() y luego llena con setters.
-     * Usado por: UsuarioDAO.obtenerNegocioAsignado() para retornar el negocio de un trabajador.
+     * CONSTRUCTOR POR DEFECTO
+     * Provecha funcional en POO base, permitiendo a interfaces contenedoras la precarga asíncrona u ortogonal
+     * del artefacto base con una huella mínima en la Virtual Machine previo a la saturación de data set.
      */
-    public Negocio() {
-    }
-
-    /**
-     * CONSTRUCTOR CON PARÁMETROS
-     * Permite crear un Negocio con todos los datos de una sola vez.
-     * Usado por: NegocioDAO cuando lee los datos de un ResultSet de la BD.
-     */
-    public Negocio(int idNegocio, String nombre, String direccion, String estado) {
-        this.idNegocio = idNegocio;   // Viene de: rs.getInt("id_negocio") en el DAO
-        this.nombre = nombre;         // Viene de: rs.getString("nombre") en el DAO
-        this.direccion = direccion;   // Viene de: rs.getString("direccion") en el DAO
-        this.estado = estado;         // Viene de: rs.getString("estado") en el DAO
-    }
-
-    // =====================================================================
-    // GETTERS Y SETTERS
-    // =====================================================================
-
-    /** Retorna el ID del negocio. Usado en JSP como: ${bar.idNegocio} para armar enlaces */
-    public int getIdNegocio() {
-        return idNegocio;
-    }
-
-    /** Asigna el ID. Llamado desde: NegocioDAO después de leer de la BD con rs.getInt("id_negocio") */
-    public void setIdNegocio(int idNegocio) {
-        this.idNegocio = idNegocio;
-    }
-
-    /** Retorna el nombre del bar. Usado en JSP como: ${bar.nombre} en lista_bares.jsp */
-    public String getNombre() {
-        return nombre;
-    }
-
-    /** Asigna el nombre. Llamado desde: NegocioDAO con rs.getString("nombre") */
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    /** Retorna la dirección. Usado en: perfil_admin.jsp o vistas de detalle */
-    public String getDireccion() {
-        return direccion;
-    }
-
-    /** Asigna la dirección. Llamado desde: NegocioDAO con rs.getString("direccion") */
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
-    }
-
-    /** Retorna el estado ('activo'/'inactivo'). Usado en JSP como: ${bar.estado} en lista_bares.jsp */
-    public String getEstado() {
-        return estado;
-    }
-
-    /** Asigna el estado. Llamado desde: NegocioDAO o InventarioDAO al cambiar estado del negocio */
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public Negocio() { // Formulación y apertura nula base genérica 
     }
 
     /**
-     * Retorna si tiene inventario activo. NO viene de la BD directamente.
-     * Se calcula en NegocioDAO.listarNegocios() con una subconsulta a la tabla INVENTARIO.
-     * Usado en lista_bares.jsp: ${bar.tieneInventarioActivo} para mostrar "Ver Inventario" o "Iniciar Inventario"
+     * CONSTRUCTOR RECARGADO EXPLÍCITO O DE LLENADO MASIVO Y SIMULTÁNEO
+     * Funcional paramétrica que expone en sola instrucción los requisitos para modelar por completo un objeto pesado
+     * garantizándolo óptimo al mapear y procesar cursores extensivos de un ResultSet origen base relacional.
+     * 
+     * @param idNegocio Valor numérico serial principal
+     * @param nombre Sustantivo del objeto negocio
+     * @param direccion Señal de puntero espacial físico descriptivo
+     * @param estado Variable switch textual orientadora de status integral
      */
-    public boolean isTieneInventarioActivo() {
-        return tieneInventarioActivo;
+    public Negocio(int idNegocio, String nombre, String direccion, String estado) { // Constructor extendido por argumentos discretos
+        this.idNegocio = idNegocio;   // Transición de flujo por pointer 'this' fijando valor al espacio memoria del miembro local.
+        this.nombre = nombre;         // Toma el string literal de instancia formal a parámetro intrínseco.
+        this.direccion = direccion;   // Enlace string análogo a campo propio instanciado.
+        this.estado = estado;         // Sobrescritura paramétrica directa de enmascarador en switch flag "estado".
     }
 
-    /** Asigna el flag de inventario activo. Llamado desde: NegocioDAO.listarNegocios() */
-    public void setTieneInventarioActivo(boolean tieneInventarioActivo) {
-        this.tieneInventarioActivo = tieneInventarioActivo;
+    // =====================================================================
+    // BLOQUE DE COMPORTAMIENTO LÓGICO Y ESTRUCTURAL: GETTERS / SETTERS
+    // Interface de operación restringida que permite manipular las aristas encapsuladas.
+    // =====================================================================
+
+    /** Accesor simple numérico: Retorna de forma segura extrayendo el primitivo identificador llave local. */
+    public int getIdNegocio() { // Invocación sin manipulación externa requerida
+        return idNegocio; // Tránsito y devolución escalar interna
+    }
+
+    /** Mutador unitario: Fuerzas o inicializas tardíamente referencias claves a este bloque desde librerías controladoras relacionales. */
+    public void setIdNegocio(int idNegocio) { // Aceptador en cascada descendente atómica
+        this.idNegocio = idNegocio; // Traspasa inyector primitivo al campo protegido
+    }
+
+    /** Acceso descriptivo base: Retorna a peticionario un encapsulado String conteniendo cadena visual descriptora base del modelo */
+    public String getNombre() { // Acceso literal genérico 
+        return nombre; // Truncado y retornado string directo
+    }
+
+    /** Mutador literal integrador: Impone al objeto transiente o persistido una nueva descripción formal en abstracción léxica */
+    public void setNombre(String nombre) { // Parámetro texto puro para asignar
+        this.nombre = nombre; // Adopción orientada interna al campo dependiente general
+    }
+
+    /** Accesor descriptivo auxiliar: Exposición forzosa para consumos transversos o de perfilamiento del registro donde habita un string locativo. */
+    public String getDireccion() { // Retrolimpia y exuda a salida la cadena asociada 
+        return direccion; // Entrega estática amarrada
+    }
+
+    /** Mutador auxiliar espacial: Inscribe paramétricamente la carga de texto a nivel local antes de asentar rutinas de guardado a nivel backend. */
+    public void setDireccion(String direccion) { // String portador paramétrico base
+        this.direccion = direccion; // Adaptador estático final
+    }
+
+    /** Consulta del status lógico virtual del estado paramétrico (flag activo-apagado): Determina ramificaciones MVC condicionales sin re-consumo generalizado. */
+    public String getEstado() { // Entrega orientadora atómica polimórfica (pseudobooleana embebida en String)
+        return estado; // Trasmitida a flujos visualizadores y lógicos externos 
+    }
+
+    /** Modificador switch maestro: Revierte forzosamente comportamientos o flags de intercepción estática al inyectar lógicas "inactivas" truncando funcionamientos macro */
+    public void setEstado(String estado) { // Sustituto léxico condicionador restrictivo 
+        this.estado = estado; // Asume y sobre impone a instancia original 
+    }
+
+    /** 
+     * Funcionalidad lógica de comprobación atípica o extra-transiente a BD (pseudo-relacional proxy).
+     * Devuelve una confirmación primitivo-booleana determinista forjada por integraciones foráneas 
+     * en DAOs con alcance multi-nivel en vez de ser embebida natural. 
+     * @return booleano estricto indicando validación superior.
+     */
+    public boolean isTieneInventarioActivo() { // Llamado getter convencional mutado para literales boolean de estándar JavaBean ("is")
+        return tieneInventarioActivo; // Exporta validación en formato bits estricto.
+    }
+
+    /** Seteo de validación condicionada o resolutivo virtual: Procesa y sella in situ respuestas lógicas originadas externamente y validadas transaccionalmente por otros objetos DAO. */
+    public void setTieneInventarioActivo(boolean tieneInventarioActivo) { // Variable determinística de inyección
+        this.tieneInventarioActivo = tieneInventarioActivo; // Asume variable de decisión precomputada globalmente
     }
 }

@@ -93,7 +93,7 @@
                                 <tr>
                                     <th>Producto</th>
                                     <th>Cant.</th>
-                                    <th>P. Unitario</th>
+
                                     <th>Subtotal</th>
                                 </tr>
                             </thead>
@@ -103,9 +103,7 @@
                                     <tr>
                                         <td>${d.nombreProducto}</td>
                                         <td>${d.cantidad}</td>
-                                        <td>$
-                                            <fmt:formatNumber value="${d.precioUnitario}" pattern="#,##0" />
-                                        </td>
+
                                         <td>$
                                             <fmt:formatNumber value="${d.subtotal}" pattern="#,##0" />
                                         </td>
@@ -114,7 +112,7 @@
                                 </c:forEach>
 
                                 <tr class="total-row">
-                                    <td colspan="3" style="text-align: right;">TOTAL:</td>
+                                    <td colspan="2" style="text-align: right;">TOTAL:</td>
                                     <td>$
                                         <fmt:formatNumber value="${granTotal}" pattern="#,##0" />
                                     </td>

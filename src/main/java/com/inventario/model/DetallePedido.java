@@ -1,127 +1,130 @@
-package com.inventario.model;
+package com.inventario.model; // Instrucción que empaqueta y ubica al código en el subdirectorio del módulo model
 
 /**
- * MODELO: Clase DetallePedido (Entidad/POJO)
+ * Modelo de datos: Clase DetallePedido (Entidad o POJO - Plain Old Java Object).
  * 
- * Representa la tabla DETALLE_PEDIDOS de la base de datos MySQL.
- * Cada fila es UN producto específico dentro de un Pedido a Proveedor.
- * 
- * FLUJO DE DATOS:
- * - CREACIÓN:    agregar_pedido.jsp → PedidoServlet?action=guardar → PedidoDAO.registrarPedido() → INSERT en tabla DETALLE_PEDIDOS
- * - LECTURA:     PedidoDAO.listarPedidos() → PedidoServlet → visualizar_pedidos.jsp (${det.nombreProducto})
- * 
- * TABLAS RELACIONADAS:
- * - PEDIDOS_PROVEEDOR: Cada detalle pertenece a un pedido (FK: id_pedido_base)
- * - INVENTARIO_DETALLE: Referencia al producto en el inventario (FK: id_inv_detalle). Al recibir pedido, se suma stock.
+ * Capa de abstracción Orientada a Objetos para la estructura física de la tabla 'detalle_pedidos'.
+ * Modela la cardinalidad "muchos" dentro de un objeto superior "PedidoProveedor", representando 
+ * unitariamente un renglón o ítem individual solicitado a nivel de requerimiento de inventario.
  */
-public class DetallePedido {
+public class DetallePedido { // Inicia la declaración de la clase pública encapsulada
 
     // =====================================================================
-    // ATRIBUTOS DE LA BD - Columnas de la tabla DETALLE_PEDIDOS
+    // ATRIBUTOS DE CLASE O ESTADOS PERSISTIDOS
+    // Estructuras de datos puras que representan metadatos referenciales de almacenamiento.
     // =====================================================================
 
-    private int idPedidoRegistro;     // PK: id_pedido_registro (INT, AUTO_INCREMENT). Identificador único de la línea de detalle.
-    private int idPedidoBase;         // FK: id_pedido_base (INT). Referencia al pedido padre en PEDIDOS_PROVEEDOR.
-    private int idInvDetalle;         // FK: id_inv_detalle (INT). Referencia al producto en INVENTARIO_DETALLE. Viene de: agregar_pedido.jsp → select name="id_inv_detalle"
-    private int cantidadPedida;       // cantidad_pedida (INT). Unidades solicitadas. Viene de: agregar_pedido.jsp → input name="cantidad"
-    private double precioUnitarioReal;// precio_unitario_real (DECIMAL). Precio real por unidad. Calculado en JS: (subtotal+iva)/cantidad
+    private int idPedidoRegistro;     // Tipo primitivo de dato entero; llave primaria aislada que identifica este ítem en la transacción.
+    private int idPedidoBase;         // Tipo primitivo entero usado como vinculación lógica en memoria al modelo agregado PedidoProveedor.
+    private int idInvDetalle;         // Parámetro numérico relacional que asocia el ítem de pedido directamente con una variable de stock en DetalleInventario.
+    private int cantidadPedida;       // Espacio de memoria de magnitud numérica para alojar la solicitud volumétrica o contable del renglón.
+    private double precioUnitarioReal;// Atributo flotante en la memoria estática de la clase que documenta el costo estricto ponderado de la reposición.
 
     // =====================================================================
-    // ATRIBUTOS AUXILIARES - NO son columnas de la BD
+    // ATRIBUTOS TRANSIENTES O DEPENDENCIAS VIRTUALES
+    // Reservas de memoria adicionales usadas puramente en el runtime del contenedor web.
     // =====================================================================
 
-    private String nombreProducto;    // Nombre del producto para mostrar en visualizar_pedidos.jsp (${det.nombreProducto})
-    private double subtotalCalculado; // Calculado como: cantidadPedida * precioUnitarioReal. Para mostrar en la vista.
+    private String nombreProducto;    // Ubicación de memoria tipo string para renderizar en vista el sustantivo del producto pedido.
+    private double subtotalCalculado; // Variable de instancia de resolución matemática (cantidad * precio) con fines de formateo de datos.
 
     /**
-     * CONSTRUCTOR VACÍO
-     * Usado por: PedidoDAO al crear objetos desde ResultSet.
+     * CONSTRUCTOR POR OMISIÓN (Vacío)
+     * Requisito de la Especificación de JavaBeans. Permite creación en tiempo de ejecución (Reflexión)
+     * y el alojamiento dinámico en pila del objeto sin inicializar per se su espacio de propiedades.
      */
-    public DetallePedido() {
+    public DetallePedido() { // Operador invocable 
     }
 
     /**
-     * CONSTRUCTOR COMPLETO (solo atributos de BD)
+     * CONSTRUCTOR DE LLENADO RÁPIDO O SOBRECARGADO
+     * Función paramétrica que agiliza la población completa de los datos de negocio en un solo hilo.
+     * 
+     * @param idPedidoRegistro ID transaccional propio
+     * @param idPedidoBase ID general de la cabecera del requerimiento
+     * @param idInvDetalle ID abstracto de dependencia del inventario
+     * @param cantidadPedida Valor entero de porción requerida
+     * @param precioUnitarioReal Valor decimal preciso asociado a monetización
      */
-    public DetallePedido(int idPedidoRegistro, int idPedidoBase, int idInvDetalle, int cantidadPedida, double precioUnitarioReal) {
-        this.idPedidoRegistro = idPedidoRegistro;       // Viene de: rs.getInt("id_pedido_registro")
-        this.idPedidoBase = idPedidoBase;               // Viene de: rs.getInt("id_pedido_base")
-        this.idInvDetalle = idInvDetalle;                // Viene de: rs.getInt("id_inv_detalle")
-        this.cantidadPedida = cantidadPedida;            // Viene de: rs.getInt("cantidad_pedida")
-        this.precioUnitarioReal = precioUnitarioReal;    // Viene de: rs.getDouble("precio_unitario_real")
+    public DetallePedido(int idPedidoRegistro, int idPedidoBase, int idInvDetalle, int cantidadPedida, double precioUnitarioReal) { // Firma con 5 parámetros tipados
+        this.idPedidoRegistro = idPedidoRegistro;       // Uso de puntero explícito "this" para referenciar al campo persistido contra la variable formal
+        this.idPedidoBase = idPedidoBase;               // Enlace lógico inter-componentes
+        this.idInvDetalle = idInvDetalle;                // Set funcional del nexo al inventario modular
+        this.cantidadPedida = cantidadPedida;            // Declaración intrínseca de conteo de elementos
+        this.precioUnitarioReal = precioUnitarioReal;    // Ingesta monetaria decimal a nivel de campo asociado
     }
 
     // =====================================================================
-    // GETTERS Y SETTERS
+    // METODOS ENCAPSULADORES PROTECTORES Y RESTAURADORES (Getters, Setters)
     // =====================================================================
 
-    /** PK del detalle. Usado internamente por PedidoDAO */
-    public int getIdPedidoRegistro() {
-        return idPedidoRegistro;
+    /** Accesor simple: retorna numéricamente el serial asignado para este ítem en su registro global */
+    public int getIdPedidoRegistro() { // Retorno directo int
+        return idPedidoRegistro; // Extracción local
     }
 
-    /** Asigna el ID. Llamado desde: PedidoDAO con rs.getInt("id_pedido_registro") */
-    public void setIdPedidoRegistro(int idPedidoRegistro) {
-        this.idPedidoRegistro = idPedidoRegistro;
+    /** Mutador unitario: ajusta dinámicamente o redefine el número de registro serial */
+    public void setIdPedidoRegistro(int idPedidoRegistro) { // Parámetro numérico inyectable
+        this.idPedidoRegistro = idPedidoRegistro; // Sobrescritura paramétrica
     }
 
-    /** FK al pedido padre. Asignado en PedidoDAO al insertar detalle */
-    public int getIdPedidoBase() {
+    /** Accesor relacional: expone externamente a qué objeto matriz (PedidoProveedor) pertenece este detalle hijo */
+    public int getIdPedidoBase() { // Retorna foránea del contexto
         return idPedidoBase;
     }
 
-    /** Asigna pedido padre. Viene de: PedidoDAO → idGenerado después del INSERT del pedido */
-    public void setIdPedidoBase(int idPedidoBase) {
-        this.idPedidoBase = idPedidoBase;
+    /** Mutador estructural logic: Fija mediante inyección el puntero (id) referencial a toda la orden completa */
+    public void setIdPedidoBase(int idPedidoBase) { // Argumento inyectable para orden general
+        this.idPedidoBase = idPedidoBase; // Instancia su dependencia al padre
     }
 
-    /** FK a INVENTARIO_DETALLE. Identifica qué producto del inventario se pidió */
-    public int getIdInvDetalle() {
-        return idInvDetalle;
+    /** Accesor secundario relacional: Extrae el elemento atómico que vincula a un lote especifico de inventario (DetalleInventario) */
+    public int getIdInvDetalle() { // Devuelve puntero relacional
+        return idInvDetalle; // Exposición pura
     }
 
-    /** Asigna id_inv_detalle. Viene de: PedidoServlet → Integer.parseInt(request.getParameter("id_inv_detalle")) */
-    public void setIdInvDetalle(int idInvDetalle) {
-        this.idInvDetalle = idInvDetalle;
+    /** Mutador dinámico: Asigna numéricamente el alias identificativo del cruce material sobre el inventario */
+    public void setIdInvDetalle(int idInvDetalle) { // Toma integrador estructural
+        this.idInvDetalle = idInvDetalle; // Acopla objeto en pila
     }
 
-    /** Cantidad solicitada. Usado en JSP como: ${det.cantidadPedida} */
-    public int getCantidadPedida() {
-        return cantidadPedida;
+    /** Accesor de métrica física: Extrae iterativamente unidades tangibles requeridas para operaciones sumatorias */
+    public int getCantidadPedida() { // Número primitivo devuelto
+        return cantidadPedida; // Abstracción encapsulada
     }
 
-    /** Asigna cantidad. Viene de: PedidoServlet → Integer.parseInt(request.getParameter("cantidad")) */
-    public void setCantidadPedida(int cantidadPedida) {
-        this.cantidadPedida = cantidadPedida;
+    /** Mutador operacional físico: Alteración forzada pre-transaccional o de recuperación DAO para el flujo base numérico solicitado */
+    public void setCantidadPedida(int cantidadPedida) { // Puntero al campo abstracto físico
+        this.cantidadPedida = cantidadPedida; // Modificación transitoria
     }
 
-    /** Precio unitario real del proveedor. Usado en JSP como: ${det.precioUnitarioReal} */
-    public double getPrecioUnitarioReal() {
-        return precioUnitarioReal;
+    /** Accesor financiero atómico: Retorna el doble de escala flotante relativo a métricas monetarias referenciales de unidad */
+    public double getPrecioUnitarioReal() { // Tipo real para moneda
+        return precioUnitarioReal; // Salida asimétrica simple
     }
 
-    /** Asigna precio. Viene de: PedidoServlet → Double.parseDouble(request.getParameter("precio_unitario")) */
-    public void setPrecioUnitarioReal(double precioUnitarioReal) {
-        this.precioUnitarioReal = precioUnitarioReal;
+    /** Mutador relacional escalar: Enlaza contablemente a nivel software un coste transaccional derivado final de la vista padre */
+    public void setPrecioUnitarioReal(double precioUnitarioReal) { // Asigna precio final evaluado
+        this.precioUnitarioReal = precioUnitarioReal; // Absorción en instancia
     }
 
-    /** Nombre del producto (auxiliar). Viene de: PedidoDAO con JOIN a PRODUCTO vía INVENTARIO_DETALLE */
-    public String getNombreProducto() {
-        return nombreProducto;
+    /** Accesor derivado nominal: Consumo local de cadena para nombramiento genérico del artículo */
+    public String getNombreProducto() { // Resolución visual amigable de puntero dinámico foráneo
+        return nombreProducto; // String resuelto relacionalmente
     }
 
-    /** Asigna nombre. Llamado desde: PedidoDAO con rs.getString("nombre") del JOIN */
-    public void setNombreProducto(String nombreProducto) {
-        this.nombreProducto = nombreProducto;
+    /** Mutador auxiliar: Consigna variable textual dependiente procesada durante inicializaciones masivas en el controlador */
+    public void setNombreProducto(String nombreProducto) { // Adquisición de texto estático descriptivo
+        this.nombreProducto = nombreProducto; // Seteo del campo local ampliado
     }
 
-    /** Subtotal calculado (auxiliar). Calculado como: cantidadPedida * precioUnitarioReal */
-    public double getSubtotalCalculado() {
-        return subtotalCalculado;
+    /** Accesor aritmético resolutivo: Extrae como abstracción independiente de la BD un valor cruzado total del registro base */
+    public double getSubtotalCalculado() { // Devuelve estado procesado del ítem
+        return subtotalCalculado; // Resultado temporal instanciable
     }
 
-    /** Asigna subtotal. Calculado en PedidoDAO o en la vista */
-    public void setSubtotalCalculado(double subtotalCalculado) {
-        this.subtotalCalculado = subtotalCalculado;
+    /** Mutador de presentación matemática transiente: Acepta y registra en encriptado final computado antes de rendir salidas por interfaz Web. */
+    public void setSubtotalCalculado(double subtotalCalculado) { // Recibe derivación ya calculada
+        this.subtotalCalculado = subtotalCalculado; // Persistencia temporal in memory
     }
 }

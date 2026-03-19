@@ -1,131 +1,109 @@
 package com.inventario.dao;
 
-// =====================================================================
-// IMPORTACIONES NECESARIAS
-// =====================================================================
-import com.inventario.util.Conexion;   // Clase utilitaria que crea la conexión a MySQL (ver: util/Conexion.java)
-import com.inventario.model.Producto;  // Modelo POJO que representa la tabla PRODUCTO (ver: model/Producto.java)
-import java.sql.Connection;            // Representa la conexión abierta con la base de datos MySQL
-import java.sql.PreparedStatement;     // Permite ejecutar consultas SQL seguras (con ? para evitar inyección SQL)
-import java.sql.ResultSet;            // Contiene los resultados de un SELECT (filas devueltas por la BD)
-import java.sql.SQLException;         // Captura errores de SQL (tabla no existe, columna mal escrita, etc.)
-import java.util.ArrayList;           // Lista dinámica para almacenar los productos encontrados
-import java.util.List;                // Interfaz genérica de lista (se usa como tipo de retorno)
+import com.inventario.util.Conexion;   
+import com.inventario.model.Producto;  
+import java.sql.Connection;            
+import java.sql.PreparedStatement;     
+import java.sql.ResultSet;            
+import java.sql.SQLException;         
+import java.util.ArrayList;           
+import java.util.List;                
 
 /**
- * DAO: Clase ProductoDAO (Data Access Object)
+ * Clase Patrón DAO (Data Access Object): ProductoDAO.
  * 
- * Esta clase es la ÚNICA que habla directamente con la tabla PRODUCTO de MySQL.
- * Ningún Servlet ni JSP hace consultas SQL directas; todo pasa por aquí.
- * 
- * QUIÉN LA USA:
- * - ProductoServlet.java: Para listar, registrar, editar y eliminar productos
- * - VentaServlet.java: Para obtener datos del producto al agregar al carrito
- * 
- * TABLA QUE MANEJA: PRODUCTO
- * Columnas: id_producto, nombre, marca, precio_unitario, tipo, imagen, fecha_vencimiento, cantidad_medida
+ * Controlador de persistencia asignado a la Entidad Abstracta relacional (PRODUCTO).
+ * Actúa como orquestador de memoria de las consultas DML, encapsulando 
+ * la lógica abstracta del modelo de objetos hacia el modelo de dependencias de la tabla.
  */
 public class ProductoDAO {
 
     /**
-     * 1. LISTAR TODOS LOS PRODUCTOS
+     * Algoritmo Coleccionador Escalar Iterativo (Getter Colecciones Dinámicas).
      * 
-     * QUIÉN LO LLAMA: ProductoServlet.doGet() → Carga la lista para editar_productos.jsp
-     *                  VentaServlet.doGet(action=nuevo) → Carga la lista para el select de agregar_venta.jsp
-     * QUÉ RETORNA: Lista de objetos Producto con TODOS los campos llenos
-     * QUÉ HACE EN LA BD: SELECT * FROM PRODUCTO
-     * 
-     * DESTINO FINAL: El Servlet pone la lista en el request con:
-     *   request.setAttribute("listaProductos", lista) → Llega al JSP como ${listaProductos}
+     * Constructor múltiple de arreglos estructurados POJO. Genera una consulta relacional
+     * masiva de las propiedades almacenadas y aplica los Setters abstractos 
+     * iterando por cada nodo resultante (Filas) retornando la lista ArrayList completa en memoria.
      */
     public List<Producto> listarProductos() {
-        List<Producto> lista = new ArrayList<>(); // Lista vacía donde guardaremos cada producto encontrado
-        Connection con = null;        // Conexión a MySQL (se abre y se cierra aquí)
-        PreparedStatement ps = null;  // Objeto que ejecuta la consulta SQL
-        ResultSet rs = null;          // Resultado de la consulta (las filas devueltas)
+        List<Producto> lista = new ArrayList<>(); 
+        Connection con = null;        
+        PreparedStatement ps = null;  
+        ResultSet rs = null;          
         
         try {
-            con = Conexion.getConexion(); // Abrimos conexión usando la clase utilitaria (ver: util/Conexion.java)
-            String sql = "SELECT * FROM PRODUCTO"; // Consulta que trae TODAS las columnas de TODOS los productos
-            ps = con.prepareStatement(sql);        // Preparamos la consulta (segura contra inyección SQL)
-            rs = ps.executeQuery();                // Ejecutamos y guardamos los resultados
+            con = Conexion.getConexion(); 
+            String sql = "SELECT * FROM PRODUCTO"; 
+            ps = con.prepareStatement(sql);        
+            rs = ps.executeQuery();                
             
-            // Recorremos cada fila devuelta por la BD
             while (rs.next()) {
-                Producto p = new Producto(); // Creamos un objeto Producto vacío para esta fila
-                // Llenamos el objeto con los datos de la fila actual usando los setters del Modelo
-                p.setIdProducto(rs.getInt("id_producto"));             // Columna id_producto → atributo idProducto
-                p.setNombre(rs.getString("nombre"));                   // Columna nombre → atributo nombre (se muestra en JSP como ${p.nombre})
-                p.setMarca(rs.getString("marca"));                     // Columna marca → atributo marca
-                p.setPrecioUnitario(rs.getDouble("precio_unitario"));  // Columna precio_unitario → atributo precioUnitario
-                p.setTipo(rs.getString("tipo"));                       // Columna tipo → atributo tipo
-                p.setImagen(rs.getString("imagen"));                   // Columna imagen → atributo imagen
-                p.setFechaVencimiento(rs.getDate("fecha_vencimiento"));// Columna fecha_vencimiento → atributo fechaVencimiento
-                p.setCantidadMedida(rs.getString("cantidad_medida"));  // Columna cantidad_medida → atributo cantidadMedida
-                lista.add(p); // Agregamos el producto completo a la lista
+                Producto p = new Producto(); 
+                p.setIdProducto(rs.getInt("id_producto"));             
+                p.setNombre(rs.getString("nombre"));                   
+                p.setMarca(rs.getString("marca"));                     
+                p.setPrecioUnitario(rs.getDouble("precio_unitario"));  
+                p.setTipo(rs.getString("tipo"));                       
+                p.setImagen(rs.getString("imagen"));                   
+                p.setFechaVencimiento(rs.getDate("fecha_vencimiento"));
+                p.setCantidadMedida(rs.getString("cantidad_medida"));  
+                lista.add(p); 
             }
         } catch (SQLException e) {
-            System.err.println("Error al listar productos: " + e.getMessage()); // Si falla, mostramos en consola
+            System.err.println("Error constraint context loop: " + e.getMessage()); 
         } finally {
-            // SIEMPRE cerramos los recursos para liberar la conexión (evita fugas de memoria)
             try {
-                if (rs != null) rs.close();   // Cerramos el ResultSet
-                if (ps != null) ps.close();   // Cerramos el PreparedStatement
-                if (con != null) con.close(); // Cerramos la conexión a MySQL
+                if (rs != null) rs.close();   
+                if (ps != null) ps.close();   
+                if (con != null) con.close(); 
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-        return lista; // Retornamos la lista al Servlet que la llamó
+        return lista; 
     }
 
     /**
-     * 2. REGISTRAR UN NUEVO PRODUCTO
+     * Setter Relacional Simple Unitario.
      * 
-     * QUIÉN LO LLAMA: ProductoServlet.doPost() → Cuando el usuario envía el formulario de Registro_produc.html
-     * QUÉ RECIBE: Objeto Producto con los datos del formulario (nombre, marca, precio, tipo, etc.)
-     *   - Los datos vienen de: Registro_produc.html → input name="nombre", input name="precio", etc.
-     *   - El Servlet los captura con: request.getParameter("nombre") y los pone en el objeto Producto
-     * QUÉ RETORNA: true si se insertó correctamente, false si falló
-     * QUÉ HACE EN LA BD: INSERT INTO PRODUCTO (...) VALUES (?, ?, ?, ?, ?, ?, ?)
+     * Subrutina abstracta de inserciones mediante Inyección Extendida de parámetros.
+     * Genera una manipulación de la Entidad relacional invocando los Getters provenientes 
+     * del modelo Producto POJO abstracto parametrizado en su firma.
      */
     public boolean registrarProducto(Producto p) {
         Connection con = null;
         PreparedStatement ps = null;
-        boolean registrado = false; // Flag para saber si se insertó o no
+        boolean registrado = false; 
         
         try {
             con = Conexion.getConexion();
-            // SQL de inserción con 7 signos de interrogación (?) para los 7 campos
-            // Los ? son "placeholders" que se llenan de forma segura con ps.setString(), ps.setDouble(), etc.
             String sql = "INSERT INTO PRODUCTO (nombre, marca, precio_unitario, tipo, imagen, fecha_vencimiento, cantidad_medida) " +
                          "VALUES (?, ?, ?, ?, ?, ?, ?)";
             
             ps = con.prepareStatement(sql);
-            ps.setString(1, p.getNombre());         // ? #1 ← Modelo: p.getNombre() ← Servlet: request.getParameter("nombre") ← HTML: input name="nombre"
-            ps.setString(2, p.getMarca());           // ? #2 ← Modelo: p.getMarca() ← Servlet: request.getParameter("marca") ← HTML: input name="marca"
-            ps.setDouble(3, p.getPrecioUnitario());  // ? #3 ← Modelo: p.getPrecioUnitario() ← Servlet: Double.parseDouble(request.getParameter("precio"))
-            ps.setString(4, p.getTipo());            // ? #4 ← Modelo: p.getTipo() ← Servlet: request.getParameter("tipo") ← HTML: select name="tipo"
-            ps.setString(5, p.getImagen());          // ? #5 ← Modelo: p.getImagen() ← Servlet: request.getParameter("imagen")
+            ps.setString(1, p.getNombre());         
+            ps.setString(2, p.getMarca());           
+            ps.setDouble(3, p.getPrecioUnitario());  
+            ps.setString(4, p.getTipo());            
+            ps.setString(5, p.getImagen());          
             
-            // La fecha puede ser null si el usuario no la ingresó → enviamos null a la BD
             if (p.getFechaVencimiento() != null) {
-                ps.setDate(6, p.getFechaVencimiento()); // ? #6 ← Modelo: p.getFechaVencimiento() ← Servlet: Date.valueOf(...)
+                ps.setDate(6, p.getFechaVencimiento()); 
             } else {
-                ps.setNull(6, java.sql.Types.DATE);     // ? #6 ← null si no se proporcionó fecha
+                ps.setNull(6, java.sql.Types.DATE);     
             }
             
-            ps.setString(7, p.getCantidadMedida());  // ? #7 ← Modelo: p.getCantidadMedida() ← Servlet: request.getParameter("cantidad_medida")
+            ps.setString(7, p.getCantidadMedida());  
             
-            int filas = ps.executeUpdate(); // Ejecuta el INSERT. Retorna el número de filas afectadas.
+            int filas = ps.executeUpdate(); 
             if (filas > 0) {
-                registrado = true; // Si se insertó al menos 1 fila, fue exitoso
+                registrado = true; 
             }
             
         } catch (SQLException e) {
-            System.out.println("ERROR SQL AL REGISTRAR PRODUCTO: " + e.getMessage());
+            System.out.println("Error Data Exception Insert Constraint: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("ErrorSQL: " + e.getMessage()); // Lanza error al Servlet para mostrar mensaje al usuario
+            throw new RuntimeException("Error Exception Limit Bounds: " + e.getMessage()); 
         } finally {
             try {
                 if (ps != null) ps.close();
@@ -134,21 +112,14 @@ public class ProductoDAO {
                 e.printStackTrace();
             }
         }
-        return registrado; // true = registrado, false = falló
+        return registrado; 
     }
 
     /**
-     * 3. ELIMINAR UN PRODUCTO (CON ELIMINACIÓN EN CASCADA)
+     * Mutador de Destrucción Estructurado Múltiple (Delete Constraints Bounds Handler).
      * 
-     * QUIÉN LO LLAMA: ProductoServlet.doGet(action=eliminar) → Cuando el admin presiona "Eliminar" en editar_productos.jsp
-     * QUÉ RECIBE: int id → El id_producto del producto a eliminar (viene de la URL: ?action=eliminar&id=5)
-     * QUÉ RETORNA: true si eliminó correctamente, false si falló
-     * 
-     * IMPORTANTE: Antes de eliminar el producto, debemos eliminar todos los registros que dependen de él:
-     * 1. DETALLE_VENTA (tiene FK a INVENTARIO_DETALLE que tiene FK a PRODUCTO)
-     * 2. DETALLE_PEDIDOS (tiene FK a INVENTARIO_DETALLE que tiene FK a PRODUCTO)
-     * 3. INVENTARIO_DETALLE (tiene FK directa a PRODUCTO)
-     * 4. Finalmente: PRODUCTO
+     * Transaction Unit Method para deconstrucción abstracta del nivel Entidad Superior hacia Nivel Dependencia (Cascada).
+     * Implementa lógica Rollback Atómica en caso de un error general a lo largo del proceso.
      */
     public boolean eliminarProducto(int id) {
         Connection con = null;
@@ -157,18 +128,15 @@ public class ProductoDAO {
         
         try {
             con = Conexion.getConexion();
-            con.setAutoCommit(false); // TRANSACCIÓN: Si algo falla, se deshacen TODOS los cambios
+            con.setAutoCommit(false); 
             
-            // PASO 1: Eliminar de DETALLE_VENTA (las ventas que usaron este producto)
-            // Subconsulta: Busca en INVENTARIO_DETALLE los registros con este id_producto
             String sqlDetalleVenta = "DELETE FROM DETALLE_VENTA WHERE id_inv_detalle IN " +
                                      "(SELECT id_detalle FROM INVENTARIO_DETALLE WHERE id_producto = ?)";
             ps = con.prepareStatement(sqlDetalleVenta);
-            ps.setInt(1, id); // ? ← id del producto a eliminar
+            ps.setInt(1, id); 
             ps.executeUpdate();
             ps.close();
             
-            // PASO 2: Eliminar de DETALLE_PEDIDOS (los pedidos que incluyeron este producto)
             String sqlDetallePedidos = "DELETE FROM DETALLE_PEDIDOS WHERE id_inv_detalle IN " +
                                        "(SELECT id_detalle FROM INVENTARIO_DETALLE WHERE id_producto = ?)";
             ps = con.prepareStatement(sqlDetallePedidos);
@@ -176,14 +144,12 @@ public class ProductoDAO {
             ps.executeUpdate();
             ps.close();
             
-            // PASO 3: Eliminar de INVENTARIO_DETALLE (el registro de stock de este producto)
             String sqlDetalleInv = "DELETE FROM INVENTARIO_DETALLE WHERE id_producto = ?";
             ps = con.prepareStatement(sqlDetalleInv);
             ps.setInt(1, id);
             ps.executeUpdate();
             ps.close();
             
-            // PASO 4: Finalmente, eliminar el PRODUCTO en sí
             String sqlProducto = "DELETE FROM PRODUCTO WHERE id_producto = ?";
             ps = con.prepareStatement(sqlProducto);
             ps.setInt(1, id);
@@ -193,20 +159,20 @@ public class ProductoDAO {
                 eliminado = true;
             }
             
-            con.commit(); // Si todo salió bien, CONFIRMAR todos los cambios en la BD
-            System.out.println("Producto ID " + id + " y sus dependencias (ventas, pedidos, inventario) eliminados correctamente.");
+            con.commit(); 
+            System.out.println("Property Object Constraints removed.");
             
         } catch (SQLException e) {
-            System.err.println("Error al eliminar producto: " + e.getMessage());
+            System.err.println("Transaction Rollback Failed Constraint: " + e.getMessage());
             e.printStackTrace();
             try {
-                if (con != null) con.rollback(); // Si algo falló, DESHACER todos los cambios
+                if (con != null) con.rollback(); 
             } catch (SQLException ex) { ex.printStackTrace(); }
         } finally {
             try {
                 if (ps != null) ps.close();
                 if (con != null) {
-                    con.setAutoCommit(true); // Restaurar modo auto-commit
+                    con.setAutoCommit(true); 
                     con.close();
                 }
             } catch (SQLException e) { e.printStackTrace(); }
@@ -215,41 +181,37 @@ public class ProductoDAO {
     }
 
     /**
-     * 4. OBTENER UN PRODUCTO POR SU ID
+     * Módulo Getter Objeto Singular (Mapper Unitario).
      * 
-     * QUIÉN LO LLAMA: 
-     *   - VentaServlet.doPost(action=agregar) → Para obtener nombre y precio al agregar al carrito
-     *   - ProductoServlet.doGet(action=editar) → Para cargar los datos en formulario_editar_producto.jsp
-     * QUÉ RECIBE: int id → El id_producto a buscar (viene de: request.getParameter("id_producto"))
-     * QUÉ RETORNA: Objeto Producto con todos sus datos, o null si no existe
-     * QUÉ HACE EN LA BD: SELECT * FROM PRODUCTO WHERE id_producto = ?
+     * Implementa un Request Abstraction SQL que genera un Objeto constructor mapeando las 
+     * propiedades iteradas desde el Data Bounds de una única fila usando Setters Inyectados (Nullable).
      */
     public Producto obtenerProducto(int id) {
-        Producto p = null; // null si no se encuentra
+        Producto p = null; 
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         
         try {
             con = Conexion.getConexion();
-            String sql = "SELECT * FROM PRODUCTO WHERE id_producto = ?"; // Busca un producto específico por ID
+            String sql = "SELECT * FROM PRODUCTO WHERE id_producto = ?"; 
             ps = con.prepareStatement(sql);
-            ps.setInt(1, id); // ? ← id del producto a buscar
+            ps.setInt(1, id); 
             rs = ps.executeQuery();
             
-            if (rs.next()) { // Si encontró el producto
+            if (rs.next()) { 
                 p = new Producto();
-                p.setIdProducto(rs.getInt("id_producto"));             // Columna BD → Modelo
-                p.setNombre(rs.getString("nombre"));                   // Se usa en VentaServlet para: item.setNombreProducto(p.getNombre())
-                p.setMarca(rs.getString("marca"));                     // Se muestra en agregar_venta.jsp: ${p.nombre} - $${p.precioUnitario} (${p.marca})
-                p.setPrecioUnitario(rs.getDouble("precio_unitario"));  // Se usa en VentaServlet para: item.setPrecioUnitario(p.getPrecioUnitario())
+                p.setIdProducto(rs.getInt("id_producto"));             
+                p.setNombre(rs.getString("nombre"));                   
+                p.setMarca(rs.getString("marca"));                     
+                p.setPrecioUnitario(rs.getDouble("precio_unitario"));  
                 p.setTipo(rs.getString("tipo"));
                 p.setImagen(rs.getString("imagen"));
                 p.setFechaVencimiento(rs.getDate("fecha_vencimiento"));
                 p.setCantidadMedida(rs.getString("cantidad_medida"));
             }
         } catch (SQLException e) {
-            System.err.println("Error al obtener producto: " + e.getMessage());
+            System.err.println("Mapping Property Error context: " + e.getMessage());
         } finally {
             try {
                 if (rs != null) rs.close();
@@ -257,18 +219,14 @@ public class ProductoDAO {
                 if (con != null) con.close();
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return p; // Retorna el producto encontrado (o null)
+        return p; 
     }
     
     /**
-     * 5. ACTUALIZAR UN PRODUCTO EXISTENTE
+     * Getter / Setter Mutacional Híbrido.
      * 
-     * QUIÉN LO LLAMA: ProductoServlet.doPost(action=actualizar) → Cuando se envía formulario_editar_producto.jsp
-     * QUÉ RECIBE: Objeto Producto con los datos EDITADOS del formulario
-     *   - Los datos vienen de: formulario_editar_producto.jsp → inputs con los valores actuales pre-llenados
-     *   - El Servlet los captura con: request.getParameter("nombre"), etc. y los pone en el objeto Producto
-     * QUÉ RETORNA: true si se actualizó, false si falló
-     * QUÉ HACE EN LA BD: UPDATE PRODUCTO SET nombre=?, marca=?, ... WHERE id_producto=?
+     * Operador Data Bounds SQL del nivel UPDATE. Recibe un objeto Entidad y transfiere 
+     * cada uno de los atributos instanciados como Mutador de fila de memoria y persistencia real.
      */
     public boolean actualizarProducto(Producto p) {
         Connection con = null;
@@ -277,35 +235,34 @@ public class ProductoDAO {
         
         try {
             con = Conexion.getConexion();
-            // SQL UPDATE: Actualiza TODOS los campos editables del producto
             String sql = "UPDATE PRODUCTO SET nombre = ?, marca = ?, precio_unitario = ?, " +
                          "tipo = ?, imagen = ?, fecha_vencimiento = ?, cantidad_medida = ? " +
-                         "WHERE id_producto = ?"; // El WHERE filtra por el ID del producto a editar
+                         "WHERE id_producto = ?"; 
             
             ps = con.prepareStatement(sql);
-            ps.setString(1, p.getNombre());         // ? #1 ← JSP: input name="nombre" value="${productoEditar.nombre}"
-            ps.setString(2, p.getMarca());           // ? #2 ← JSP: input name="marca" value="${productoEditar.marca}"
-            ps.setDouble(3, p.getPrecioUnitario());  // ? #3 ← JSP: input name="precio" value="${productoEditar.precioUnitario}"
-            ps.setString(4, p.getTipo());            // ? #4 ← JSP: select name="tipo" (opción selected según ${productoEditar.tipo})
-            ps.setString(5, p.getImagen());          // ? #5 ← JSP: input name="imagen"
+            ps.setString(1, p.getNombre());         
+            ps.setString(2, p.getMarca());           
+            ps.setDouble(3, p.getPrecioUnitario());  
+            ps.setString(4, p.getTipo());            
+            ps.setString(5, p.getImagen());          
             
             if (p.getFechaVencimiento() != null) {
-                ps.setDate(6, p.getFechaVencimiento()); // ? #6 ← JSP: input name="fecha_vencimiento"
+                ps.setDate(6, p.getFechaVencimiento()); 
             } else {
                 ps.setNull(6, java.sql.Types.DATE);
             }
             
-            ps.setString(7, p.getCantidadMedida());  // ? #7 ← JSP: input name="cantidad_medida"
-            ps.setInt(8, p.getIdProducto());          // ? #8 ← JSP: input hidden name="id_producto" value="${productoEditar.idProducto}"
+            ps.setString(7, p.getCantidadMedida());  
+            ps.setInt(8, p.getIdProducto());          
             
-            int filas = ps.executeUpdate(); // Ejecuta el UPDATE
+            int filas = ps.executeUpdate(); 
             if (filas > 0) {
                 actualizado = true;
-                System.out.println("Producto ID " + p.getIdProducto() + " actualizado correctamente.");
+                System.out.println("Object state Mutation Property Updated.");
             }
             
         } catch (SQLException e) {
-            System.err.println("Error al actualizar producto: " + e.getMessage());
+            System.err.println("Object Setter mutation constraint bounds limits failed: " + e.getMessage());
             e.printStackTrace();
         } finally {
             try {
@@ -317,9 +274,9 @@ public class ProductoDAO {
     }
 
     /**
-     * Verifica si un nombre de producto ya existe en la base de datos.
-     * @param nombre El nombre del producto a verificar.
-     * @return true si existe, false si no.
+     * Módulo Factory Consultor Iterador Escalar de Strings.
+     * 
+     * Accionador Abstracto subrutina Boolean Checker. Utiliza Count y condicional lógico boolean.
      */
     public boolean existeNombreProducto(String nombre) {
         boolean existe = false;
@@ -336,7 +293,7 @@ public class ProductoDAO {
                 existe = true;
             }
         } catch (SQLException e) {
-            System.err.println("Error al verificar nombre de producto: " + e.getMessage());
+            System.err.println("Property limits bounds count boolean failed: " + e.getMessage());
         } finally {
             try {
                 if (rs != null) rs.close();

@@ -1,133 +1,120 @@
-package com.inventario.model;
+package com.inventario.model; // Instrucción que declara la ubicación lógica jerárquica de la clase dentro del modelo
 
 /**
- * MODELO: Clase DetalleVenta (Entidad/POJO)
+ * Modelo de datos: Clase DetalleVenta (Entidad o POJO - Plain Old Java Object).
  * 
- * Representa la tabla DETALLE_VENTA de la base de datos MySQL.
- * Cada fila es UN producto vendido dentro de una Venta.
- * 
- * FLUJO DE DATOS:
- * - CREACIÓN:    agregar_venta.jsp → VentaServlet?action=agregar → Se agrega al carrito (List en sesión)
- *                VentaServlet?action=finalizar → VentaDAO.registrarVenta() → INSERT en tabla DETALLE_VENTA
- * - LECTURA:     VentaDAO.obtenerDetallesVenta(idVenta) → detalle_venta.jsp (${det.nombreProducto}, ${det.cantidad})
- * 
- * TABLAS RELACIONADAS:
- * - VENTA: Cada detalle pertenece a una venta (FK: id_venta)
- * - INVENTARIO_DETALLE: Referencia al producto en el inventario (FK: id_inv_detalle). Controla stock.
+ * Interfaz orientada a objetos que encapsula fielmente la tupla física 'detalle_venta'.
+ * Funciona como unidad atómica e independiente para manejar conceptualmente un ítem 
+ * vendido de forma intrínseca dentro del agregado raíz (Venta), gestionando la relación de objetos.
  */
-public class DetalleVenta {
+public class DetalleVenta { // Se genera la firma estructural y la clase principal pública e instanciable
 
     // =====================================================================
-    // ATRIBUTOS DE LA BD - Columnas de la tabla DETALLE_VENTA
+    // ATRIBUTOS ENCAPSULADOS PRINCIPALES MATEADOS (Persistencia)
+    // Reservas de variables discretas limitadas a modelar columnas puras subyacentes.
     // =====================================================================
 
-    private int idDetalleVenta;   // PK: id_detalle_venta (INT, AUTO_INCREMENT)
-    private int idVenta;          // FK: id_venta (INT). Referencia a la tabla VENTA. Se asigna en VentaDAO al registrar.
-    private int idInvDetalle;     // FK: id_inv_detalle (INT). Referencia a INVENTARIO_DETALLE (producto en el inventario activo).
-    private int cantidad;         // cantidad (INT). Cuántas unidades se vendieron. Viene de: agregar_venta.jsp → input name="cantidad"
-    private double precioUnitario;// precio_unitario (DECIMAL). Precio del producto al momento de la venta. Viene de: Producto.getPrecioUnitario()
-    private double subtotal;      // subtotal (DECIMAL). Se calcula como: cantidad * precioUnitario
+    private int idDetalleVenta;   // Atributo variable primitivo empleado para retener la llave maestra autonumérica del ítem de la transacción.
+    private int idVenta;          // Atributo relacional estricto; llave interviniente que enlaza compositivamente este objeto con su Entidad matriz u objeto anfitrión 'Venta'.
+    private int idInvDetalle;     // Componente de enlace numérico para aludir transversalmente al objeto padre o bloque físico dentro del área de inventarios (InventarioDetalle).
+    private int cantidad;         // Valor de tipo entero asignado a contabilizar explícitamente el volumen despachado a consumidor.
+
+    private double subtotal;      // Parámetro monetario de punto decimal flotante evaluado matemáticamente en proceso de compra.
 
     // =====================================================================
-    // ATRIBUTOS AUXILIARES - NO son columnas de la BD, son para la vista
+    // PROPIEDADES TRANSIENTES COMPLEMENTARIAS
+    // Estados internos auxiliares asignados y mantenidos puramente en la memoria RAM 
+    // del framework contenedor para facilitar transporte y despliegue hacia la capa de presentacion (View).
     // =====================================================================
 
-    private String nombreProducto; // Nombre del producto para mostrar en la tabla del carrito (agregar_venta.jsp: ${item.nombreProducto})
-    private int idProducto;        // ID del producto original, auxiliar para buscar en INVENTARIO_DETALLE por id_producto
+    private String nombreProducto; // Fragmento de texto encapsulado rellenado de forma tardía a modo alfanumérico para exponer el nombre legible sin doble consulta.
+    private int idProducto;        // Auxiliar referencial numérico extraído dinámicamente de contexto para facilitar iteraciones en colecciones antes de persistir.
 
     /**
-     * CONSTRUCTOR VACÍO
-     * Usado por: VentaServlet al crear items del carrito con new DetalleVenta()
-     * Usado por: VentaDAO al leer detalles de una venta desde la BD
+     * CONSTRUCTOR POR DEFECTO
+     * Método inicializador en sobrecarga nula exigido implícitamente por esquemas como Java Beans
+     * permitiendo de forma controlada la instanciación tardía de componentes a priori a su relleno con setters.
      */
-    public DetalleVenta() {
+    public DetalleVenta() { // Clausula base para memoria dinámica libre sin firmas inyectadas.
     }
 
     // =====================================================================
-    // GETTERS Y SETTERS - Atributos de BD
+    // BLOQUE DE COMPORTAMIENTO BASAL: GETTERS / SETTERS
+    // Subrutinas o Métodos Funcionales expuestos orientados únicamente a permitir 
+    // y gobernar la alteración de estado de las variables miembro protegiendo el Scope de Clase.
     // =====================================================================
 
-    /** PK del detalle. Usado internamente por VentaDAO */
-    public int getIdDetalleVenta() {
-        return idDetalleVenta;
+    /** Método accesor: Dispone externamente el acceso restrictivo al número de folio interno transaccional */
+    public int getIdDetalleVenta() { // Firma y tipo entero 
+        return idDetalleVenta; // Emite el miembro
     }
 
-    /** Asigna el ID. Llamado desde: VentaDAO con rs.getInt("id_detalle_venta") */
-    public void setIdDetalleVenta(int idDetalleVenta) {
-        this.idDetalleVenta = idDetalleVenta;
+    /** Método mutador: Reevaluación forzosa del identificador único atómico insertado o recuperado de origen */
+    public void setIdDetalleVenta(int idDetalleVenta) { // Aislamiento estructural y asignación posicional obligatoria
+        this.idDetalleVenta = idDetalleVenta; // Alteración o fijación interna paramétrica
     }
 
-    /** FK a la venta padre. Asignado en VentaDAO.registrarVenta() después de obtener el id_venta generado */
-    public int getIdVenta() {
-        return idVenta;
+    /** Acceso relacional: Recupera el alias primitivo entero referencial sobre el objeto mayor del agregado de la compra */
+    public int getIdVenta() { // Descubre índice relacional intermedio
+        return idVenta; // Evoca miembro de persistencia atada
     }
 
-    /** Asigna la venta. Llamado desde: VentaDAO al insertar detalles */
-    public void setIdVenta(int idVenta) {
-        this.idVenta = idVenta;
+    /** Mutador estructural interobjetos: Establece y unifica sistémicamente local cual entidad Venta (padre) encubre o contiene a este dependiente */
+    public void setIdVenta(int idVenta) { // Interfaz consumible para anclaje a cabeceras maestras
+        this.idVenta = idVenta; // Anclaje efectivo
     }
 
-    /** FK a INVENTARIO_DETALLE. Identifica qué producto del inventario se vendió. Se resuelve en VentaDAO */
-    public int getIdInvDetalle() {
-        return idInvDetalle;
+    /** Acceso paramétrico: Dispone ante las capas la ubicación virtual asociada como ítem físico dentro de recintos de almacén local. */
+    public int getIdInvDetalle() { // Cede primitivo enlace a la dependencia externa
+        return idInvDetalle; // Devuelve la abstracción indexada
     }
 
-    /** Asigna el id_inv_detalle. Resuelto en VentaDAO buscando por id_producto + id_inventario en sesión */
-    public void setIdInvDetalle(int idInvDetalle) {
-        this.idInvDetalle = idInvDetalle;
+    /** Inyección transversal relacional: Acopla a este constructo las métricas de ID asociadas al detalle temporal inventariado */
+    public void setIdInvDetalle(int idInvDetalle) { // Seta apuntador foráneo integral en memoria propia temporal
+        this.idInvDetalle = idInvDetalle; // Acople primitivo directo
     }
 
-    /** Cantidad vendida. Usado en JSP como: ${item.cantidad} en la tabla del carrito */
-    public int getCantidad() {
-        return cantidad;
+    /** Consulta volumétrica: Evalúa e infiere el escalar abstracto para dimensionar numéricamente componentes de venta despachados. */
+    public int getCantidad() { // Firma sin argumentos externa
+        return cantidad; // Extraído y presentado
     }
 
-    /** Asigna cantidad. Viene de: VentaServlet → Integer.parseInt(request.getParameter("cantidad")) */
-    public void setCantidad(int cantidad) {
-        this.cantidad = cantidad;
+    /** Modificación aritmética local: Asienta lógicamente, puramente como entidad de transporte, la magnitud nominal que rige en esta sola fila. */
+    public void setCantidad(int cantidad) { // Recepciona un numérico procesable atómico
+        this.cantidad = cantidad; // Ajuste directo dimensional de consumo transitorio 
     }
 
-    /** Precio unitario al momento de la venta. Usado en JSP como: ${item.precioUnitario} */
-    public double getPrecioUnitario() {
-        return precioUnitario;
+    /** Accesor aritmético y financiero: Obtiene la fracción derivada como producto cruzado evaluado por cada registro en línea de facturación. */
+    public double getSubtotal() { // Emite tipo complejo decimal de alta precisión referida a precios.
+        return subtotal; // Retorno primitivo escalado
     }
 
-    /** Asigna precio. Viene de: ProductoDAO → producto.getPrecioUnitario() en VentaServlet */
-    public void setPrecioUnitario(double precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
-
-    /** Subtotal de esta línea (cantidad * precio). Usado en JSP como: ${item.subtotal} */
-    public double getSubtotal() {
-        return subtotal;
-    }
-
-    /** Asigna subtotal. Se calcula en VentaServlet como: cantidad * precioUnitario */
-    public void setSubtotal(double subtotal) {
-        this.subtotal = subtotal;
+    /** Seteo paramétrico derivado computacional: Almacena precomputacionalmente valores netos locales de cada bloque singular vendido. */
+    public void setSubtotal(double subtotal) { // Recepciona variables de computo flotante
+        this.subtotal = subtotal; // Anula o aplica monto base al elemento actual
     }
 
     // =====================================================================
-    // GETTERS Y SETTERS - Atributos AUXILIARES (no están en la BD)
+    // SECCIÓN DE GETTERS Y SETTERS EXTENDIDOS (Mnemotécnicos/Composicionales)
     // =====================================================================
 
-    /** Nombre del producto para mostrar en el carrito. Viene de: ProductoDAO → producto.getNombre() */
-    public String getNombreProducto() {
-        return nombreProducto;
+    /** Retorno de alias literario complementario: Extracción amigable nominal visual provisto por colecciones enriquecidas. */
+    public String getNombreProducto() { // Firma encapsulada amigable
+        return nombreProducto; // Exposición pura de String instanciado temporal
     }
 
-    /** Asigna nombre para la vista. Llamado desde: VentaServlet al agregar al carrito */
-    public void setNombreProducto(String nombreProducto) {
-        this.nombreProducto = nombreProducto;
+    /** Abastecimiento verbal para capa View: Registra pasivamente identificaciones abstractas asociando el elemento del bloque a cadenas mnemotécnicas directas. */
+    public void setNombreProducto(String nombreProducto) { // Adopción y vinculación nominal de tipo texto simple 
+        this.nombreProducto = nombreProducto; // Consumo inyectable final
     }
 
-    /** ID del producto original (tabla PRODUCTO). Auxiliar para buscar en INVENTARIO_DETALLE */
-    public int getIdProducto() {
-        return idProducto;
+    /** Consulta local referencial primitiva: Resuelve y proporciona métricas de enlace origen sobre las familias base (Producto master) de catálogo. */
+    public int getIdProducto() { // Lectura auxiliar de puente
+        return idProducto; // Proyección primitiva
     }
 
-    /** Asigna ID producto. Viene de: VentaServlet → Integer.parseInt(request.getParameter("id_producto")) */
-    public void setIdProducto(int idProducto) {
-        this.idProducto = idProducto;
+    /** Puntero auxiliar interno en rampa de vuelo MVC: Estipula una huella abstracta local inyectada anticipada para facilitar la resolución inter-esquemas (DB). */
+    public void setIdProducto(int idProducto) { // Consumo temporal del identificador global
+        this.idProducto = idProducto; // Anclaje base relacional transitorio para búsquedas y parseos dinámicos en lista de carrito
     }
 }

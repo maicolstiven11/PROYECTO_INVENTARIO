@@ -7,13 +7,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * DAO para obtener datos de informes y estadísticas del negocio.
- * Calcula totales de ventas, gastos y pedidos para el dashboard de informes.
+ * Clase InformeDAO: Controlador Analítico Transaccional Estructural.
+ * Representa una Capa Data Access Object exclusiva para la ejecución
+ * de sentencias DQL abstractas (Select Count/Sum). 
+ * Produce tipos de datos primitivos encapsulando lógica de Base de Datos.
  */
 public class InformeDAO {
 
     /**
-     * Obtiene el total de ventas de un inventario específico.
+     * Módulo Getter de Subrutina SQL Analítica.
+     * Retorna una propiedad estructurada tipo de dato nativo (double) de sumatorias. 
      */
     public double obtenerTotalVentas(int idInventario) {
         double total = 0;
@@ -43,7 +46,8 @@ public class InformeDAO {
     }
 
     /**
-     * Obtiene el total de gastos de un inventario específico.
+     * Método Accessor Matemático (Getter de sumatoria).
+     * Aplica la interface limitante (idInventario parameter property) sobre consultas SQL complejas.
      */
     public double obtenerTotalGastos(int idInventario) {
         double total = 0;
@@ -73,7 +77,8 @@ public class InformeDAO {
     }
 
     /**
-     * Obtiene el total de pedidos de un inventario específico.
+     * Accionador Abstracto Analítico Relacional (Getter).
+     * Obtiene una sumatoria transaccional empaquetada en tipo valor de variable flotante iterativo.
      */
     public double obtenerTotalPedidos(int idInventario) {
         double total = 0;
@@ -103,7 +108,8 @@ public class InformeDAO {
     }
 
     /**
-     * Obtiene el número total de ventas de un inventario específico.
+     * Algoritmo Consultor Enumerador Analítico de Patrón (Counter DAO).
+     * Interfaz con ResultSet Count de parámetros unificados. Retorna un Tipo Primitivo Int Abstracto.
      */
     public int obtenerCantidadVentas(int idInventario) {
         int cantidad = 0;

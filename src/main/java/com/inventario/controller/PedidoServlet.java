@@ -1,4 +1,4 @@
-package com.inventario.controller;
+package com.inventario.controller; // Declaración de espacio de nombres organizativo de artefactos de red 
 
 import com.inventario.dao.PedidoDAO;
 import com.inventario.dao.ProductoDAO;
@@ -7,10 +7,8 @@ import com.inventario.model.DetallePedido;
 import com.inventario.model.PedidoProveedor;
 import com.inventario.model.Producto;
 import com.inventario.model.Proveedor;
-import com.inventario.model.Usuario;
 import java.io.IOException;
 import java.sql.Date;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -21,143 +19,142 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- * CONTROLADOR: Servlet encargado de gestionar los Pedidos a Proveedores.
+ * Controlador Lógico Orquestador de Intermediación: PedidoServlet.
  * 
- * Implementa: RF-25 (Registrar Pedido a Proveedor)
- * Cumple: RNF-02 (Protección SQL Injection - delega en DAO con PreparedStatement)
- *         RNF-03 (Gestión de Sesiones - obtiene idInventarioActual de la sesión)
- *         RNF-08 (Mensajes de Error - redirige con parámetros de error descriptivos)
- *         RNF-13 (Arquitectura MVC - Capa Controlador)
+ * Clase de fachada interceptora (Front Controller MVC).
+ * Ejerce la centralización estructural en la capa Servlet, orquestando objetos POJO relacionales complejos 
+ * y multi-DAO delegativos (Proveedor, Producto, Pedido y Detalle) para resolver colecciones completas e inyecciones dependientes.
  */
-@WebServlet(name = "PedidoServlet", urlPatterns = {"/PedidoServlet"})
-public class PedidoServlet extends HttpServlet {
+@WebServlet(name = "PedidoServlet", urlPatterns = {"/PedidoServlet"}) // Vinculación decorativa hacia la interfaz HTTP del Servlet Container.
+public class PedidoServlet extends HttpServlet { // Subclase especializada de Servlet base para web interactivo.
 
     /**
-     * RF-25: Método doGet - Carga los datos necesarios para el formulario de nuevo pedido.
-     * Carga la lista de proveedores (RF-23) y productos (RF-10) para los selects del formulario.
+     * Sobreescritura del método consultivo HTTP GET.
+     * Procesa la interfaz selectiva que secciona dos modos de subrutina: 
+     * - Listado Relacional (Visualizar base existente instanciada en memoria).
+     * - Disparo Constructor / Preparador (Recoge las relaciones lógicas foráneas Previas y adjuntarlas como variables de contexto al View).
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException { // Ampara contra la cadena de excepciones relativas Web MVC .
         
-        String action = request.getParameter("action");
+        String action = request.getParameter("action"); // Localizador semántico simple del Request param de control .
         
-        if ("listar".equals(action)) {
-            // Listar pedidos del negocio actual
-            HttpSession session = request.getSession();
-            Integer idNegocio = (Integer) session.getAttribute("idNegocioActual");
+        if ("listar".equals(action)) { // Inicia filtro controlador de acción en memoria booleana 
+            // Acceso relacional transiente en polimorfismo referencial 
+            HttpSession session = request.getSession(); // Accesor a la capa envoltura
+            Integer idNegocio = (Integer) session.getAttribute("idNegocioActual"); // Instancia a puntero estático o nulo 
             
-            if (idNegocio != null) {
-                PedidoDAO pedidoDAO = new PedidoDAO();
-                List<PedidoProveedor> listaPedidos = pedidoDAO.listarPedidos(idNegocio);
-                request.setAttribute("listaPedidos", listaPedidos);
-                request.getRequestDispatcher("view/visualizar_pedidos.jsp").forward(request, response);
+            if (idNegocio != null) { // Punto restrictivo de anclaje base .
+                PedidoDAO pedidoDAO = new PedidoDAO(); // Carga Orquestador modelo BD.
+                List<PedidoProveedor> listaPedidos = pedidoDAO.listarPedidos(idNegocio); // Estructura Array List transiente asimétrica.
+                request.setAttribute("listaPedidos", listaPedidos); // Empaque semántico polimórfico al scope buffer de sesión
+                request.getRequestDispatcher("view/visualizar_pedidos.jsp").forward(request, response); // Redireccionamiento o Forward abstracto hacia JSP Template.
             } else {
-                response.sendRedirect("index.jsp");
+                response.sendRedirect("index.jsp"); // Castigo purificador de enrutamiento 
             }
-        } else if (action == null || action.equals("nuevo")) {
-            nuevoPedido(request, response);  // RF-25: Preparar formulario de nuevo pedido
+        } else if (action == null || action.equals("nuevo")) { // Fallback u originador condicionado
+            nuevoPedido(request, response);  // Llama método utilitario o helper referenciado interno de la propia subclase
         }
     }
 
     /**
-     * RF-25: Carga listas de proveedores y productos del inventario para los dropdowns.
-     * CAMBIADO: Ahora carga los items de inventario_detalle (productos con stock) en vez de todos los productos.
+     * Metodo helper subestructural interno de preparación.
+     * Carga y cruza las colecciones independientes Listas dependientes del DAO de Producto y Proveedor 
+     * en simultáneo y las inyecta en el objeto Request como colecciones estáticas antes de re-dirigir a su Vista.
      */
     private void nuevoPedido(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        ProveedorDAO proveedorDAO = new ProveedorDAO();
-        ProductoDAO productoDAO = new ProductoDAO();
+            throws ServletException, IOException { // Firma pasiva
+        ProveedorDAO proveedorDAO = new ProveedorDAO(); // Generador lector primario foráneo
+        ProductoDAO productoDAO = new ProductoDAO(); // Generador lector sub-foráneo
         
-        HttpSession session = request.getSession();
-        Integer idInventario = (Integer) session.getAttribute("idInventarioActual");
+        HttpSession session = request.getSession(); // Lector session scope
+        Integer idInventario = (Integer) session.getAttribute("idInventarioActual"); // Lector transaccional escalar 
         
-        List<Proveedor> proveedores = proveedorDAO.listarProveedores();
-        // Cargar TODOS los productos de la BD para permitir pedidos de productos nuevos
-        List<Producto> listaProductos = productoDAO.listarProductos();
+        List<Proveedor> proveedores = proveedorDAO.listarProveedores(); // Instanciador Colección List relacional
+        // Lector general absoluto sin filtro para permitir inserciones atómicas desde el View de nuevos
+        List<Producto> listaProductos = productoDAO.listarProductos(); // Colección general persistente de Modelo "Producto" 
         
-        request.setAttribute("listaProveedores", proveedores);
-        request.setAttribute("listaProductos", listaProductos);
-        request.setAttribute("idInventarioActual", idInventario);
+        request.setAttribute("listaProveedores", proveedores); // Adjunta Arreglo Tipado
+        request.setAttribute("listaProductos", listaProductos); // Adjunta Arreglo relacional Tipado
+        request.setAttribute("idInventarioActual", idInventario); // Pasa la variable base numérica atómica 
         
-        request.getRequestDispatcher("view/agregar_pedido.jsp").forward(request, response);
+        request.getRequestDispatcher("view/agregar_pedido.jsp").forward(request, response); // Despacha ortogonal o re-direcciona todo al JSP con buffer.
     }
 
     /**
-     * RF-25: Método doPost - Procesa y registra un nuevo pedido a proveedor.
-     * Recibe los datos del formulario agregar_pedido.jsp, calcula total y precio unitario,
-     * y guarda el pedido en la BD mediante transacción atómica.
-     * RF-25 Restricción 1: Debe existir un inventario activo en sesión.
-     * RF-25 Restricción 4: Operación transaccional (PEDIDOS_PROVEEDOR + DETALLE_PEDIDOS).
+     * Sobreescritura del método transaccional HTTP POST (Payload inyectivo cruzado multi-tabla).
+     * Intercepta el empaquetado del frontend y recrea lógicamente Entidades completas (Modelo Pedido y Detalle) para enviarlas en 
+     * una sola transacción atómica doble al gestor DAO, completando y mutando dependencias secundarias en el proceso iterativamente calculadas.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException { // Lanza excepcion asilada o framework
         
-        try {
+        try { // Contenedor protector y vigilador subyacente de integridad en parseo númerico enlazado y null-pointers .
             // =====================================================================
-            // RF-25 PASO 1: Recoger datos del formulario HTML
+            // INSTANCIACIÓN DE MAPEO DIRECTO ESCALAR Y ALFANUMÉRICO LÓGICO
             // =====================================================================
-            int idProveedor = Integer.parseInt(request.getParameter("id_proveedor"));
-            int idProducto = Integer.parseInt(request.getParameter("id_producto")); // Recibe producto directo
+            int idProveedor = Integer.parseInt(request.getParameter("id_proveedor")); // Casteo iterativo de param String de llave primaria
+            int idProducto = Integer.parseInt(request.getParameter("id_producto")); // Idem para la entidad final (Producto referencial asilado)
             
-            String fechaPedidoStr = request.getParameter("fecha_pedido");
-            String fechaEntregaStr = request.getParameter("fecha_entrega");
+            String fechaPedidoStr = request.getParameter("fecha_pedido"); // Binding temporal Date literal 
+            String fechaEntregaStr = request.getParameter("fecha_entrega"); // Binding para cronológico estimado literal 
             
-            int cantidad = Integer.parseInt(request.getParameter("cantidad"));
-            double subtotal = Double.parseDouble(request.getParameter("subtotal"));
-            double iva = Double.parseDouble(request.getParameter("iva")); // RESTAURADO
+            int cantidad = Integer.parseInt(request.getParameter("cantidad")); // Cast numérico Cardinal primitivo
+            double subtotal = Double.parseDouble(request.getParameter("subtotal")); // Mutación numeral Coma Flotante fraccionaria (Double nativo) .
+            double iva = Double.parseDouble(request.getParameter("iva")); // Conversión extractiva de impuesto foránea (Aritmética decimal)
             
-            // RESTAURADO: total = subtotal + IVA
-            double total = subtotal + iva;
-            double precioUnitario = total / cantidad;
+            // Reestructuracion mutativa en RAM por Ecuacion Financiera
+            double total = subtotal + iva; // Fusión escalar de coste neto base .
+            double precioUnitario = total / cantidad; // Cálculo del divisor final fraccionario
             
-            HttpSession session = request.getSession();
-            Integer idInventario = (Integer) session.getAttribute("idInventarioActual");
+            HttpSession session = request.getSession(); // Restaura memoria temporal HTTP.
+            Integer idInventario = (Integer) session.getAttribute("idInventarioActual"); // Consigue variable delimitadora int de memoria 
             
-            if (idInventario == null) {
-                response.sendRedirect("NegocioServlet?error=SinInventarioActivo");
-                return;
+            if (idInventario == null) { // Blindaje si hay error de pérdida de contexto lógico o sesion vaciada
+                response.sendRedirect("NegocioServlet?error=SinInventarioActivo"); // Corta flujo redireccionando a un origen control
+                return; // Corta scope.
             } 
             
-            // Obtener o crear el detalle de inventario automáticamente si es un producto nuevo
-            com.inventario.dao.DetalleInventarioDAO detDao = new com.inventario.dao.DetalleInventarioDAO();
-            int idInvDetalle = detDao.obtenerOCrearDetalle(idInventario, idProducto);
+            // Subrutina auxiliar auto-mágica delegativa a otra DAO. Resuelve ID interno de InventarioDetalle (Inyección Polimórfica In-Time).
+            com.inventario.dao.DetalleInventarioDAO detDao = new com.inventario.dao.DetalleInventarioDAO(); // Fabricación dinámica inter-conexion
+            int idInvDetalle = detDao.obtenerOCrearDetalle(idInventario, idProducto); // Generación de clave por subrutina delegada
             
-            // Crear Pedido
-            PedidoProveedor pedido = new PedidoProveedor();
-            pedido.setIdProveedor(idProveedor);
-            pedido.setFechaPedido(Date.valueOf(fechaPedidoStr));
-            pedido.setFechaEntrega(Date.valueOf(fechaEntregaStr));
-            pedido.setSubtotal(subtotal);   // RESTAURADO
-            pedido.setIvaPedido(iva);      // RESTAURADO
-            pedido.setTotalPedido(total);
-            pedido.setIdInventario(idInventario);
+            // CONSTRUCCIÓN ASIMÉTRICA DEL POJO ENTIDAD MADRE (PedidoProveedor) 
+            PedidoProveedor pedido = new PedidoProveedor(); // Genera atómico instanciado Wrapper nuevo en HEAP
+            pedido.setIdProveedor(idProveedor); // Setter relacional clave ID
+            pedido.setFechaPedido(Date.valueOf(fechaPedidoStr)); // Transvasa factorizado LocalDate estático
+            pedido.setFechaEntrega(Date.valueOf(fechaEntregaStr)); // Constructor de Date en capa modelo setter
+            pedido.setSubtotal(subtotal);   // Método modificador a encapsulado interno
+            pedido.setIvaPedido(iva);      // Idem
+            pedido.setTotalPedido(total); // Setter compuesto deducido
+            pedido.setIdInventario(idInventario); // Setter relacion FK de objeto Contextual
             
-            // Crear Detalle con id_inv_detalle (MANTIENE lógica de stock)
-            DetallePedido detalle = new DetallePedido();
-            detalle.setIdInvDetalle(idInvDetalle); 
-            detalle.setCantidadPedida(cantidad);
-            detalle.setPrecioUnitarioReal(precioUnitario);
+            // CONSTRUCCIÓN SIMÉTRICA DEL POJO ENTIDAD DEPENDIENTE (DetallePedido) 
+            DetallePedido detalle = new DetallePedido(); // Envoltorio secundario
+            detalle.setIdInvDetalle(idInvDetalle); // Modificador relacional foráneo a la tabla link subyacente
+            detalle.setCantidadPedida(cantidad); // Setter cardinalidad numeral
+            detalle.setPrecioUnitarioReal(precioUnitario); // Mutador de factor computado
             
-            List<DetallePedido> detalles = new ArrayList<>();
-            detalles.add(detalle);
+            List<DetallePedido> detalles = new ArrayList<>(); // Inicializador general base Array Dinámico .
+            detalles.add(detalle); // Inyector o Additivo hacia el listado Collection.
             
-            // Guardar en BD (transacción + stock automático)
-            PedidoDAO pedidoDAO = new PedidoDAO();
-            boolean exito = pedidoDAO.registrarPedido(pedido, detalles);
+            // ORQUESTACIÓN TRANSACCIONAL ÚNICA DAO (Commit Double Batch)
+            PedidoDAO pedidoDAO = new PedidoDAO(); // Gestor de capa BD
+            boolean exito = pedidoDAO.registrarPedido(pedido, detalles); // Disparo doble resolutivo que amarra el Booleano final indicando exito logico transaccional completo
             
-            if (exito) {
-                response.sendRedirect("view/pedido_finalizado.html");  // RF-25: Redirigir a confirmación
+            if (exito) { // Bifurcacion condicional
+                response.sendRedirect("view/pedido_finalizado.html");  // Conclusión asíncrona hacia una interfaz statica de cierre feliz
             } else {
-                // RNF-08: Redirigir con error
-                response.sendRedirect("PedidoServlet?action=nuevo&msj=error");
+                // Resolución asíncrona reactiva alterna si SQL transaction falló pero atrapó internamente (No Exception)
+                response.sendRedirect("PedidoServlet?action=nuevo&msj=error"); // Salida con param
             }
             
-        } catch (Exception e) {
-            e.printStackTrace();
-            // RNF-08: Redirigir con error descriptivo
-            response.sendRedirect("PedidoServlet?action=nuevo&msj=error_datos");
+        } catch (Exception e) { // Atrapatodo y debug 
+            e.printStackTrace(); // Salida sucia
+            // Re-armado del buffer con Query Parameter de choque de datos para el UI Error
+            response.sendRedirect("PedidoServlet?action=nuevo&msj=error_datos"); // Limpieza controlada
         }
     }
 }
