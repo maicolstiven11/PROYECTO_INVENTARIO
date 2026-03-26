@@ -89,6 +89,23 @@
                     </div>
                 </form>
             </main>
+            <script>
+                // Evitar que el usuario escriba el signo menos (-) o la letra 'e'
+                document.querySelectorAll('.inventario__entrada-cantidad').forEach(input => {
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === '-' || e.key === 'e' || e.key === '+') {
+                            e.preventDefault();
+                        }
+                    });
+                    
+                    // Asegurar que si pegan un valor negativo, se convierta a 0 al perder el foco
+                    input.addEventListener('blur', function() {
+                        if (this.value < 0) {
+                            this.value = 0;
+                        }
+                    });
+                });
+            </script>
         </body>
 
         </html>

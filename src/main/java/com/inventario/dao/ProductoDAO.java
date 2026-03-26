@@ -18,43 +18,71 @@ import java.util.List;
 public class ProductoDAO {
 
     /**
-     * Trae un listado completo de todos los productos del catálogo.
-     * Lista cada fila de la tabla PRODUCTO.
+     * Trae el catálogo de productos con el stock actual de un negocio específico.
+     * Utiliza una subconsulta para evitar duplicados por inventarios pasados.
+     * 
+     * @param idNegocio ID del bar para filtrar el stock activo
+     * @return Lista de productos con su stock (o 0 si no tienen)
      */
-    public List<Producto> listarProductos() {
-        List<Producto> lista = new ArrayList<>(); // Lista donde se pondrán los elementos a presentar
+    /**
+     * Trae el catálogo de productos con el stock actual de un negocio específico.
+     * Utiliza una subconsulta para evitar duplicados por inventarios pasados.
+     */
+    public List<Producto> listarProductos(int idNegocio) {
+        List<Producto> lista = new ArrayList<>(); // Lista de productos para la página
         Connection con = null;        
         PreparedStatement ps = null;  
         ResultSet rs = null;          
         
         try {
-            con = Conexion.getConexion(); // Nos asociamos al driver BD
-            String sql = "SELECT * FROM PRODUCTO"; // Simplemente trae todo el catálogo
-            ps = con.prepareStatement(sql);        
-            rs = ps.executeQuery();                
+            con = Conexion.getConexion(); // Enlace a la bd
             
-            while (rs.next()) { // Recorre línea a línea el catálogo retornado por SQL
-                Producto p = new Producto(); // Creamos la representación del producto
-                p.setIdProducto(rs.getInt("id_producto"));             // ID
-                p.setNombre(rs.getString("nombre"));                   // Empanadas
-                p.setMarca(rs.getString("marca"));                     // Ricuras
-                p.setPrecioUnitario(rs.getDouble("precio_unitario"));  // Costo por unidad
-                p.setTipo(rs.getString("tipo"));                       // Comestible, Varios, Aseo, Bebida
-                p.setImagen(rs.getString("imagen"));                   // Nombre de la foto subida
-                p.setFechaVencimiento(rs.getDate("fecha_vencimiento"));// Su caducidad (Ojalá no estén vencidas)
-                p.setCantidadMedida(rs.getString("cantidad_medida"));  // 150gr, 1L, etc.
-                lista.add(p); // Y agregalo a la Lista
+
+            String sql = "SELECT p.*, COALESCE(idx.cantidad_inicial, 0) AS stock_actual " +   // Selecciona todos los campos de PRODUCTO y además calcula el stock_actual (si no hay cantidad, devuelve 0 con COALESCE)
+
+                         "FROM PRODUCTO p " +   // Tabla principal: PRODUCTO con alias "p"
+
+                         "LEFT JOIN (" +   // Hace un LEFT JOIN con una subconsulta (alias idx). Trae todos los productos aunque no tengan inventario activo
+
+                         "    SELECT di.id_producto, di.cantidad_inicial " +   // Subconsulta: selecciona id_producto y cantidad_inicial de INVENTARIO_DETALLE
+
+                         "    FROM INVENTARIO_DETALLE di " +   // Tabla INVENTARIO_DETALLE con alias "di"
+
+                         "    INNER JOIN INVENTARIO i ON di.id_inventario = i.id_inventario " +   // Une INVENTARIO_DETALLE con INVENTARIO, solo si coinciden los id_inventario
+
+                         "    WHERE i.id_negocio = ? AND i.estado = 'activo'" +   // Filtra: solo inventarios del negocio indicado (parámetro ?) y que estén activos
+
+                         ") idx ON p.id_producto = idx.id_producto";   // Relaciona la subconsulta (idx) con PRODUCTO: une por id_producto
+
+                         
+            ps = con.prepareStatement(sql);    
+            ps.setInt(1, idNegocio); // Inyectamos el bar del usuario
+            rs = ps.executeQuery(); // Disparamos la búsqueda
+            
+            while (rs.next()) { // Recorremos el catálogo resultante
+                Producto p = new Producto();
+                // Mapeo de columnas de MySQL a variables de Java:
+                p.setIdProducto(rs.getInt("id_producto"));
+                p.setNombre(rs.getString("nombre"));
+                p.setMarca(rs.getString("marca"));
+                p.setPrecioUnitario(rs.getDouble("precio_unitario"));
+                p.setTipo(rs.getString("tipo"));
+                p.setImagen(rs.getString("imagen"));
+                p.setFechaVencimiento(rs.getDate("fecha_vencimiento"));
+                p.setCantidadMedida(rs.getString("cantidad_medida"));
+                p.setStok_actual(rs.getDouble("stock_actual")); // Atrapamos el cálculo de la subconsulta
+                lista.add(p); // Añadimos al listado final
             }
         } catch (SQLException e) {
             System.err.println("Error al listar productos: " + e.getMessage()); 
-        } finally { // Cierre basurero
+        } finally {
             try {
                 if (rs != null) rs.close();   
                 if (ps != null) ps.close();   
                 if (con != null) con.close(); 
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return lista; // Mandar al que llamó la variable
+        return lista; // Devolvemos el catálogo listo para mostrar en la web
     }
 
     /**
@@ -63,32 +91,34 @@ public class ProductoDAO {
     public boolean registrarProducto(Producto p) {
         Connection con = null;
         PreparedStatement ps = null;
-        boolean registrado = false; // Flag de confirmacion de guardado
+        boolean registrado = false;
         
         try {
-            con = Conexion.getConexion(); // Conexion DB
-            // Preparamos todos sus campos posibles
+            con = Conexion.getConexion(); // Nos conectamos
+            
+            // CONSULTA SQL (Inserción en Catálogo):
             String sql = "INSERT INTO PRODUCTO (nombre, marca, precio_unitario, tipo, imagen, fecha_vencimiento, cantidad_medida) " +
                          "VALUES (?, ?, ?, ?, ?, ?, ?)";
             
-            ps = con.prepareStatement(sql); // Enganchar conector
-            ps.setString(1, p.getNombre());          // Nombre
-            ps.setString(2, p.getMarca());           // Fabrica
-            ps.setDouble(3, p.getPrecioUnitario());  // $$
-            ps.setString(4, p.getTipo());            // Clase
-            ps.setString(5, p.getImagen());          // Archivo visual
+            ps = con.prepareStatement(sql);
+            ps.setString(1, p.getNombre()); // Nombre del líquido/snack
+            ps.setString(2, p.getMarca()); // Empresa fabricante
+            ps.setDouble(3, p.getPrecioUnitario()); // Costo al público
+            ps.setString(4, p.getTipo()); // Categioría (bebida, snack, etc)
+            ps.setString(5, p.getImagen()); // Link de la foto
             
-            if (p.getFechaVencimiento() != null) { // Alimento, con fecha
+            // Lógica para fechas nulas (evita errores SQL si no tiene vencimiento)
+            if (p.getFechaVencimiento() != null) {
                 ps.setDate(6, p.getFechaVencimiento()); 
-            } else { // Si no era un producto perecedero o se dejó vacío un balde, la ingresa con null
+            } else {
                 ps.setNull(6, java.sql.Types.DATE);     
             }
             
-            ps.setString(7, p.getCantidadMedida());  // Unidad magnitud
+            ps.setString(7, p.getCantidadMedida()); // ej: "330ml", "100gr"
             
-            int filas = ps.executeUpdate(); // Confirmar escritura a disco
+            int filas = ps.executeUpdate(); // Ejecutamos la orden
             if (filas > 0) {
-                registrado = true; // Todo bien
+                registrado = true; // Si MySQL aceptó el registro
             }
             
         } catch (SQLException e) {
@@ -101,13 +131,62 @@ public class ProductoDAO {
                 if (con != null) con.close();
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return registrado; // Return final
+        return registrado;
     }
 
     /**
-     * Tarea minuciosa de borrar un producto del CATALOGO GENERAL.
-     * Borrar al papá borrará también a todos los hijos debido a la base de datos (Llaves foráneas).
-     * Esto busca en las ventas que incluyeron este producto, los pedidos y todo y lo desaparece para no dejar referencias muertas.
+     * Verifica si un producto tiene datos vinculados (ventas o pedidos).
+     * Se usa para impedir que se borre si ya tiene historial contable.
+     */
+    public boolean productoTieneDatos(int idProducto) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        boolean tieneDatos = false;
+
+        try {
+            con = Conexion.getConexion();
+            
+            // CONSULTA SQL DE INTEGRIDAD (Conteo cruzado):
+            // 1. SELECT COUNT(*): Cuenta registros de ventas y pedidos.
+            // 2. id_inv_detalle IN (...): Busca si el producto está en el inventario de algún bar
+            //    que ya haya registrado movimientos (Ventas o Compras).
+            String sql = "SELECT " +   // Inicia la consulta SELECT principal
+
+                         "(SELECT COUNT(*) FROM DETALLE_VENTA WHERE id_inv_detalle IN " +   // Subconsulta 1: cuenta cuántos registros hay en DETALLE_VENTA para un id_inv_detalle específico
+
+                         "(SELECT id_detalle FROM INVENTARIO_DETALLE WHERE id_producto = ?)) + " +   // Sub-subconsulta: obtiene los id_detalle de INVENTARIO_DETALLE que corresponden al producto indicado (primer parámetro ?)
+
+                         "(SELECT COUNT(*) FROM DETALLE_PEDIDOS WHERE id_inv_detalle IN " +   // Subconsulta 2: cuenta cuántos registros hay en DETALLE_PEDIDOS para esos mismos id_inv_detalle
+
+                         "(SELECT id_detalle FROM INVENTARIO_DETALLE WHERE id_producto = ?)) " +   // Sub-subconsulta: nuevamente obtiene los id_detalle de INVENTARIO_DETALLE para el producto indicado (segundo parámetro ?)
+
+                         "AS total_datos";   // El resultado final será la suma de ambas cuentas, con alias "total_datos"
+
+            
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idProducto);
+            ps.setInt(2, idProducto);
+            rs = ps.executeQuery();
+
+            if (rs.next() && rs.getInt("total_datos") > 0) {
+                tieneDatos = true; // El producto no es nuevo, ya tiene historia
+            }
+        } catch (SQLException e) {
+            System.err.println("Error verificando historial de producto: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return tieneDatos;
+    }
+
+    /**
+     * Elimina un producto SOLO si no tiene historial vinculado.
+     * Primero limpia su rastro en INVENTARIO_DETALLE y luego lo quita del catálogo maestro.
      */
     public boolean eliminarProducto(int id) {
         Connection con = null;
@@ -116,83 +195,67 @@ public class ProductoDAO {
         
         try {
             con = Conexion.getConexion();
-            con.setAutoCommit(false); // Activamos la Transacción para garantizar seguridad total (todo se hace al final con .commit)
             
-            // 1. Borrar todas las ocasiones en que el producto se le facturó (vendio) a un cliente 
-            // Subconsulta IN por si el producto es parte de muchos detalles
-            String sqlDetalleVenta = "DELETE FROM DETALLE_VENTA WHERE id_inv_detalle IN " +
-                                     "(SELECT id_detalle FROM INVENTARIO_DETALLE WHERE id_producto = ?)";
-            ps = con.prepareStatement(sqlDetalleVenta);
-            ps.setInt(1, id); 
-            ps.executeUpdate();
-            ps.close(); // Liberamos 1
-            
-            // 2. Borrar las ocasiones en que se armó pedido pidiendo ESTE producto
-            String sqlDetallePedidos = "DELETE FROM DETALLE_PEDIDOS WHERE id_inv_detalle IN " +
-                                       "(SELECT id_detalle FROM INVENTARIO_DETALLE WHERE id_producto = ?)";
-            ps = con.prepareStatement(sqlDetallePedidos);
-            ps.setInt(1, id);
-            ps.executeUpdate();
-            ps.close(); // Liberamos 2
-            
-            // 3. Borrar el stock del producto de cualquier negocio
+            // TRANSACCIÓN: O borramos rastro y maestro, o nada.
+            con.setAutoCommit(false); 
+
+            // PASO 1: Eliminar registros de vinculación en inventarios (si están vacíos).
             String sqlDetalleInv = "DELETE FROM INVENTARIO_DETALLE WHERE id_producto = ?";
             ps = con.prepareStatement(sqlDetalleInv);
             ps.setInt(1, id);
             ps.executeUpdate();
-            ps.close(); // Liberamos 3
-            
-            // 4. Si logramos limpiar todo el rastro de la familia, eliminamos al final la tarjeta maestra del producto
+            ps.close();
+
+            // PASO 2: Eliminar la existencia del producto del catálogo PRODUCTO.
             String sqlProducto = "DELETE FROM PRODUCTO WHERE id_producto = ?";
             ps = con.prepareStatement(sqlProducto);
             ps.setInt(1, id);
             
-            int filas = ps.executeUpdate(); // Este es el que vale
-            if (filas > 0) { // Si sí hubo limpieza...
-                eliminado = true; // Asignar meta en verdadero OK
+            int filas = ps.executeUpdate();
+            if (filas > 0) {
+                eliminado = true;
+                con.commit(); // Confirmamos el borrado atómico
+                System.out.println("Producto " + id + " eliminado correctamente del catálogo.");
+            } else {
+                con.rollback(); // Algo salió mal, recuperamos el producto
             }
             
-            con.commit(); // Confirmar ahora sí la desaparición oficial
-            System.out.println("Producto completamente limpiado y borrado del sistema.");
-            
-        } catch (SQLException e) { // Pánico
-            System.err.println("Falla crítica borrando producto en cascada: " + e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Error al intentar eliminar producto: " + e.getMessage());
             e.printStackTrace();
-            try {
-                if (con != null) con.rollback(); // Que Dios se apiade y revierta hasta el subtotal que se alteró en las facturas al borrarlo, dejar todo intocable
-            } catch (SQLException ex) { ex.printStackTrace(); }
-        } finally { // Liberar pesada memoria
+            try { if (con != null) con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+        } finally {
             try {
                 if (ps != null) ps.close();
                 if (con != null) {
-                    con.setAutoCommit(true); // Terminar transaction
-                    con.close(); // Dejar libre server HTTP
+                    con.setAutoCommit(true);
+                    con.close();
                 }
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return eliminado; // Mandar Boolean Veredicto (lo borré o no lo pude borrar)
+        return eliminado;
     }
 
     /**
      * Busca los datos de un único producto a través de su código o ID. 
-     * Retorna una caja armadita con toda su información para pintarlo en formularios que se necesite arreglar.
      */
     public Producto obtenerProducto(int id) {
-        Producto p = null; // Primero null previene errores si justo el usuario pide uno borrado 
+        Producto p = null; // Caja vacía
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         
         try {
-            con = Conexion.getConexion(); // Conectar
-            String sql = "SELECT * FROM PRODUCTO WHERE id_producto = ?";  // Traete mi catálogo de este único producto
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, id); // Dale el identificador
-            rs = ps.executeQuery(); // Exige
+            con = Conexion.getConexion();
             
-            if (rs.next()) { // Si sí había ese código
-                p = new Producto(); // Ahora si construyo la maquina producto en java
-                // Y le voy vaciando el embudo
+            // CONSULTA SQL: Búsqueda exacta por llave primaria.
+            String sql = "SELECT * FROM PRODUCTO WHERE id_producto = ?"; 
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
+            
+            if (rs.next()) { // Si el servidor encontró el producto
+                p = new Producto(); // Llenamos el objeto Java:
                 p.setIdProducto(rs.getInt("id_producto"));             
                 p.setNombre(rs.getString("nombre"));                   
                 p.setMarca(rs.getString("marca"));                     
@@ -202,88 +265,89 @@ public class ProductoDAO {
                 p.setFechaVencimiento(rs.getDate("fecha_vencimiento"));
                 p.setCantidadMedida(rs.getString("cantidad_medida"));
             }
-        } catch (SQLException e) { // Falló query en bd
+        } catch (SQLException e) {
             System.err.println("Error recuperando producto específico: " + e.getMessage());
-        } finally { // Bye bye recursos
+        } finally {
             try {
                 if (rs != null) rs.close();
                 if (ps != null) ps.close();
                 if (con != null) con.close();
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return p; // Sale el producto del inventario para su uso en pantalla (o null si era mito)
+        return p; // Retornamos el producto localizado
     }
     
     /**
-     * Operación final, modifica uno o más de uno de los parámetros de nuestro 
-     * articulo que existe en el catálogo maestro. Actualiza la tabla PRODUCTO.
+     * Modifica los parámetros de un artículo existente en el catálogo.
      */
     public boolean actualizarProducto(Producto p) {
         Connection con = null;
         PreparedStatement ps = null;
-        boolean actualizado = false; // Como siempre veredicto
+        boolean actualizado = false;
         
         try {
-            con = Conexion.getConexion(); // Conexion 
-            // Hacer UPDATE en todos sus campos basado en el ID final (WHERE id_producto = ?)
-            String sql = "UPDATE PRODUCTO SET nombre = ?, marca = ?, precio_unitario = ?, " +
-                         "tipo = ?, imagen = ?, fecha_vencimiento = ?, cantidad_medida = ? " +
-                         "WHERE id_producto = ?"; 
+            con = Conexion.getConexion();
             
-            ps = con.prepareStatement(sql); // Instalar String de busqueda
+            // CONSULTA SQL (Actualización de Catálogo):
+            String sql = "UPDATE PRODUCTO SET nombre = ?, marca = ?, precio_unitario = ?, " +   // Actualiza la tabla PRODUCTO, cambiando nombre, marca y precio_unitario
+                        "tipo = ?, imagen = ?, fecha_vencimiento = ?, cantidad_medida = ? " +   // También actualiza tipo, imagen, fecha de vencimiento y cantidad_medida
+                        "WHERE id_producto = ?";   // Condición: solo se actualiza el producto cuyo id_producto coincida con el valor dado
+            
+            ps = con.prepareStatement(sql);
             ps.setString(1, p.getNombre());         
             ps.setString(2, p.getMarca());           
             ps.setDouble(3, p.getPrecioUnitario());  
             ps.setString(4, p.getTipo());            
             ps.setString(5, p.getImagen());          
             
-            if (p.getFechaVencimiento() != null) { // Por si actualizaron agregando fechitas o el prod caducaba
+            // Manejo de fecha nula en edición
+            if (p.getFechaVencimiento() != null) {
                 ps.setDate(6, p.getFechaVencimiento()); 
             } else {
-                ps.setNull(6, java.sql.Types.DATE); // De pronto le borraron su vencimiento para ponerlo perenne
+                ps.setNull(6, java.sql.Types.DATE);
             }
             
             ps.setString(7, p.getCantidadMedida());  
-            ps.setInt(8, p.getIdProducto());          // Con este identificamos a quien actualizar.
+            ps.setInt(8, p.getIdProducto()); // Identificador del registro a editar
             
-            int filas = ps.executeUpdate(); // Se guardo cambio
-            if (filas > 0) { // Si SQL confirmara renglon editado OK
-                actualizado = true; // Todo good
-                System.out.println("El producto con su respectiva ID ha quedado remodeleado.");
+            int filas = ps.executeUpdate(); // Ejecutamos el cambio físico
+            if (filas > 0) {
+                actualizado = true; // Si MySQL confirmó la edición
             }
             
-        } catch (SQLException e) { // Si reventaba base de datos por violaciones foraneas (Que pusiera tipo en nulo ej)
+        } catch (SQLException e) {
             System.err.println("Falla de UPDATE catalogo maestro: " + e.getMessage());
             e.printStackTrace();
-        } finally { // Libere recursos DB
+        } finally {
             try {
                 if (ps != null) ps.close();
                 if (con != null) con.close();
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return actualizado; // Devuelve la confirmación.
+        return actualizado;
     }
 
     /**
-     * Revisa de forma rápida si un producto (con el mismo exacto nombre) ya se hallaba en base.
-     * Es bueno para evitar clonar el mismo artículo por accidente antes de hacer Inserciones.
+     * Revisa si un producto con el mismo nombre ya existe (Para evitar productos duplicados).
      */
     public boolean existeNombreProducto(String nombre) {
-        boolean existe = false; // Empezamos negativos
+        boolean existe = false; // Bandera de seguridad
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            con = Conexion.getConexion(); // Conex.
-            // Contamos cuánto de ese nombre hemos ingresado. 
+            con = Conexion.getConexion();
+            
+            // CONSULTA SQL (Conteo rápido por nombre):
             String sql = "SELECT COUNT(*) FROM PRODUCTO WHERE nombre = ?";
             ps = con.prepareStatement(sql);
             ps.setString(1, nombre);
-            rs = ps.executeQuery(); // Disparamos query count
-            if (rs.next() && rs.getInt(1) > 0) { // Si el primer valor del COUNT(*) rebotaba más de 0...
-                existe = true; // ...sí existía ese nombre ya en alguna parte. True.
+            rs = ps.executeQuery();
+            
+            if (rs.next() && rs.getInt(1) > 0) { // Si el conteo es mayor a 0
+                existe = true; // Alerta: el nombre ya está ocupado
             }
-        } catch (SQLException e) { // Pos si caemos
+        } catch (SQLException e) {
             System.err.println("Falla de verificación de choque de nombres prod: " + e.getMessage());
         } finally {
             try {
@@ -292,6 +356,6 @@ public class ProductoDAO {
                 if (con != null) con.close();
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return existe; // Decimos si al final existió
+        return existe; // Informamos si hay choque
     }
 }

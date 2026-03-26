@@ -181,13 +181,31 @@ CREATE TABLE detalle_pedidos (
 -- ==========================================
 
 -- Insertar roles por defecto
-INSERT INTO rol (nombre_rol) VALUES ('Administrador');
-INSERT INTO rol (nombre_rol) VALUES ('Trabajador');
+INSERT INTO rol (id_rol, nombre_rol) VALUES (1, 'ADMIN');
+INSERT INTO rol (id_rol, nombre_rol) VALUES (2, 'TRABAJADOR');
 
 -- Insertar permisos básicos
-INSERT INTO permiso (nombre, descripcion) VALUES ('TODO', 'Acceso total al sistema');
-INSERT INTO permiso (nombre, descripcion) VALUES ('VENTAS', 'Acceso solo a ventas y stock');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (1, 'VER_BARES', 'Permite ver la lista de bares asignados');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (2, 'AGREGAR_NEGOCIO', 'Permite registrar nuevos bares');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (3, 'ELIMINAR_NEGOCIO', 'Permite eliminar bares (Admin)');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (4, 'GESTIONAR_TRABAJADORES', 'Permite crear y editar usuarios');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (5, 'VER_PRODUCTOS', 'Permite ver el listado de productos');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (6, 'AGREGAR_PRODUCTO', 'Permite crear nuevos productos');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (7, 'EDITAR_PRODUCTO', 'Permite editar productos');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (8, 'ELIMINAR_PRODUCTO', 'Permite eliminar productos');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (9, 'INICIAR_INVENTARIO', 'Permite iniciar ciclos de inventario');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (10, 'REALIZAR_VENTA', 'Permite registrar ventas');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (11, 'VER_HISTORIAL_VENTAS', 'Permite ver el historial completo de ventas');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (12, 'REGISTRAR_GASTO', 'Permite registrar gastos');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (13, 'VER_GASTOS', 'Permite ver historial de gastos');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (14, 'GESTIONAR_PROVEEDORES', 'Permite agregar y editar proveedores');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (15, 'HACER_PEDIDOS_PROVEEDOR', 'Permite realizar pedidos a proveedores');
+INSERT INTO permiso (id_permiso, nombre, descripcion) VALUES (16, 'VER_INFORMES', 'Permite ver informes y reportes del sistema');
 
--- Asignar permisos a roles
-INSERT INTO rol_permiso (id_rol, id_permiso) VALUES (1, 1);
-INSERT INTO rol_permiso (id_rol, id_permiso) VALUES (2, 2);
+-- Asignar permisos a roles (1=ADMIN, 2=TRABAJADOR)
+INSERT INTO rol_permiso (id_rol, id_permiso) VALUES
+(1, 1), (2, 1), (1, 2), (1, 3), (1, 4), (1, 5), (2, 5),
+(1, 6), (1, 7), (1, 8), (1, 9), (2, 9), (1, 10), (2, 10),
+(1, 11), (2, 11), (1, 12), (2, 12), (1, 13), (1, 14),
+(1, 15), (2, 15), (1, 16);
+

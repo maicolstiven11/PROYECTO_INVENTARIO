@@ -74,7 +74,9 @@ public class PedidoServlet extends HttpServlet {
         Integer idInventario = (Integer) session.getAttribute("idInventarioActual"); // Revisar en qué mes nos lo gastaremos
         
         List<Proveedor> proveedores = proveedorDAO.listarProveedores(); // Traer todos los vendedores de cerveza/papas
-        List<Producto> listaProductos = productoDAO.listarProductos(); // Traer el catálogo de inventario base 
+        Integer idNegocio = (Integer) request.getSession().getAttribute("idNegocioActual");
+        if (idNegocio == null) idNegocio = 0;
+        List<Producto> listaProductos = productoDAO.listarProductos(idNegocio);
         
         // Pega estas dos listas en el request para que tu HTML dibuje las etiquetas <select>
         request.setAttribute("listaProveedores", proveedores); 

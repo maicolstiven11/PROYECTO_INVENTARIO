@@ -20,8 +20,12 @@ public class InventarioDAO {
      * Crea un nuevo periodo de inventario en la base de datos (por ejemplo, el inventario mensual del negocio).
      * Además, cambia de una vez el estado del negocio a 'activo'.
      */
+    /**
+     * Crea un nuevo periodo de inventario en la base de datos (por ejemplo, el inventario mensual del negocio).
+     * Además, cambia de una vez el estado del negocio a 'activo'.
+     */
     public int iniciarInventario(int idNegocio, String tipoControl, Date fechaInicio) {
-        Connection con = null; // Conexión apuntada a vacío
+        Connection con = null; // Variable para gestionar el enchufe a MySQL
         PreparedStatement psInventario = null; // Consulta para la tabla Inventario 
         PreparedStatement psNegocio = null; // Consulta para la tabla Negocio
         ResultSet rsKeys = null; // Para guardar el ID nuevo que se genere
@@ -29,47 +33,58 @@ public class InventarioDAO {
         
         try {
             con = Conexion.getConexion(); // Nos conectamos
-            con.setAutoCommit(false); // Ponemos esto en falso para que si falla un paso, no guarde nada a medias (Transacción)
             
-            // Comando para insertar el nuevo registro del inventario con sus campos
+            // TRANSACCIÓN: Desactivamos el auto-guardado (AutoCommit) para que ambos pasos
+            // se guarden juntos. Si uno falla, el otro NO se guarda.
+            con.setAutoCommit(false); 
+            
+            // CONSULTA SQL 1 (Inserción de Inventario):
+            // 1. INSERT INTO INVENTARIO: Tabla donde se crean los periodos.
+            // 2. VALUES (?, ?, ?, ?): Datos de negocio, tipo, estado ('activo') y fecha inicial.
             String sqlInventario = "INSERT INTO INVENTARIO (id_negocio, tipo_control, estado, fecha_inicio) " +
                                    "VALUES (?, ?, ?, ?)";
-            // Le indicamos RETURN_GENERATED_KEYS porque vamos a necesitar saber qué ID de inventario nos dio la BD
+            
+            // Usamos RETURN_GENERATED_KEYS para capturar el ID que MySQL le asigne automáticamente
             psInventario = con.prepareStatement(sqlInventario, PreparedStatement.RETURN_GENERATED_KEYS);
-            psInventario.setInt(1, idNegocio); // Seleccionamos a qué negocio pertenece
-            psInventario.setString(2, tipoControl != null ? tipoControl : "mensual");  // Qué tipo es, si viene vacío pone "mensual"
-            psInventario.setString(3, "activo"); // El inventario arranca marcado como activo obligatoriamente
-            psInventario.setDate(4, fechaInicio); // Guardamos la fecha recibida
+            psInventario.setInt(1, idNegocio); // Quién es el dueño
+            psInventario.setString(2, tipoControl != null ? tipoControl : "mensual");  // Control de tiempo
+            psInventario.setString(3, "activo"); // Estado inicial
+            psInventario.setDate(4, fechaInicio); // Fecha de arranque
             
             int filas = psInventario.executeUpdate(); // Ejecutamos la inserción
             
-            if (filas > 0) { // Si sí se creó el registro del inventario...
-                rsKeys = psInventario.getGeneratedKeys(); // Solicitamos su nuevo ID
+            if (filas > 0) { // Si el inventario se creó con éxito...
+                rsKeys = psInventario.getGeneratedKeys(); // Pedimos el ID recién nacido
                 if (rsKeys.next()) {
-                    idGenerado = rsKeys.getInt(1); // Leemos el id y lo guardamos
+                    idGenerado = rsKeys.getInt(1); // Lo guardamos en nuestra variable de Java
                 }
                 
-                // Ahora actualizamos la tabla NEGOCIO y le ponemos estado 'activo' a su dueño
+                // CONSULTA SQL 2 (Actualización de Negocio):
+                // 1. UPDATE NEGOCIO SET estado = 'activo': Marcamos el bar/negocio como operativo.
+                // 2. WHERE id_negocio = ?: Solo afectamos al dueño de este inventario.
                 String sqlNegocio = "UPDATE NEGOCIO SET estado = 'activo' WHERE id_negocio = ?";
-                psNegocio = con.prepareStatement(sqlNegocio); // Preparamos
-                psNegocio.setInt(1, idNegocio); // Le inyectamos aquí el ID del negocio afectado
-                psNegocio.executeUpdate(); // Ejecutamos la actualización
+                psNegocio = con.prepareStatement(sqlNegocio); 
+                psNegocio.setInt(1, idNegocio); 
+                psNegocio.executeUpdate(); 
                 
-                con.commit(); // Si ambos pasos fueron un éxito, confirmamos que LA TRANSACCION VALE
+                // FINALIZACIÓN EXITOSA: Guardamos físicamente los dos cambios en el disco duro
+                con.commit(); 
                 System.out.println("DAO: Inventario iniciado con ID: " + idGenerado + " para Negocio: " + idNegocio);
             } else {
-                con.rollback(); // Si el inventario no pudo insertarse, echamos todo para atrás
+                // FALLO: Si no se pudo crear el inventario, deshacemos cualquier cambio pendiente
+                con.rollback(); 
             }
             
         } catch (SQLException e) {
             System.err.println("Error al iniciar inventario: " + e.getMessage());
             e.printStackTrace();
             if (con != null) {
-                try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); } // Echar atrás si hay error grave SQL
+                try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); } // Echar atrás si hay error
             }
         } finally {
             try {
-                if (con != null) con.setAutoCommit(true); // Dejar la configuración del servidor web como estaba
+                // Limpieza y restauración de la configuración de conexión
+                if (con != null) con.setAutoCommit(true); 
                 if (rsKeys != null) rsKeys.close();
                 if (psNegocio != null) psNegocio.close();
                 if (psInventario != null) psInventario.close();
@@ -84,26 +99,32 @@ public class InventarioDAO {
      * Solo retorna aquel inventario que de la base de datos tenga estado "activo".
      */
     public Inventario obtenerInventarioActivo(int idNegocio) {
-        Inventario inv = null; // Empezamos en null porque puede no haber ninguno abierto
+        Inventario inv = null; // Empezamos asumiendo que no hay nada abierto
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         
         try {
-            con = Conexion.getConexion(); // Nos conectamos   
-            // Busca toda la filla de INVENTARIO pero exige que el estado sea obligatoriamente 'activo'
-            String sql = "SELECT * FROM INVENTARIO WHERE id_negocio = ? AND estado = 'activo'";
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, idNegocio); // Insertamos ID
-            rs = ps.executeQuery(); // Mandamos búsqueda
+            con = Conexion.getConexion(); // Enlace a MySQL
             
-            if (rs.next()) { // Si se encontró algo
-                inv = new Inventario(); // Creamos objeto vacío
-                inv.setIdInventario(rs.getInt("id_inventario")); // Pasamos el ID del inventario
-                inv.setIdNegocio(rs.getInt("id_negocio")); // Pasamos el del negocio
-                inv.setFechaInicio(rs.getDate("fecha_inicio")); // Pasamos qué día arrancó
-                inv.setTipoControl(rs.getString("tipo_control")); // Semanal, mensual, etc
-                inv.setEstado(rs.getString("estado")); // El estado
+            // CONSULTA SQL (Selección con Filtro Doble):
+            // 1. SELECT *: Pide todas las columnas (ID, fecha, tipo, etc).
+            // 2. WHERE id_negocio = ?: Filtra por el bar del usuario.
+            // 3. AND estado = 'activo': Condición vital para no traer inventarios que ya se cerraron.
+            String sql = "SELECT * FROM INVENTARIO WHERE id_negocio = ? AND estado = 'activo'";
+            
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idNegocio); 
+            rs = ps.executeQuery(); // Disparamos la búsqueda
+            
+            if (rs.next()) { // Si el servidor encontró un inventario abierto
+                inv = new Inventario(); // Creamos la "caja" de Java
+                // Llenamos la caja con los datos de las columnas de MySQL:
+                inv.setIdInventario(rs.getInt("id_inventario")); 
+                inv.setIdNegocio(rs.getInt("id_negocio")); 
+                inv.setFechaInicio(rs.getDate("fecha_inicio")); 
+                inv.setTipoControl(rs.getString("tipo_control")); 
+                inv.setEstado(rs.getString("estado")); 
             }
         } catch (SQLException e) {
             System.err.println("Error al obtener inventario activo: " + e.getMessage());
@@ -114,7 +135,7 @@ public class InventarioDAO {
                 if (con != null) con.close();
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return inv; // Devolvemos el inventario (si existe) o nulo si no existe
+        return inv; // Retornamos el objeto lleno o null si no había nada activo
     }
 
     /**
@@ -122,35 +143,40 @@ public class InventarioDAO {
      * Ideal para hacer el historial general de cortes de mes.
      */
     public java.util.List<Inventario> listarInventariosPorNegocio(int idNegocio) {
-        java.util.List<Inventario> lista = new java.util.ArrayList<>(); // Creamos la estructura lista para llenar
+        java.util.List<Inventario> lista = new java.util.ArrayList<>(); // Bolsa para guardar el historial
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         
         try {
             con = Conexion.getConexion();
-            // Trae todo de INVENTARIO para ese negocio, ordenándolo por fecha desde la más reciente hacia atrás  
-            String sql = "SELECT * FROM INVENTARIO WHERE id_negocio = ? ORDER BY fecha_inicio DESC";
-            ps = con.prepareStatement(sql); // Armamos la consulta
-            ps.setInt(1, idNegocio); // Filtramos por el id del negocio
-            rs = ps.executeQuery(); // Pedimos al SQL que busque
             
-            while (rs.next()) { // Por cada registro encontrado en el historial:
-                Inventario inv = new Inventario(); // Nuevo objeto para guardar sus datos
-                inv.setIdInventario(rs.getInt("id_inventario")); // Traemos ID
-                inv.setIdNegocio(rs.getInt("id_negocio")); // Traemos el dueño
-                inv.setFechaInicio(rs.getDate("fecha_inicio")); // Traemos fecha de creación
-                inv.setTipoControl(rs.getString("tipo_control")); // Regla de tiempo
-                inv.setEstado(rs.getString("estado")); // ¿Activo o Inactivo?
-                lista.add(inv); // Lo mandamos a la lista
+            // CONSULTA SQL (Listado Histórico):
+            // 1. SELECT *: Selecciona todos los inventarios.
+            // 2. WHERE id_negocio = ?: Del negocio actual.
+            // 3. ORDER BY fecha_inicio DESC: Ordenamos para que el más nuevo salga de primero en la tabla.
+            String sql = "SELECT * FROM INVENTARIO WHERE id_negocio = ? ORDER BY fecha_inicio DESC";
+            
+            ps = con.prepareStatement(sql); 
+            ps.setInt(1, idNegocio); 
+            rs = ps.executeQuery(); 
+            
+            while (rs.next()) { // Recorremos fila por fila mientras MySQL tenga datos
+                Inventario inv = new Inventario(); 
+                inv.setIdInventario(rs.getInt("id_inventario")); 
+                inv.setIdNegocio(rs.getInt("id_negocio")); 
+                inv.setFechaInicio(rs.getDate("fecha_inicio")); 
+                inv.setTipoControl(rs.getString("tipo_control")); 
+                inv.setEstado(rs.getString("estado")); 
+                lista.add(inv); // Agregamos a la lista para enviarla a la vista Web (JSP)
             }
         } catch (SQLException e) {
             System.err.println("Error al listar inventarios: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) rs.close(); // Liberamos cursores
-                if (ps != null) ps.close(); // Liberamos comandos
-                if (con != null) con.close(); // Liberamos enlace
+                if (rs != null) rs.close(); 
+                if (ps != null) ps.close(); 
+                if (con != null) con.close(); 
             } catch (SQLException e) { e.printStackTrace(); }
         }
         return lista; // Se envía la colección recabada
@@ -162,30 +188,35 @@ public class InventarioDAO {
      */
     public boolean finalizarInventario(int idInventario) {
         Connection con = null;
-        PreparedStatement psEnv = null;
-        boolean finalizado = false; // Nos sirve para saber si sí se hizo el UPDATE a tiempo
+        PreparedStatement ps = null;
+        boolean finalizado = false; // Variable de confirmación
         
         try {
-            con = Conexion.getConexion(); 
-            // Modifica (UPDATE) la tabla INVENTARIO exclusivamente su columna estado a 'inactivo'
-            String sqlInv = "UPDATE INVENTARIO SET estado = 'inactivo' WHERE id_inventario = ?";
-            psEnv = con.prepareStatement(sqlInv); // Preparamos sql
-            psEnv.setInt(1, idInventario); // Le indicamos a a la base cual ID tiene que cambiar
-            int f1 = psEnv.executeUpdate(); // Ejecuta 
+            con = Conexion.getConexion(); // Nos conectamos
             
-            if (f1 > 0) { // Si alteró una fila correctamente en la bd
-                finalizado = true; // Todo bien
+            // CONSULTA SQL (Cierre de Periodo):
+            // 1. UPDATE INVENTARIO: Vamos a cambiar un dato existente.
+            // 2. SET estado = 'inactivo': Ponemos el candado al inventario.
+            // 3. WHERE id_inventario = ?: Únicamente cerramos el que el usuario seleccionó.
+            String sql = "UPDATE INVENTARIO SET estado = 'inactivo' WHERE id_inventario = ?";
+            
+            ps = con.prepareStatement(sql); 
+            ps.setInt(1, idInventario); 
+            int filasModificadas = ps.executeUpdate(); // Realizamos el cambio físico
+            
+            if (filasModificadas > 0) { 
+                finalizado = true; // Si MySQL confirmó la edición, devolvemos éxito
             }
             
         } catch (SQLException e) {
             System.err.println("Error al finalizar inventario: " + e.getMessage());
         } finally {
             try {
-                if (psEnv != null) psEnv.close();
+                if (ps != null) ps.close();
                 if (con != null) con.close();
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return finalizado; // Devuelve la confirmación boolean
+        return finalizado; // Retornamos true si se pudo cerrar el candado
     }
 
     /**
@@ -193,27 +224,31 @@ public class InventarioDAO {
      * Útil por ejemplo para comparar el mes pasado contra este mes.
      */
     public Inventario obtenerUltimoInventarioCerrado(int idNegocio) {
-        Inventario inv = null; // Iniciamos con que "nada fue encontrado"
+        Inventario inv = null; // Iniciamos asumiendo que es el primero de la historia
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         
         try {
-            con = Conexion.getConexion();
-            // Acá solicitamos a INVENTARIO una fila con estado inactivo 
-            // La base de datos es ordenada con ORDER ... DESC y se le pone LIMIT 1 para coger solo el primero que aparezca de arriba hacia abajo (el último cerrado de verdad)
-            String sql = "SELECT * FROM INVENTARIO WHERE id_negocio = ? AND estado = 'inactivo' ORDER BY id_inventario DESC LIMIT 1";
-            ps = con.prepareStatement(sql); // Lo preparamos
-            ps.setInt(1, idNegocio); // Le damos el id negocio
-            rs = ps.executeQuery(); // Efectuamos la petición
+            con = Conexion.getConexion(); 
             
-            if (rs.next()) { // Si en efecto hubo un último inventario (porque de pronto es un negocio tan nuevo que este es su primer mes y no hay cerrados)
-                inv = new Inventario(); // Lo fabricamos en Java
-                inv.setIdInventario(rs.getInt("id_inventario")); // Le metemos su ID
-                inv.setIdNegocio(rs.getInt("id_negocio")); // Su negocio
-                inv.setFechaInicio(rs.getDate("fecha_inicio")); // Inicio de mes
-                inv.setTipoControl(rs.getString("tipo_control"));
-                inv.setEstado(rs.getString("estado"));
+            // CONSULTA SQL (Búsqueda del más reciente cerrado):
+            // 1. WHERE estado = 'inactivo': Solo nos interesan los que ya terminaron.
+            // 2. ORDER BY id_inventario DESC: Los ordena de mayor a menor (el último creado arriba).
+            // 3. LIMIT 1: Solo nos traemos la primera fila, que es precisamente el último que se cerró.
+            String sql = "SELECT * FROM INVENTARIO WHERE id_negocio = ? AND estado = 'inactivo' ORDER BY id_inventario DESC LIMIT 1";
+            
+            ps = con.prepareStatement(sql); 
+            ps.setInt(1, idNegocio); 
+            rs = ps.executeQuery(); 
+            
+            if (rs.next()) { // Si el servidor encontró el historial previo
+                inv = new Inventario(); 
+                inv.setIdInventario(rs.getInt("id_inventario")); 
+                inv.setIdNegocio(rs.getInt("id_negocio")); 
+                inv.setFechaInicio(rs.getDate("fecha_inicio")); 
+                inv.setTipoControl(rs.getString("tipo_control")); 
+                inv.setEstado(rs.getString("estado")); 
             }
         } catch (SQLException e) {
             System.err.println("Error al obtener último inventario cerrado: " + e.getMessage());
@@ -224,6 +259,6 @@ public class InventarioDAO {
                 if (con != null) con.close();
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return inv; // Y se lo servimos al controlador que lo pidio
+        return inv; // Retornamos el inventario clausurado más reciente
     }
 }

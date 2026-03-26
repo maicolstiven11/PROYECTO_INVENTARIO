@@ -140,7 +140,9 @@ public class VentaServlet extends HttpServlet {
      */
     private void cargarProductos(HttpServletRequest request) { 
         ProductoDAO pDao = new ProductoDAO(); 
-        List<Producto> lista = pDao.listarProductos();      
+        Integer idNegocio = (Integer) request.getSession().getAttribute("idNegocioActual");
+        if (idNegocio == null) idNegocio = 0;
+        List<Producto> lista = pDao.listarProductos(idNegocio);   
         request.setAttribute("listaProductos", lista); 
     }
 

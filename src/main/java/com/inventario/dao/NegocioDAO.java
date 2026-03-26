@@ -10,72 +10,96 @@ import java.util.ArrayList;
 import java.util.List;                
 
 /**
- * Clase NegocioDAO.
+ * Clase NegocioDAO (Data Access Object).
  * 
- * Contiene todas las instrucciones SQL (crear, buscar, eliminar) 
- * que permiten manejar la información de las tiendas/bares registrados 
- * en este proyecto directamente en la base de datos principal.
+ * Se encarga de todas las operaciones sobre la tabla NEGOCIO en la base de datos:
+ * registrar bares nuevos, listar los que pertenecen a un dueño, inactivarlos
+ * y eliminar solo los que estén vacíos (sin datos vinculados).
  */
 public class NegocioDAO {
 
     /**
-     * Acción para registrar un nuevo negocio en el sistema y a su vez 
-     * asignarle un dueño (un usuario).
-     * Se trata de dos tablas: la tabla NEGOCIO y luego la tabla USUARIO_NEGOCIO.
+     * Registra un nuevo negocio en la base de datos y lo vincula con su dueño.
+     * Inserta en la tabla NEGOCIO y luego en la tabla puente USUARIO_NEGOCIO.
+     * Usa transacción para asegurar que ambas inserciones se hagan o ninguna.
+     *
+     * @param negocio Objeto con nombre y dirección del bar
+     * @param idUsuario ID del administrador dueño
+     * @return El ID generado para el nuevo negocio, o -1 si falló
+     */
+    /**
+     * Registra un nuevo negocio en la base de datos y lo vincula con su dueño.
+     * Inserta en la tabla NEGOCIO y luego en la tabla puente USUARIO_NEGOCIO.
+     * Usa transacción para asegurar que ambas inserciones se hagan o ninguna.
+     *
+     * @param negocio Objeto con nombre y dirección del bar
+     * @param idUsuario ID del administrador dueño
+     * @return El ID generado para el nuevo negocio, o -1 si falló
      */
     public int registrarNegocio(Negocio negocio, int idUsuario) {
-        Connection con = null;
-        PreparedStatement psNegocio = null;  // Consulta para el negocio
-        PreparedStatement psVinculo = null;  // Consulta para vincular al usuario
-        ResultSet rsKeys = null;             // Para capturar cuál ID se generó
-        int idGenerado = -1;                 // Bandera, si queda en -1 falló
+        Connection con = null; // Socket para hablar con MySQL
+        PreparedStatement psNegocio = null; // Comando para la tabla de bares
+        PreparedStatement psVinculo = null; // Comando para la tabla que une dueños con bares
+        ResultSet rsKeys = null; // Cofre para recibir el ID autoincremental
+        int idGenerado = -1; // Bandera de error
         
         try {
-            con = Conexion.getConexion(); // Hacemos enlace al motor SQL
-            con.setAutoCommit(false); // Activamos protección (Transactions): Si la segunda consulta se daña, la primera no se guarda
+            con = Conexion.getConexion(); // Abrimos el canal
             
-            // Este comando guarda en la base de datos de NEGOCIO un negocio nuevo (siempre arranca inactivo)
+            // TRANSACCIÓN DE SEGURIDAD: Desactivamos el guardado automático.
+            // Esto es porque un negocio SIN dueño no debe existir. O se crean ambos registros o ninguno.
+            con.setAutoCommit(false); 
+
+            // CONSULTA SQL 1 (Creación de Bar):
+            // 1. INSERT INTO NEGOCIO: Metemos nombre y dirección.
+            // 2. estado: Por defecto 'inactivo' porque aún no tiene inventario inicial.
             String sqlNegocio = "INSERT INTO NEGOCIO (nombre, direccion, estado) VALUES (?, ?, ?)";
-            psNegocio = con.prepareStatement(sqlNegocio, PreparedStatement.RETURN_GENERATED_KEYS); // Retenemos ID autogenerado
-            psNegocio.setString(1, negocio.getNombre());    // Rellena la pregunta 1 con el nombre del bar
-            psNegocio.setString(2, negocio.getDireccion()); // Rellena la 2 con su dirección
-            psNegocio.setString(3, "inactivo");             // Se impone estado a 'inactivo' al no existir inventario aún
             
-            int filas = psNegocio.executeUpdate(); // Realizamos la inserción al sistema
-            if (filas > 0) { // Validamos si SQL dice que copió 1 renglón 
-                rsKeys = psNegocio.getGeneratedKeys(); // Solicitamos a SQL que nos diga cuál identificador se puso
+            // Pedimos que nos devuelva las llaves (ID) generadas
+            psNegocio = con.prepareStatement(sqlNegocio, PreparedStatement.RETURN_GENERATED_KEYS);
+            psNegocio.setString(1, negocio.getNombre()); // Nombre del bar comercial
+            psNegocio.setString(2, negocio.getDireccion()); // Ubicación física
+            psNegocio.setString(3, "inactivo"); // Estado de "en espera"
+            
+            int filas = psNegocio.executeUpdate(); // Realizamos la inserción
+            
+            if (filas > 0) { // Si el bar se creó...
+                rsKeys = psNegocio.getGeneratedKeys(); // Atrapamos el ID
                 if (rsKeys.next()) {
-                    idGenerado = rsKeys.getInt(1); // Agarramos ese número 
-                    negocio.setIdNegocio(idGenerado); // El objeto Java se actualiza
+                    idGenerado = rsKeys.getInt(1); // Lo guardamos
+                    negocio.setIdNegocio(idGenerado);
                 }
                 
-                // Si sí pudimos recuperar un número válido de negocio, y tenemos el numero de trabajador...
+                // CONSULTA SQL 2 (Vinculación):
+                // 1. INSERT INTO USUARIO_NEGOCIO: Tabla puente vital para saber de quién es el bar.
+                // 2. id_usuario, id_negocio: Son las llaves foráneas que cruzan la información.
                 if (idUsuario > 0 && idGenerado > 0) {
-                    // Armamos consulta a la tabla puente (la que conecta al usuario y al negocio)
                     String sqlVinculo = "INSERT INTO USUARIO_NEGOCIO (id_usuario, id_negocio) VALUES (?, ?)";
-                    psVinculo = con.prepareStatement(sqlVinculo); // Preparamos otra solicitud SQL
-                    psVinculo.setInt(1, idUsuario);   // Ponemos ID de empleado
-                    psVinculo.setInt(2, idGenerado);  // Ponemos el recién fabricado de local
-                    psVinculo.executeUpdate(); // Se guarda el vinculo
+                    psVinculo = con.prepareStatement(sqlVinculo);
+                    psVinculo.setInt(1, idUsuario); // Quién es el dueño
+                    psVinculo.setInt(2, idGenerado); // Qué negocio compró/registró
+                    psVinculo.executeUpdate(); // Ejecutamos la unión física
                     System.out.println("DAO: Negocio " + idGenerado + " vinculado con Usuario " + idUsuario);
                 }
                 
-                con.commit(); // CONFIRMACION FINAL: Ambas consultas salieron bien, la base de datos escribe permanentemente esta sesión
+                // ÉXITO: Los dos pasos salieron bien, le decimos a MySQL que guarde todo definitivamente
+                con.commit(); 
                 System.out.println("DAO: Negocio registrado con ID: " + idGenerado);
             } else {
-                con.rollback(); // En caso de que sqlNegocio fallara, abortamos procedimiento
+                // FALLO: Algo pasó en el primer paso, deshacemos todo
+                con.rollback();
             }
             
         } catch (SQLException e) {
             System.out.println("Error al registrar negocio: " + e.getMessage());
             e.printStackTrace();
-            if (con != null) { // Si hay pánico y se revienta la memoria
-                try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); } // Aborta todos los cambios desde la base de datos
+            if (con != null) {
+                try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); } // Crash preventivo
             }
             throw new RuntimeException("ErrorSQL: " + e.getMessage()); 
         } finally {
             try {
-                // Pasos de higiene: Restaurar configuración normal y matar todo resto en memoria
+                // Restauramos configuración y soltamos cables
                 if (con != null) con.setAutoCommit(true); 
                 if (rsKeys != null) rsKeys.close();
                 if (psVinculo != null) psVinculo.close();
@@ -83,205 +107,265 @@ public class NegocioDAO {
                 if (con != null) con.close();
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return idGenerado; // Finaliza arrojando si su creación entregó ID válido (+1) o si erró (-1)
+        return idGenerado; // Retornamos el ID o el error (-1)
     }
 
     /**
-     * Muestra todos los negocios pertenecientes a un determinado usuario administrativo.
-     * También permite saber (mediante una sub-consulta) si ese negocio está con inventario andando.
+     * Lista todos los negocios que pertenecen a un usuario administrador.
+     * Además calcula si cada negocio tiene un inventario activo (abierto).
      */
     public List<Negocio> listarNegocios(int idUsuario) {
-        List<Negocio> lista = new ArrayList<>(); // Organizador para nuestra tabla en pantalla
-        Connection con = null; // Link
-        PreparedStatement ps = null; // Compilador
-        ResultSet rs = null; // Cajón del resultado
+        List<Negocio> lista = new ArrayList<>(); // Lista de bares del administrador
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        
+        try {
+            con = Conexion.getConexion(); // Enlace seguro
+            
+            String sql = "SELECT n.*, " +   // Selecciona todos los campos de la tabla NEGOCIO (alias n)
+
+                         "(SELECT COUNT(*) FROM INVENTARIO i WHERE i.id_negocio = n.id_negocio AND i.estado = 'activo') as tiene_inv " +   // Subconsulta: cuenta cuántos inventarios activos existen para cada negocio, y lo devuelve como la columna 'tiene_inv'
+
+                         "FROM NEGOCIO n " +   // Tabla principal: NEGOCIO con alias "n"
+
+                         "INNER JOIN USUARIO_NEGOCIO un ON n.id_negocio = un.id_negocio " +   // Une NEGOCIO con USUARIO_NEGOCIO, para saber qué negocios están asociados a un usuario específico
+
+                         "WHERE un.id_usuario = ?";   // Filtra: solo devuelve los negocios asociados al usuario indicado (parámetro ?)
+
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idUsuario); // Filtro de seguridad (solo mis bares)
+            rs = ps.executeQuery(); // Disparamos radar
+            
+            while(rs.next()){ // Convertimos cada fila de MySQL en un objeto Negocio de Java
+                Negocio n = new Negocio();
+                n.setIdNegocio(rs.getInt("id_negocio"));
+                n.setNombre(rs.getString("nombre"));
+                n.setDireccion(rs.getString("direccion"));
+                n.setEstado(rs.getString("estado"));
+                
+                // Si la subconsulta contó 1 o más, marcamos que tiene inventario abierto
+                boolean activo = rs.getInt("tiene_inv") > 0;
+                n.setTieneInventarioActivo(activo); // Dato vital para habilitar/deshabilitar botones en la web
+                
+                lista.add(n); // Añadimos al listado final
+            }
+        } catch (SQLException e) {
+            System.err.println("Error listar negocios: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return lista;
+    }
+
+    /**
+     * Verifica si un negocio tiene datos vinculados en otras tablas.
+     * Si tiene datos, NO se debe borrar sino inactivar para no perder la contabilidad histórica.
+     */
+    public boolean negocioTieneDatos(int idNegocio) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        boolean tieneDatos = false;
+
+        try {
+            con = Conexion.getConexion();
+
+          
+            String sql = "SELECT " +   // Inicia la consulta principal SELECT
+
+                         "(SELECT COUNT(*) FROM INVENTARIO WHERE id_negocio = ?) + " +   // Subconsulta 1: cuenta cuántos inventarios existen para el negocio indicado (primer parámetro ?)
+
+                         "(SELECT COUNT(*) FROM USUARIO_NEGOCIO un " +   // Subconsulta 2: comienza contando usuarios asociados a un negocio en la tabla USUARIO_NEGOCIO
+
+                         " INNER JOIN USUARIO u ON un.id_usuario = u.id_usuario " +   // Une USUARIO_NEGOCIO con USUARIO para obtener información del usuario
+
+                         " WHERE un.id_negocio = ? AND u.id_rol = 2) " +   // Filtra: solo usuarios del negocio indicado (segundo parámetro ?) y cuyo rol sea 2 (ej. empleados)
+
+                         "AS total_datos";   // El resultado final es la suma de ambas cuentas, con alias 'total_datos'
+
+            
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idNegocio);
+            ps.setInt(2, idNegocio);
+            rs = ps.executeQuery();
+
+            if (rs.next() && rs.getInt("total_datos") > 0) {
+                tieneDatos = true; // No está vacío, precaución
+            }
+        } catch (SQLException e) {
+            System.err.println("Error verificando datos del negocio: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return tieneDatos;
+    }
+
+    /**
+     * Cambia el estado de un negocio de "activo" a "inactivo".
+     * Se usa cuando el bar tiene datos históricos y borrarlo causaría errores o pérdida de información.
+     */
+    public boolean inactivarNegocio(int idNegocio) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        boolean actualizado = false;
+
+        try {
+            con = Conexion.getConexion(); // Nos conectamos
+            
+            // CONSULTA SQL (Edición de Estado):
+            // Modificamos la columna 'estado' para que el sistema sepa que este bar ya no abre cajas.
+            String sql = "UPDATE NEGOCIO SET estado = 'inactivo' WHERE id_negocio = ?";
+            
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idNegocio); // Bar objetivo
+
+            if (ps.executeUpdate() > 0) { // Si MySQL confirmó el cambio
+                actualizado = true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al inactivar negocio: " + e.getMessage());
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return actualizado; // Éxito o Fracaso
+    }
+
+    /**
+     * Elimina un negocio SOLO si no tiene datos vinculados (está vacío).
+     * Borra primero de la tabla puente USUARIO_NEGOCIO y luego de NEGOCIO (Respetando FK).
+     */
+    public boolean eliminarNegocio(int idNegocio) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        boolean eliminado = false;
         
         try {
             con = Conexion.getConexion();
             
-            // Esta consulta gigante hace dos cosas: 
-            // 1. SELECT n.* saca los datos desde la tabla NEGOCIO
-            // 2. Hace un (SELECT COUNT...) dentro de otra consulta para averiguar si en INVENTARIO hay algún registro en estado 'activo' atado a este bar. Y a ese true/false lo llama 'tiene_inv' 
-            // 3. Usa el INNER JOIN para saber relacionar y filtrar solo los que pertenezcan a id_usuario ?
-            String sql = "SELECT n.*, " +
-                         "(SELECT COUNT(*) FROM INVENTARIO i WHERE i.id_negocio = n.id_negocio AND i.estado = 'activo') as tiene_inv " +
-                         "FROM NEGOCIO n " +
-                         "INNER JOIN USUARIO_NEGOCIO un ON n.id_negocio = un.id_negocio " + 
-                         "WHERE un.id_usuario = ?"; 
-            ps = con.prepareStatement(sql); // Monta el string
-            ps.setInt(1, idUsuario); // Ingresa el parámetro
-            rs = ps.executeQuery(); // Exige resultado lectivo
-            
-            while(rs.next()){ // Empieza lectura de renglones respondidos desde la base
-                Negocio n = new Negocio(); // Se forma plantilla para ir armando cada caja
-                n.setIdNegocio(rs.getInt("id_negocio"));       // Obtenemos su identificador único
-                n.setNombre(rs.getString("nombre"));           // Obtenemos su nombre comercial
-                n.setDireccion(rs.getString("direccion"));     // Dónde queda
-                n.setEstado(rs.getString("estado"));           // Abierto o cancelado
-                
-                boolean activo = rs.getInt("tiene_inv") > 0;   // Ese bloque '(SELECT COUNT...) as tiene_inv' lo interpretamos así. Si su número contable fue 1 o más, da Verdadero. Si dio 0, es falso.
-                n.setTieneInventarioActivo(activo);            // Mandamos esa deducción a nuestro Objeto en Java
-                
-                lista.add(n); // Anexamos la caja armada a nuestro inventario logístico (al final es esto lo que ve el JSP)
-            }
-        } catch (SQLException e) {
-            System.err.println("Error listar negocios: " + e.getMessage()); // Excepción control
-        } finally {
-            try {
-                if (rs != null) rs.close(); // Limpiar y matar
-                if (ps != null) ps.close(); // Limpiar y matar
-                if (con != null) con.close(); // Fin
-            } catch (SQLException e) { e.printStackTrace(); }
-        }
-        return lista; // Se reenvía a Servlet la colección de locales
-    }
+            // TRANSACCIÓN: O borramos del puente y de la tabla principal, o no tocamos nada.
+            con.setAutoCommit(false); 
 
+            // PASO 1: Eliminar el vínculo legal del dueño con este bar.
+            String sqlVinculo = "DELETE FROM USUARIO_NEGOCIO WHERE id_negocio = ?";
+            ps = con.prepareStatement(sqlVinculo);
+            ps.setInt(1, idNegocio);
+            ps.executeUpdate();
+            ps.close();
 
-    /**
-     * Tarea extremadamente crítica: ELIMINACIÓN TOTAL de un negocio.
-     * Ya que en base de datos toda la historia está enlazada al ID de un local, es imposible borrar el local sin antes borrar TODO.
-     * Esta consulta es larga porque elimina por nivel, desde la rama más pequeña que pide un pedido hasta destruir un inventario entero y luego sí dejar borrar a un local. 
-     */
-    public boolean eliminarNegocio(int idNegocio) {
-        Connection con = null;
-        PreparedStatement ps = null; // Reutilizamos esta consulta por que la memoria de esto se vuelve pesada
-        boolean eliminado = false; // El veredicto de éxito
-        
-        try {
-            con = Conexion.getConexion(); // Nos alineamos servidor DB
-            con.setAutoCommit(false); // Activamos la red de contención: si algo de las lineas inferiores falla, TODO LA FUNCIÓN SE DESHACE, así se previene dejar DB corruptas.
-            
-            // FASE 1: Destruir detalles del producto que se haya VENDIDO (hace join con inventario para lograr ubicar este local)
-            String sql1 = "DELETE dv FROM DETALLE_VENTA dv " +
-                         "INNER JOIN VENTA v ON dv.id_venta = v.id_venta " +         
-                         "INNER JOIN INVENTARIO i ON v.id_inventario = i.id_inventario " + 
-                         "WHERE i.id_negocio = ?";                                    
-            ps = con.prepareStatement(sql1);
-            ps.setInt(1, idNegocio); // Le enchufa la variable que pasamos
-            ps.executeUpdate(); // Orden ejecutada pero en suspenso hasta el .commit
-            ps.close(); // Se apaga la memoria para no asfixiar a Java
-            
-            // FASE 2: Destruir la base de las VENTAS facturadas como tal
-            String sql2 = "DELETE v FROM VENTA v " +
-                         "INNER JOIN INVENTARIO i ON v.id_inventario = i.id_inventario " +
-                         "WHERE i.id_negocio = ?";
-            ps = con.prepareStatement(sql2);
-            ps.setInt(1, idNegocio);
-            ps.executeUpdate();
-            ps.close();
-            
-            // FASE 3 PARTE 1: Eliminar artículos comprados al PROVEEDOR (join es para localizar a través de la red)
-            String sql3_1 = "DELETE dp FROM DETALLE_PEDIDOS dp " +
-                            "INNER JOIN PEDIDOS_PROVEEDOR pp ON dp.id_pedido_base = pp.id_pedido_base " + 
-                            "INNER JOIN INVENTARIO i ON pp.id_inventario = i.id_inventario " +            
-                            "WHERE i.id_negocio = ?";
-            ps = con.prepareStatement(sql3_1);
-            ps.setInt(1, idNegocio);
-            ps.executeUpdate();
-            ps.close();
-            
-            // FASE 3 PARTE 2: Destruir el cascarón de la FACTURA entera hacia en proveedor
-            String sql3_2 = "DELETE pp FROM PEDIDOS_PROVEEDOR pp " +
-                            "INNER JOIN INVENTARIO i ON pp.id_inventario = i.id_inventario " +
-                            "WHERE i.id_negocio = ?";
-            ps = con.prepareStatement(sql3_2);
-            ps.setInt(1, idNegocio);
-            ps.executeUpdate();
-            ps.close();
-            
-            // FASE 4: Sacudir a lo que haya de GASTO DIARIOS que contuviera la factura manual (arriendos recibos papas)
-            String sql3 = "DELETE g FROM GASTO_DIARIO g " +
-                         "INNER JOIN INVENTARIO i ON g.id_inventario = i.id_inventario " +
-                         "WHERE i.id_negocio = ?";
-            ps = con.prepareStatement(sql3);
-            ps.setInt(1, idNegocio);
-            ps.executeUpdate();
-            ps.close();
-            
-            // FASE 5: Vaciar físicamente cuántos elementos estaban reportados y avaluados en la bodega local como estock estricto
-            String sql4 = "DELETE di FROM INVENTARIO_DETALLE di " +
-                         "INNER JOIN INVENTARIO i ON di.id_inventario = i.id_inventario " +
-                         "WHERE i.id_negocio = ?";
-            ps = con.prepareStatement(sql4);
-            ps.setInt(1, idNegocio);
-            ps.executeUpdate();
-            ps.close();
-            
-            // FASE 6: Anular definitivamente los propios inventarios (la caja mayor virtual ahora inexistente)
-            String sql5 = "DELETE FROM INVENTARIO WHERE id_negocio = ?";
-            ps = con.prepareStatement(sql5);
-            ps.setInt(1, idNegocio);
-            ps.executeUpdate();
-            ps.close();
-            
-            // FASE 7: Acaba el puente relacional de dueños a locales o dueños a administradores. 
-            String sql6 = "DELETE FROM USUARIO_NEGOCIO WHERE id_negocio = ?";
-            ps = con.prepareStatement(sql6);
-            ps.setInt(1, idNegocio);
-            ps.executeUpdate();
-            ps.close();
-            
-            // FASE 8 CLÍMAX: La sentencia base, al matar todo el árbol en sus raíces, el sistema dejará eliminar de golpe la existencia superior del identificador original
-            String sql7 = "DELETE FROM NEGOCIO WHERE id_negocio = ?";
-            ps = con.prepareStatement(sql7);
+            // PASO 2: Eliminar la existencia física del negocio de la tabla NEGOCIO.
+            String sqlNegocio = "DELETE FROM NEGOCIO WHERE id_negocio = ?";
+            ps = con.prepareStatement(sqlNegocio);
             ps.setInt(1, idNegocio);
             
-            int filas = ps.executeUpdate(); // Confirmamos resultado que nos dará este ultimo SQL
-            if (filas > 0) { // Si efectivamente eliminó 1 
-                eliminado = true; // Seteamos nuestra meta
-                con.commit();  // AHORA SÍ, ESTA SOLA PALABRA MATERIALIZA Y CONFIRMA TODAS LA ORDENES EN TABLAS 1 AL 8
-                System.out.println("Negocio " + idNegocio + " eliminado con todos sus datos."); // Logging de server ok
+            int filas = ps.executeUpdate();
+            if (filas > 0) { // Si se borró de verdad...
+                eliminado = true;
+                con.commit(); // Confirmamos el borrado atómico
+                System.out.println("Negocio " + idNegocio + " eliminado correctamente (estaba vacío).");
             } else {
-                con.rollback(); // Caso donde ya en el FASE 8 fallara, manda rollback
+                con.rollback(); // Algo falló, recuperamos el bar
             }
             
-        } catch (SQLException e) { // Si algo explotara a mitad de camino en SQL, se activará este catch
-            System.err.println("Error al eliminar negocio: " + e.getMessage()); // Escribe lo que falló en DB
-            e.printStackTrace(); 
-            try { if (con != null) con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); } // Orden imperativa para que en caso de excepción, la memoria se vacie y NADA A MEDIAS DE LOS PASOS se altere
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar negocio: " + e.getMessage());
+            e.printStackTrace();
+            try { if (con != null) con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
         } finally {
             try {
-                if (ps != null) ps.close(); // Apagados de consumo
+                if (ps != null) ps.close();
                 if (con != null) {
-                    con.setAutoCommit(true); // Vuelta a predeterminados
-                    con.close(); // FIN proceso
+                    con.setAutoCommit(true);
+                    con.close();
                 }
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return eliminado; // Mandará un True informático confirmando o falso en que el proyecto local no existía al tocarlo o reventó
+        return eliminado;
     }
 
     /**
-     * Sumador contador que únicamente ve si el Administrador en sesión todavía tiene dominios sobre algún establecimiento.
-     * Retorna sólo un número entero para no cargar memoria de arreglos pesados de string u objetos modelados, sólo cifra.
+     * Cuenta cuántos negocios tiene un usuario (para las tarjetas del Dashboard).
      */
     public int contarNegocios(int idUsuario) {
-        int cantidad = 0; // Preasignamos para evitar lecturas nulas matematicas nulos
+        int cantidad = 0; // Iniciamos contador
         Connection con = null;
         PreparedStatement ps = null;
-        ResultSet rs = null; // Almacenará tan sólo una casilla de un 1 column row
+        ResultSet rs = null;
         try {
-            con = Conexion.getConexion(); // Solicitud al link estatico
-            // Usamos COUNT(*), la forma más rapida posible en bases de datos donde unimos NEGOCIO y USUARIO NEGOCIO buscando solo un cruce de IDs correspondientes al ID asignado en Java.
-            String sql = "SELECT COUNT(*) FROM NEGOCIO n " +
-                         "INNER JOIN USUARIO_NEGOCIO un ON n.id_negocio = un.id_negocio " +
-                         "WHERE un.id_usuario = ?";
-            ps = con.prepareStatement(sql); // Instamos
-            ps.setInt(1, idUsuario);  // Llenamos el ?
-            rs = ps.executeQuery(); // Pedimos el número 
-            if (rs.next()) { // Solo habrá un resultado de primer renglón porque es función agregada, asi que movemos el limitador.
-                cantidad = rs.getInt(1); // Se recupera ese dígito solitario encontrado en el primer (y único) campo evaluado.
+            con = Conexion.getConexion();
+            
+            // CONSULTA SQL (Conteo con Join):
+            // Cuenta las filas de NEGOCIO cruzadas con USUARIO_ID por medio de la tabla puente.
+            String sql = "SELECT COUNT(*) FROM NEGOCIO n " +   // Cuenta cuántos registros hay en la tabla NEGOCIO (alias n)
+
+                         "INNER JOIN USUARIO_NEGOCIO un ON n.id_negocio = un.id_negocio " +   // Une NEGOCIO con USUARIO_NEGOCIO, solo si existe coincidencia en id_negocio (relación negocio-usuario)
+
+                         "WHERE un.id_usuario = ?";   // Filtra: solo devuelve los negocios asociados al usuario indicado (parámetro ?)
+
+            
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idUsuario); // Usuario logueado
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                cantidad = rs.getInt(1); // Atrapamos el número final
             }
         } catch (SQLException e) { 
-            e.printStackTrace(); // Log
+            e.printStackTrace();
         } finally {
             try {
-                if (rs != null) rs.close(); // Kill var
-                if (ps != null) ps.close(); // Kill var
-                if (con != null) con.close(); // Close server
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
             } catch (SQLException e) { e.printStackTrace(); } 
         }
-        return cantidad; // Exponemos solo un digito numerico final a vistas Front End Control Servlet 
+        return cantidad;
     }
 
+    /**
+     * Obtiene los datos de un negocio específico por su ID.
+     */
+    public Negocio obtenerNegocio(int idNegocio) {
+        Negocio n = null; // Caja vacía
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            con = Conexion.getConexion(); // Enlace
+            
+            // CONSULTA SQL: Búsqueda exacta por ID único.
+            String sql = "SELECT * FROM NEGOCIO WHERE id_negocio = ?";
+            
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, idNegocio);
+            rs = ps.executeQuery();
+            
+            if (rs.next()) { // Si el bar existe en el sistema
+                n = new Negocio(); // Llenamos el objeto Java con sus datos:
+                n.setIdNegocio(rs.getInt("id_negocio"));
+                n.setNombre(rs.getString("nombre"));
+                n.setDireccion(rs.getString("direccion"));
+                n.setEstado(rs.getString("estado"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return n; // Retornamos el bar localizado
+    }
 }

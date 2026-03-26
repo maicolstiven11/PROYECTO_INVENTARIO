@@ -29,16 +29,32 @@ public class InformeServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException { 
 
-        HttpSession session = request.getSession(); // Ingresa a la memoria viva de la sesión del usuario
-        String idNegocioStr = request.getParameter("idNegocio"); // Extrae un ID de negocio si vino por la URL
-        String idInventarioStr = request.getParameter("idInventario"); // Extrae un ID de inventario si vino por la URL
+        HttpSession session = request.getSession(true); // Aseguramos que exista sesión
+        String idNegocioStr = request.getParameter("idNegocio"); 
+        String idInventarioStr = request.getParameter("idInventario"); 
 
-        // Si llegó el idNegocio por URL lo convierte a número. Si no, lo extrae directamente de la memoria de la sesión (Atributo guardado)
-        Integer idNegocio = (idNegocioStr != null) ? Integer.parseInt(idNegocioStr) : (Integer) session.getAttribute("idNegocioActual");
+        Integer idNegocio = null;
+        
+        // --- OBTENCIÓN SEGURA DEL ID DE NEGOCIO ---
+        try {
+            if (idNegocioStr != null && !idNegocioStr.isEmpty()) {
+                idNegocio = Integer.parseInt(idNegocioStr);
+            } else if (session != null) {
+                Object attr = session.getAttribute("idNegocioActual");
+                if (attr instanceof Integer) {
+                    idNegocio = (Integer) attr;
+                } else if (attr instanceof String) {
+                    idNegocio = Integer.parseInt((String) attr);
+                }
+            }
+        } catch (NumberFormatException e) {
+            idNegocio = null;
+        }
 
-        if (idNegocio == null) { // Si resulta que no se encontró en qué negocio estamos parados
-            response.sendRedirect("NegocioServlet"); // Redirige al inicio de locales
-            return; // Detiene la ejecución aquí
+        // Si no tenemos ni ID de negocio ni ID de inventario, no podemos hacer nada
+        if (idNegocio == null && (idInventarioStr == null || idInventarioStr.isEmpty())) { 
+            response.sendRedirect("NegocioServlet?error=SesionExpirada"); 
+            return; 
         }
 
         InventarioDAO invDao = new InventarioDAO(); // Instanciamos la clase que manipula Inventarios en la BD

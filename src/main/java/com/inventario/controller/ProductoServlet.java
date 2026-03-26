@@ -9,6 +9,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import java.io.File;
 import java.io.InputStream;
@@ -24,44 +25,35 @@ import javax.servlet.http.Part;
  * quitar del catálogo o editar sus descripciones y precios.
  */
 @WebServlet(name = "ProductoServlet", urlPatterns = {"/ProductoServlet"}) 
-@MultipartConfig( // Etiqueta estricta obligatoria para que Java te permita arrastrar Archivos (Fotos jpg, png) en los formularios
-    fileSizeThreshold = 1024 * 1024 * 1, // 1 MB límite temporal antes de usar el disco
-    maxFileSize = 1024 * 1024 * 10,      // 10 MB límite de peso de tu simple foto
-    maxRequestSize = 1024 * 1024 * 100   // 100 MB máximo en toda la red de peticiones a la vez
+@MultipartConfig(
+    fileSizeThreshold = 1024 * 1024 * 1,
+    maxFileSize = 1024 * 1024 * 10,
+    maxRequestSize = 1024 * 1024 * 100
 )
 public class ProductoServlet extends HttpServlet { 
 
-    /**
-     * Función interna oculta auxiliar. 
-     * Se usa para recortarle el nombre original a la foto, hacerle un código único (Para que 2 fotos de 'papa.jpg' no se pisen entre ellas)
-     * y las guarda/copia físicamente en la carpeta 'assets/img' de tu proyecto Java.
-     */
     private String subirImagen(Part part, HttpServletRequest request) throws IOException { 
         String fileName = null; 
-        if (part != null && part.getSize() > 0) { // Si realmente sí arrastró una imagen 
+        if (part != null && part.getSize() > 0) {
             String contentDisp = part.getHeader("content-disposition"); 
-            String[] items = contentDisp.split(";"); // Leemos la cabecera oculta para averiguar su extensión (.png, .jpg)
+            String[] items = contentDisp.split(";");
             for (String s : items) { 
                 if (s.trim().startsWith("filename")) { 
-                    fileName = s.substring(s.indexOf("=") + 2, s.length() - 1); // Cortamos la URI original ("foto1") 
+                    fileName = s.substring(s.indexOf("=") + 2, s.length() - 1);
                 }
             }
             if (fileName != null && !fileName.isEmpty()) { 
-                // Le pegamos el Tiempo Actual a la foto + nombre (Ej: 13904810934_foto1.jpg)
                 fileName = System.currentTimeMillis() + "_" + new File(fileName).getName(); 
                 
-                // Ubicaciones de carpetas de tu servidor local
                 String uploadPath = request.getServletContext().getRealPath("") + File.separator + "assets" + File.separator + "img"; 
                 String sourcePath = "c:\\adso\\2994281\\PROYECTO_INVENTARIO\\src\\main\\webapp\\assets\\img"; 
                 
-                // Crea carpetas si no existían 
                 File uploadDir = new File(uploadPath); 
                 if (!uploadDir.exists()) uploadDir.mkdirs(); 
                 
                 File sourceDir = new File(sourcePath); 
                 if (!sourceDir.exists()) sourceDir.mkdirs(); 
                 
-                // Escribe en ambas carpetas copiándola
                 part.write(uploadPath + File.separator + fileName); 
                 
                 try {
@@ -73,44 +65,35 @@ public class ProductoServlet extends HttpServlet {
                 }
             }
         }
-        return (fileName != null && !fileName.isEmpty()) ? fileName : null; // Retorna cómo se llamaba finalmente el archivo para que BD lo sepa (ej: 031201_papa.png)
+        return (fileName != null && !fileName.isEmpty()) ? fileName : null;
     }
 
-    /**
-     * El doPost guarda tanto que un producto se CREA nuevo en el catálogo general, 
-     * como también en caso de que un administrador EDITE algún valor del producto.
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException { 
         
         String action = request.getParameter("action"); 
-        if ("actualizar".equals(action)) { // Si nos avisaron que solo íbamos a editar...
-            procesarActualizacion(request, response);  // Llama debajo la función de editar 
+        if ("actualizar".equals(action)) {
+            procesarActualizacion(request, response);
             return; 
         }
         
-        // =====================================================================
-        // ACCIÓN NORMAL: CREAR UN NUEVO PRODUCTO AL CATÁLOGO
-        // =====================================================================
-        String nombre = request.getParameter("nombre");              // Sabritas    
-        String marca = request.getParameter("marca");                // Margarita
-        String tipo = request.getParameter("tipo");                  // Paquete
+        String nombre = request.getParameter("nombre");    
+        String marca = request.getParameter("marca");
+        String tipo = request.getParameter("tipo");
         
-        // Atrapa la imagen o binario
         String imagen = null; 
         try {
             Part filePart = request.getPart("imagen"); 
             if (filePart != null && filePart.getSize() > 0) { 
-                imagen = subirImagen(filePart, request); // Utiliza subrutina mágica de arriba para transformar en string 'xx_foto.png'
+                imagen = subirImagen(filePart, request);
             }
         } catch(Exception e) { 
             System.out.println("Error al procesar la imagen: " + e.getMessage()); 
         }
         
-        String cantidadMedida = request.getParameter("cantidad_medida"); // (200 gr, 1.5 L) 
+        String cantidadMedida = request.getParameter("cantidad_medida");
         
-        // Precio transformado
         double precio = 0.0; 
         try { 
             precio = Double.parseDouble(request.getParameter("precio")); 
@@ -118,7 +101,6 @@ public class ProductoServlet extends HttpServlet {
             precio = 0.0;  
         }
         
-        // Vencimiento configurado
         Date fechaVencimiento = null; 
         try {
             String fechaStr = request.getParameter("fecha_vencimiento"); 
@@ -129,28 +111,26 @@ public class ProductoServlet extends HttpServlet {
             fechaVencimiento = null;  
         }
 
-        // Armamos un gran modelo POJO para empaquetarlo (El Producto)
         Producto p = new Producto(); 
         p.setNombre(nombre); 
         p.setMarca(marca); 
         p.setPrecioUnitario(precio); 
         p.setTipo(tipo); 
-        p.setImagen(imagen); // Set de foto URI
+        p.setImagen(imagen);
         p.setFechaVencimiento(fechaVencimiento); 
         p.setCantidadMedida(cantidadMedida); 
 
         ProductoDAO dao = new ProductoDAO(); 
         
-        // Primero, se asgura que no metas 2 veces a la fuerza el mismo string nombre "Coca-Colas"
         if (dao.existeNombreProducto(nombre)) { 
             response.sendRedirect("view/Registro_produc.html?error=producto_duplicado"); 
             return; 
         }
 
         try {
-            boolean exito = dao.registrarProducto(p);  // Mágicamente lo manda completo 
+            boolean exito = dao.registrarProducto(p);
             if (exito) { 
-                response.sendRedirect("view/Produc_registrado.html");  // Todo chidori  
+                response.sendRedirect("view/Produc_registrado.html");
             } else {
                 response.sendRedirect("view/Registro_produc.html?error=NoSeGuardoEnBD");  
             }
@@ -159,10 +139,6 @@ public class ProductoServlet extends HttpServlet {
         }
     }
 
-    /**
-     * El doGet en este caso sirve para "Eliminar Catálogo", "Cargar Editar" o
-     * simplemente listar todo el catálogo de compras para mostrarlos.
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException { 
@@ -172,27 +148,37 @@ public class ProductoServlet extends HttpServlet {
         
         if (action != null && action.equals("eliminar")) { 
             // =====================================================================
-            // ELIMINAR O QUITAR DEFINITIVAMENTE PRODUCTO DE TABLA
+            // ELIMINAR: CON VALIDACIÓN DE HISTORIAL
             // =====================================================================
             try {
-                int id = Integer.parseInt(request.getParameter("id"));  // Coge el click ID PK
-                boolean eliminado = dao.eliminarProducto(id);           // Manda la guillotina  
-                response.sendRedirect("ProductoServlet");               // Vuelve a repintarse el servlet sin datos para ver vacío...
+                int id = Integer.parseInt(request.getParameter("id"));
+                
+                // VALIDACIÓN: ¿Tiene el producto ventas o pedidos?
+                if (dao.productoTieneDatos(id)) {
+                    // TIENE DATOS: No se deja borrar
+                    response.sendRedirect("ProductoServlet?error=producto_con_datos");
+                } else {
+                    // ESTÁ LIMPIO: Se puede borrar
+                    boolean eliminado = dao.eliminarProducto(id);
+                    if (eliminado) {
+                        response.sendRedirect("ProductoServlet?msg=eliminado_exito");
+                    } else {
+                        response.sendRedirect("ProductoServlet?error=ErrorEliminar");
+                    }
+                }
+                return;
             } catch (Exception e) { 
                 e.printStackTrace(); 
-                response.sendRedirect("ProductoServlet?error=ErrorEliminar"); 
+                response.sendRedirect("ProductoServlet?error=ErrorProcesarEliminar"); 
             }
         } else if (action != null && action.equals("editar")) { 
-            // =====================================================================
-            // ABRIR FORMULARIO DE EDICIÓN YA CON LOS TEXTOS LLENOS DEL VIEJO
-            // =====================================================================
             try {
                 int id = Integer.parseInt(request.getParameter("id")); 
-                Producto p = dao.obtenerProducto(id); // Obtiene todos los campos del que vas a editar (Ej: cerveza Costeñita)                 
+                Producto p = dao.obtenerProducto(id);
                 
                 if (p != null) { 
-                    request.setAttribute("productoEditar", p);          // Le inyecta toda esa data al form HTML  
-                    request.getRequestDispatcher("view/formulario_editar_producto.jsp").forward(request, response); // Redirige a Form
+                    request.setAttribute("productoEditar", p);
+                    request.getRequestDispatcher("view/formulario_editar_producto.jsp").forward(request, response);
                 } else {
                     response.sendRedirect("ProductoServlet?error=ProductoNoEncontrado"); 
                 }
@@ -202,29 +188,28 @@ public class ProductoServlet extends HttpServlet {
             }
         } else { 
             // =====================================================================
-            // LISTAR: COMPORTAMIENTO POR DEFECTO DEL NAVEGADOR (VER PRODUCTOS)
+            // LISTAR: COMPORTAMIENTO POR DEFECTO
             // =====================================================================
-            java.util.List<Producto> lista = dao.listarProductos();    // Pide su catálogo entero 
-            request.setAttribute("listaProductos", lista);             // Los pega   
-            request.getRequestDispatcher("view/editar_productos.jsp").forward(request, response); // Dibuja la pestaña del menú
+            HttpSession session = request.getSession();
+            Integer idNegocio = (Integer) session.getAttribute("idNegocioActual");
+            
+            if (idNegocio == null) idNegocio = 0;
+            
+            java.util.List<Producto> lista = dao.listarProductos(idNegocio);
+            request.setAttribute("listaProductos", lista);
+            request.getRequestDispatcher("view/editar_productos.jsp").forward(request, response);
         }
     }
     
-    /**
-     * Subrutina complementaria: ACTUALIZAR PRODUCTO (MODIFICAR)
-     * Cuando le dan al botón verde "Actualizar" del formulario
-     */
     private void procesarActualizacion(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException { 
         
         try { 
-            // Recibe todos los atributos nuevos modificados (Ej: Antes costaba 2mil y ahora cuesta 3mil)
             int idProducto = Integer.parseInt(request.getParameter("id_producto")); 
             String nombre = request.getParameter("nombre"); 
             String marca = request.getParameter("marca"); 
             String tipo = request.getParameter("tipo"); 
             
-            // Re-procesar Foto Nueva
             String imagen = null; 
             try {
                 Part filePart = request.getPart("imagen"); 
@@ -235,12 +220,11 @@ public class ProductoServlet extends HttpServlet {
                 System.out.println("Error al actualizar imagen: " + e.getMessage()); 
             }
             
-            // MAGIA: Si el usuario NO subió ninguna foto nueva, no queremos borrar la anterior.
             if (imagen == null) { 
                 ProductoDAO tempDao = new ProductoDAO(); 
-                Producto original = tempDao.obtenerProducto(idProducto); // Traemos una copia vieja de este producto
+                Producto original = tempDao.obtenerProducto(idProducto);
                 if (original != null) { 
-                    imagen = original.getImagen(); // Extraemos cómo se llamaba su antigua foto vieja para no perderla.
+                    imagen = original.getImagen();
                 }
             }
             
@@ -263,9 +247,8 @@ public class ProductoServlet extends HttpServlet {
                 fechaVencimiento = null; 
             }
             
-            // Embolsamos la segunda versión de tu POJO nuevo editado
             Producto p = new Producto(); 
-            p.setIdProducto(idProducto);  // ¡Muy importante decirle qué ID actualizar! 
+            p.setIdProducto(idProducto);
             p.setNombre(nombre); 
             p.setMarca(marca); 
             p.setPrecioUnitario(precio); 
@@ -274,14 +257,13 @@ public class ProductoServlet extends HttpServlet {
             p.setFechaVencimiento(fechaVencimiento); 
             p.setCantidadMedida(cantidadMedida); 
             
-            // Mandar a Mutar base SQL
             ProductoDAO dao = new ProductoDAO(); 
-            boolean exito = dao.actualizarProducto(p);  // Sentencia Update
+            boolean exito = dao.actualizarProducto(p);
             
             if (exito) { 
-                response.sendRedirect("ProductoServlet?msg=ProductoActualizado");  // Felicidades  
+                response.sendRedirect("ProductoServlet?msg=ProductoActualizado");
             } else { 
-                response.sendRedirect("ProductoServlet?error=ErrorActualizar");    // Mal :c  
+                response.sendRedirect("ProductoServlet?error=ErrorActualizar");
             }
             
         } catch (Exception e) { 

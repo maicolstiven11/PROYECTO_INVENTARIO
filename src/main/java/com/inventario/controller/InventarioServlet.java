@@ -120,6 +120,17 @@ public class InventarioServlet extends HttpServlet {
             
             if (idNegocioStr != null && !idNegocioStr.isEmpty()) { 
                 int idNegocio = Integer.parseInt(idNegocioStr); 
+                
+                // --- VALIDACIÓN DE SEGURIDAD: NEGOCIO INACTIVO ---
+                com.inventario.dao.NegocioDAO negocioDao = new com.inventario.dao.NegocioDAO();
+                com.inventario.model.Negocio negocio = negocioDao.obtenerNegocio(idNegocio);
+                
+                if (negocio != null && "inactivo".equals(negocio.getEstado())) {
+                    // Si el negocio está inactivo, no debe poder entrar a gestionar inventarios
+                    response.sendRedirect("NegocioServlet?error=NegocioInactivo");
+                    return;
+                }
+                
                 InventarioDAO dao = new InventarioDAO(); 
                 // Busca rápidamente si el bar tiene un ciclo activo (en estado "A") abierto
                 com.inventario.model.Inventario inv = dao.obtenerInventarioActivo(idNegocio);  
@@ -145,7 +156,9 @@ public class InventarioServlet extends HttpServlet {
             // ===============================================================================================
             ProductoDAO prodDao = new ProductoDAO(); 
             // Extraemos todo el catálogo de galletas y cervezas base para que las vean y cuenten.
-            List<Producto> listaProductos = prodDao.listarProductos();    
+            Integer idNegocio = (Integer) request.getSession().getAttribute("idNegocioActual");
+            if (idNegocio == null) idNegocio = 0;
+            List<Producto> listaProductos = prodDao.listarProductos(idNegocio);
             
             request.setAttribute("listaProductos", listaProductos); // Pegar al request para vista      
             request.getRequestDispatcher("view/inventario_detalle.jsp").forward(request, response); 
@@ -223,6 +236,11 @@ public class InventarioServlet extends HttpServlet {
 
                     // Extraer los detalles contables para visualizarlos
                     DetalleInventarioDAO detalleDao = new DetalleInventarioDAO(); 
+                    
+                    // --- SINCRONIZACIÓN AUTOMÁTICA ---
+                    // Asegura que productos nuevos (creados tras iniciar el inventario) aparezcan en la lista
+                    detalleDao.sincronizarProductos(idInventario);
+                    
                     List<com.inventario.model.DetalleInventario> detalles = detalleDao.listarDetalles(idInventario); 
                     
                     request.setAttribute("listaDetalles", detalles); 
@@ -281,6 +299,8 @@ public class InventarioServlet extends HttpServlet {
                             double cantFinal = 0; 
                             if (cantidadesFinalesStr[i] != null && !cantidadesFinalesStr[i].isEmpty()) { 
                                 cantFinal = Double.parseDouble(cantidadesFinalesStr[i]); // Recoge lo que sobró físico en estantes
+                                // --- VALIDACIÓN DE NEGATIVOS ---
+                                if (cantFinal < 0) cantFinal = 0; // Por seguridad, si llega negativo, lo forzamos a 0
                             }
                             // Inyecta o actualiza esta nueva cifra en la tabla general base
                             detalleDao.actualizarCantidadFinal(idInventario, idProd, cantFinal); 

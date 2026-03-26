@@ -19,31 +19,80 @@ public class DetalleInventarioDAO {
      * Selecciona la tabla INVENTARIO_DETALLE y le pasa el ID del inventario, el ID del producto y cuántos hay en el momento.
      */
     public boolean insertarDetalle(int idInventario, int idProducto, double cantidadInicial) {
-        Connection con = null; // Preparamos la conexión como nula al inicio
-        PreparedStatement ps = null; // Sirve para armar la consulta SQL
-        boolean registrado = false; // Variable para saber si se guardó con éxito
+        Connection con = null; // Objeto para la conexión física a MySQL
+        PreparedStatement ps = null; // Objeto para preparar la consulta SQL de forma segura
+        boolean registrado = false; // Variable de control para saber si se insertó el dato
         
         try {
-            con = Conexion.getConexion(); // Nos conectamos a la base de datos
-            // Esta consulta inserta una nueva fila en la tabla INVENTARIO_DETALLE con el producto y sus datos
-            String sql = "INSERT INTO INVENTARIO_DETALLE (id_inventario, id_producto, cantidad_inicial) VALUES (?, ?, ?)";
-            ps = con.prepareStatement(sql); // Preparamos la consulta
-            ps.setInt(1, idInventario); // Reemplazamos el primer ? con el idInventario
-            ps.setInt(2, idProducto); // Reemplazamos el segundo ? con el idProducto
-            ps.setDouble(3, cantidadInicial); // Reemplazamos el tercer ? con la cantidad inicial
+            con = Conexion.getConexion(); // Obtenemos la conexión del puente (util/Conexion.java)
             
-            int filas = ps.executeUpdate(); // Ejecutamos la consulta en la base de datos
-            registrado = (filas > 0); // Si afectó más de 0 filas, significa que se guardó bien
+            // CONSULTA SQL: Inserta un nuevo registro en la tabla INVENTARIO_DETALLE.
+            // Se especifican las 3 columnas y se usan '?' como marcadores de posición para evitar inyección SQL.
+            String sql = "INSERT INTO INVENTARIO_DETALLE (id_inventario, id_producto, cantidad_inicial) VALUES (?, ?, ?)";
+            
+            ps = con.prepareStatement(sql); // Preparamos el comando en el servidor de BD
+            ps.setInt(1, idInventario); // Reemplazamos el 1er '?' con el código del inventario (mes/periodo)
+            ps.setInt(2, idProducto); // Reemplazamos el 2do '?' con el código del producto maestro
+            ps.setDouble(3, cantidadInicial); // Reemplazamos el 3er '?' con el stock contado físicamente
+            
+            int filas = ps.executeUpdate(); // Ejecutamos la inserción en la tabla
+            registrado = (filas > 0); // Si modificó 1 fila o más, el registro fue exitoso
             
         } catch (SQLException e) {
-            System.err.println("Error al insertar detalle inventario: " + e.getMessage()); // Muestra error si falla algo en la BD
+            System.err.println("Error al insertar detalle inventario: " + e.getMessage()); // Reporte de error en consola
         } finally {
+            // BLOQUE FINALLY: Garantiza que la conexión se cierre aunque ocurra un error
             try {
-                if (ps != null) ps.close(); // Cerramos la consulta para liberar memoria
-                if (con != null) con.close(); // Cerramos la conexión a la base de datos
+                if (ps != null) ps.close(); // Cerramos el preparador de consultas
+                if (con != null) con.close(); // Cerramos el enchufe a la base de datos
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return registrado; // Retornamos verdadero si guardó, falso si falló
+        return registrado; // Informamos el resultado (true o false)
+    }
+
+    /**
+     * Sincroniza el catálogo maestro con el inventario actual.
+     * Inserta en INVENTARIO_DETALLE cualquier producto que exista en el catálogo (PRODUCTO)
+     * pero que no tenga aún un registro en este inventario.
+     * 
+     * @param idInventario ID del periodo a sincronizar
+     */
+    public void sincronizarProductos(int idInventario) {
+        Connection con = null; // Variable para gestionar la conexión
+        PreparedStatement ps = null; // Variable para gestionar el SQL
+        try {
+            con = Conexion.getConexion(); // Abrimos conexión segura
+            
+            // CONSULTA SQL COMPLEJA (Insert con Subconsulta):
+            // 1. INSERT INTO ... SELECT: Toma datos de una tabla (PRODUCTO) y los inyecta en otra (INVENTARIO_DETALLE).
+            // 2. FROM PRODUCTO p: Selecciona todos los productos registrados en el sistema dándoles el alias 'p'.
+            // 3. WHERE ... NOT IN: Filtra solo los productos que NO estén ya presentes en este inventario específico.
+            // 4. Subconsulta (SELECT d.id_producto...): Busca los productos ya registrados en el inventario actual (alias 'd').
+            String sql = "INSERT INTO INVENTARIO_DETALLE (id_inventario, id_producto, cantidad_inicial, cantidad_final) " +
+                         "SELECT ?, p.id_producto, 0, 0 " +
+                         "FROM PRODUCTO p " +
+                         "WHERE p.id_producto NOT IN (" +
+                         "    SELECT d.id_producto " +
+                         "    FROM INVENTARIO_DETALLE d " +
+                         "    WHERE d.id_inventario = ?" +
+                         ")";
+            
+            ps = con.prepareStatement(sql); // Preparamos la operación masiva
+            ps.setInt(1, idInventario); // Pasamos el ID del inventario actual para el SELECT
+            ps.setInt(2, idInventario); // Pasamos el ID del inventario actual para el filtro NOT IN
+            
+            int filasInsertadas = ps.executeUpdate(); // Ejecutamos la sincronización
+            if (filasInsertadas > 0) {
+                System.out.println("Sincronización: Se añadieron " + filasInsertadas + " productos nuevos al inventario " + idInventario);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error sincronizando productos en inventario: " + e.getMessage());
+        } finally {
+            try {
+                if (ps != null) ps.close(); // Limpiamos recursos
+                if (con != null) con.close(); // Soltamos conexión
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
     }
 
     /**
@@ -51,151 +100,172 @@ public class DetalleInventarioDAO {
      * Une la tabla INVENTARIO_DETALLE con la tabla PRODUCTO para poder sacar el nombre.
      */
     public java.util.List<com.inventario.model.DetalleInventario> listarDetalles(int idInventario) {
-        java.util.List<com.inventario.model.DetalleInventario> lista = new java.util.ArrayList<>(); // Creamos una lista vacía para guardar los resultados
-        Connection con = null; // Variable para la conexión
-        PreparedStatement ps = null; // Para la consulta SQL
-        ResultSet rs = null; // Para guardar los resultados que nos devuelve la base de datos
+        java.util.List<com.inventario.model.DetalleInventario> lista = new java.util.ArrayList<>(); // Contenedor de resultados
+        Connection con = null; // Enlace a BD
+        PreparedStatement ps = null; // Preparador SQL
+        ResultSet rs = null; // Almacén de filas devueltas por MySQL
         
         try {
-            con = Conexion.getConexion(); // Pedimos conexión a la base de datos
-            // Buscamos todo en INVENTARIO_DETALLE y lo combinamos (JOIN) con PRODUCTO usando id_producto para saber cómo se llama
+            con = Conexion.getConexion(); // Nos conectamos
+            
+            // CONSULTA SQL (Selección con Unión/Join):
+            // 1. SELECT d.*, p.nombre: Trae todas las columnas del Detalle (d) y solo el Nombre del Producto (p).
+            // 2. FROM INVENTARIO_DETALLE d: Tabla principal de donde sacamos stock e IDs.
+            // 3. JOIN PRODUCTO p ON d.id_producto = p.id_producto: Cruza la tabla detalle con la tabla de nombres de productos.
+            // 4. WHERE d.id_inventario = ?: Filtra únicamente los productos del inventario que estamos consultando.
+            // 5. ORDER BY p.nombre ASC: Ordena alfabéticamente de la A a la Z para facilitar la vista al usuario.
             String sql = "SELECT d.*, p.nombre FROM INVENTARIO_DETALLE d " +
                          "JOIN PRODUCTO p ON d.id_producto = p.id_producto " +
-                         "WHERE d.id_inventario = ?"; // Filtramos solo por el inventario que queremos ver
-            ps = con.prepareStatement(sql); // Preparamos la consulta
-            ps.setInt(1, idInventario); // Inyectamos el ID del inventario en la consulta
-            rs = ps.executeQuery(); // Ejecutamos y guardamos la tabla de resultados en rs
+                         "WHERE d.id_inventario = ? " +
+                         "ORDER BY p.nombre ASC"; 
             
-            while (rs.next()) { // Recorremos fila por fila los resultados que llegaron
-                com.inventario.model.DetalleInventario d = new com.inventario.model.DetalleInventario(); // Creamos un nuevo objeto DetalleInventario vacío
-                d.setIdDetalle(rs.getInt("id_detalle")); // Le asignamos el ID del detalle que vino de la base de datos
-                d.setIdInventario(rs.getInt("id_inventario")); // Asignamos el ID del inventario
-                d.setIdProducto(rs.getInt("id_producto")); // Asignamos el ID del producto
-                d.setCantidadInicial(rs.getDouble("cantidad_inicial")); // Asignamos la cantidad inicial
-                d.setCantidadFinal(rs.getDouble("cantidad_final")); // Asignamos la cantidad final
-                d.setNombreProducto(rs.getString("nombre")); // Asignamos el nombre del producto que vino del JOIN
-                lista.add(d); // Agregamos este objeto completo a nuestra lista
+            ps = con.prepareStatement(sql); // Cargamos el SQL
+            ps.setInt(1, idInventario); // Inyectamos el ID del filtro
+            rs = ps.executeQuery(); // Disparamos la búsqueda
+            
+            while (rs.next()) { // Recorremos fila por fila mientras MySQL tenga datos
+                com.inventario.model.DetalleInventario d = new com.inventario.model.DetalleInventario(); // Creamos el objeto molde
+                // Rellenamos el objeto con los datos de las columnas de la BD
+                d.setIdDetalle(rs.getInt("id_detalle")); 
+                d.setIdInventario(rs.getInt("id_inventario")); 
+                d.setIdProducto(rs.getInt("id_producto")); 
+                d.setCantidadInicial(rs.getDouble("cantidad_inicial")); 
+                d.setCantidadFinal(rs.getDouble("cantidad_final")); 
+                d.setNombreProducto(rs.getString("nombre")); // Dato obtenido gracias al JOIN
+                lista.add(d); // Guardamos en la lista para enviarla a la Web
             }
         } catch (SQLException e) {
-            System.err.println("Error al listar detalles inventario: " + e.getMessage()); // Imprime si hay un error
+            System.err.println("Error al listar detalles inventario: " + e.getMessage()); 
         } finally {
             try {
-                if (rs != null) rs.close(); // Cerramos los resultados
-                if (ps != null) ps.close(); // Cerramos la consulta
-                if (con != null) con.close(); // Cerramos la conexión
+                if (rs != null) rs.close(); // Cerramos el flujo de datos
+                if (ps != null) ps.close(); // Cerramos la orden SQL
+                if (con != null) con.close(); // Apagamos la conexión
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return lista; // Devolvemos la lista llena con los detalles
+        return lista; // Enviamos la recopilación completa de productos
     }
 
     /**
      * Actualiza solo la cantidad final de un producto en el inventario.
-     * Modifica la tabla INVENTARIO_DETALLE para reemplazar la cantidad_final donde coincidan el inventario y el producto.
      */
     public boolean actualizarCantidadFinal(int idInventario, int idProducto, double cantidadFinal) {
-        Connection con = null; // Variable de conexión
-        PreparedStatement ps = null; // Variable de la consulta
-        boolean actualizado = false; // Bandera de confirmación
+        Connection con = null; // Objeto de enlace
+        PreparedStatement ps = null; // Objeto de comando
+        boolean actualizado = false; // Variable de estado
         
         try {
-            con = Conexion.getConexion(); // Conectamos
-            // Actualizamos (UPDATE) la tabla INVENTARIO_DETALLE poniendo la nueva cantidad_final filtrando por ID del inventario y del producto
-            String sql = "UPDATE INVENTARIO_DETALLE SET cantidad_final = ? WHERE id_inventario = ? AND id_producto = ?";
-            ps = con.prepareStatement(sql); // Preparamos consulta
-            ps.setDouble(1, cantidadFinal); // El primer ? es la nueva cantidad
-            ps.setInt(2, idInventario); // El segundo ? es el id de inventario
-            ps.setInt(3, idProducto); // El tercer ? es el id del producto
+            con = Conexion.getConexion(); // Conexión activa
             
-            int filas = ps.executeUpdate(); // Se ejecuta la acción en base de datos
-            actualizado = (filas > 0); // Si modificó mínimo una fila, fue exitoso
+            // CONSULTA SQL (Actualización):
+            // 1. UPDATE INVENTARIO_DETALLE: Indica la tabla donde vamos a modificar datos.
+            // 2. SET cantidad_final = ?: Establece el nuevo valor del stock final contado por el usuario.
+            // 3. WHERE id_inventario = ? AND id_producto = ?: Restricción vital para no borrar el stock de otros meses u otros productos.
+            String sql = "UPDATE INVENTARIO_DETALLE SET cantidad_final = ? WHERE id_inventario = ? AND id_producto = ?";
+            
+            ps = con.prepareStatement(sql); // Preparamos la actualización
+            ps.setDouble(1, cantidadFinal); // Nuevo stock final
+            ps.setInt(2, idInventario); // Inventario objetivo
+            ps.setInt(3, idProducto); // Producto objetivo
+            
+            int filas = ps.executeUpdate(); // Realizamos el cambio físico en el disco duro de la BD
+            actualizado = (filas > 0); // Si hubo cambios, devolvemos éxito
             
         } catch (SQLException e) {
-            System.err.println("Error al actualizar cantidad final: " + e.getMessage()); // Log de error
+            System.err.println("Error al actualizar cantidad final: " + e.getMessage()); 
         } finally {
             try {
-                if (ps != null) ps.close(); // Cerrar consulta
-                if (con != null) con.close(); // Cerrar conexión
+                if (ps != null) ps.close(); // Finalización de recurso
+                if (con != null) con.close(); // Finalización de conexión
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return actualizado; // Devuelve verdadero si pudo actualizar
+        return actualizado; // Resultado a la lógica del servidor
     }
 
     /**
      * Busca únicamente el número de la cantidad inicial registrada.
-     * Útil para saber cuánto stock base había de un producto en un inventario dado.
      */
     public double obtenerStockActual(int idInventario, int idProducto) {
-        double stock = 0; // Iniciamos con 0 por defecto
-        Connection con = null; // Conexión
-        PreparedStatement ps = null; // Para preparar la consulta
-        ResultSet rs = null; // Para leer la respuesta
+        double stock = 0; // Iniciamos en cero por defecto
+        Connection con = null; 
+        PreparedStatement ps = null; 
+        ResultSet rs = null; 
         
         try {
-            con = Conexion.getConexion(); // Nos conectamos
-            // Pide extraer únicamente el campo cantidad_inicial desde INVENTARIO_DETALLE
-            String sql = "SELECT cantidad_inicial FROM INVENTARIO_DETALLE WHERE id_inventario = ? AND id_producto = ?";
-            ps = con.prepareStatement(sql); // Prepara sql
-            ps.setInt(1, idInventario); // Inyecta el id de inventario
-            ps.setInt(2, idProducto); // Inyecta el id de producto
-            rs = ps.executeQuery(); // Realiza la búsqueda
+            con = Conexion.getConexion(); // Nos enlazamos a MySQL
             
-            if (rs.next()) { // Si encuentra al menos 1 resultado
-                stock = rs.getDouble("cantidad_inicial"); // Lo extraemos de la columna y lo guardamos en la variable stock
+            // CONSULTA SQL: Selecciona únicamente la columna 'cantidad_inicial' filtrando por ID de inventario y producto.
+            String sql = "SELECT cantidad_inicial FROM INVENTARIO_DETALLE WHERE id_inventario = ? AND id_producto = ?";
+            
+            ps = con.prepareStatement(sql); 
+            ps.setInt(1, idInventario); 
+            ps.setInt(2, idProducto); 
+            rs = ps.executeQuery(); // Ejecutamos la lectura rápida
+            
+            if (rs.next()) { // Si el cruce de IDs existe en la bodega
+                stock = rs.getDouble("cantidad_inicial"); // Extraemos el número decimal
             }
         } catch (SQLException e) {
             System.err.println("Error al obtener stock actual: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) rs.close(); // Cerramos resultados
-                if (ps != null) ps.close(); // Cerramos consulta
-                if (con != null) con.close(); // Cerramos base de datos
-            } catch (SQLException e) { e.printStackTrace(); }
-        }
-        return stock; // Retornamos ese numero que logramos leer
-    }
-
-    /**
-     * Muy similar al método listarDetalles, pero además del nombre, también trae el precio unitario del producto.
-     * Útil cuando se necesita mostrar u operar cálculos monetarios.
-     */
-    public java.util.List<com.inventario.model.DetalleInventario> listarDetallesConPrecio(int idInventario) {
-        java.util.List<com.inventario.model.DetalleInventario> lista = new java.util.ArrayList<>(); // Creamos la lista donde iran los detalles
-        Connection con = null; // Instanciamos la conexión a null
-        PreparedStatement ps = null; // Consulta nula
-        ResultSet rs = null; // Resultados nulos
-
-        try {
-            con = Conexion.getConexion(); // Abrimos conexión DB
-            // Selecciona todo de INVENTARIO_DETALLE, y de PRODUCTO pide el nombre y el precio_unitario cruzándolos por id_producto
-            String sql = "SELECT d.*, p.nombre, p.precio_unitario " +
-                         "FROM INVENTARIO_DETALLE d " +
-                         "JOIN PRODUCTO p ON d.id_producto = p.id_producto " +
-                         "WHERE d.id_inventario = ?";
-            ps = con.prepareStatement(sql); // Se arma el SQL
-            ps.setInt(1, idInventario); // Parámetro a buscar
-            rs = ps.executeQuery(); // Se lanza la consulta
-
-            while (rs.next()) { // Leemos fila por fila enviada por la tabla
-                com.inventario.model.DetalleInventario d = new com.inventario.model.DetalleInventario(); // Se genera objeto para poner los datos de esta fila
-                d.setIdDetalle(rs.getInt("id_detalle")); // Llevamos el id detalle
-                d.setIdInventario(rs.getInt("id_inventario")); // Llevamos id inventario
-                d.setIdProducto(rs.getInt("id_producto")); // Llevamos id de producto
-                d.setCantidadInicial(rs.getDouble("cantidad_inicial")); // Llevamos la cantidad guardada
-                d.setCantidadFinal(rs.getDouble("cantidad_final")); // Llevamos la cantidad final
-                d.setNombreProducto(rs.getString("nombre")); // Extraemos su nombre con el JOIN
-                d.setPrecioUnitario(rs.getDouble("precio_unitario")); // Extraemos su precio_unitario con el JOIN
-                lista.add(d); // Metemos este objeto relleno a la lista principal
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al listar detalles con precio: " + e.getMessage()); // Mostrar error
-        } finally {
-            try {
-                if (rs != null) rs.close(); // Liberamos variables
+                if (rs != null) rs.close(); 
                 if (ps != null) ps.close(); 
                 if (con != null) con.close(); 
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return lista; // Se retorna la lista
+        return stock; // Retornamos el stock físico actual
+    }
+
+    /**
+     * Muy similar al método listarDetalles, pero además del nombre, también trae el precio unitario del producto.
+     */
+    public java.util.List<com.inventario.model.DetalleInventario> listarDetallesConPrecio(int idInventario) {
+        java.util.List<com.inventario.model.DetalleInventario> lista = new java.util.ArrayList<>(); // Contenedor
+        Connection con = null; 
+        PreparedStatement ps = null; 
+        ResultSet rs = null; 
+
+        try {
+            con = Conexion.getConexion(); // Conexión abierta
+            
+         
+            String sql = "SELECT d.*, p.nombre, p.precio_unitario " +   // Selecciona todos los campos de INVENTARIO_DETALLE (alias d), más el nombre y precio_unitario del producto
+
+                         "FROM INVENTARIO_DETALLE d " +   // Tabla principal: INVENTARIO_DETALLE con alias "d"
+
+                         "JOIN PRODUCTO p ON d.id_producto = p.id_producto " +   // Une INVENTARIO_DETALLE con PRODUCTO, relacionando por id_producto (para obtener datos del producto)
+
+                         "WHERE d.id_inventario = ? " +   // Filtra: solo muestra los detalles que pertenecen al inventario indicado (parámetro ?)
+
+                         "ORDER BY p.nombre ASC";   // Ordena los resultados por el nombre del producto en orden ascendente (A-Z)
+
+            
+            ps = con.prepareStatement(sql); 
+            ps.setInt(1, idInventario); 
+            rs = ps.executeQuery(); 
+
+            while (rs.next()) { 
+                com.inventario.model.DetalleInventario d = new com.inventario.model.DetalleInventario(); 
+                d.setIdDetalle(rs.getInt("id_detalle")); 
+                d.setIdInventario(rs.getInt("id_inventario")); 
+                d.setIdProducto(rs.getInt("id_producto")); 
+                d.setCantidadInicial(rs.getDouble("cantidad_inicial")); 
+                d.setCantidadFinal(rs.getDouble("cantidad_final")); 
+                d.setNombreProducto(rs.getString("nombre")); 
+                d.setPrecioUnitario(rs.getDouble("precio_unitario")); // Cargamos el precio para cálculos de valor de inventario
+                lista.add(d); 
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al listar detalles con precio: " + e.getMessage()); 
+        } finally {
+            try {
+                if (rs != null) rs.close(); 
+                if (ps != null) ps.close(); 
+                if (con != null) con.close(); 
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return lista; 
     }
 
     /**
@@ -203,48 +273,48 @@ public class DetalleInventarioDAO {
      * Si no existe, lo crea automáticamente en 0 en la base de datos y retorna el ID con el que fue creado.
      */
     public int obtenerOCrearDetalle(int idInventario, int idProducto) {
-        int idDetalle = -1; // Arranca en -1 como símbolo de que aún no lo tenemos
-        Connection con = null; // Variable conexión
-        PreparedStatement ps = null; // Variable consulta
-        ResultSet rs = null; // Variable respuesta
+        int idDetalle = -1; // ID invádilo por defecto si algo falla
+        Connection con = null; 
+        PreparedStatement ps = null; 
+        ResultSet rs = null; 
         try {
-            con = Conexion.getConexion(); // Conectar 
+            con = Conexion.getConexion(); // Enlace
             
-            // Primero consultamos si en la tabla INVENTARIO_DETALLE ya hay una fila para este inventario y producto
+            // PRIMERA CONSULTA: Verificamos si la fila ya existe en INVENTARIO_DETALLE
             String sqlBusqueda = "SELECT id_detalle FROM INVENTARIO_DETALLE WHERE id_inventario = ? AND id_producto = ?";
-            ps = con.prepareStatement(sqlBusqueda); // Pasamos búsqueda
-            ps.setInt(1, idInventario); // Seteamos ID de inventario
-            ps.setInt(2, idProducto); // Seteamos ID de producto
-            rs = ps.executeQuery(); // Ejecutamos la búsqueda
+            ps = con.prepareStatement(sqlBusqueda); 
+            ps.setInt(1, idInventario); 
+            ps.setInt(2, idProducto); 
+            rs = ps.executeQuery(); 
             
-            if (rs.next()) { // Si la encontró
-                idDetalle = rs.getInt("id_detalle"); // Copiamos el ID de ese registro y terminamos
+            if (rs.next()) { // ¡Existe!
+                idDetalle = rs.getInt("id_detalle"); // Recuperamos el ID actual
             } else {
-                // Si la consulta no trajo nada, entonces insertamos un registro nuevo desde 0
-                // Hacemos el INSERT hacia INVENTARIO_DETALLE donde producto e inventario existen pero con cantidades en cero
+                // NO EXISTE: Procedemos a crear el registro de "casilla vacía" (0 inicial, 0 final)
+                // Usamos RETURN_GENERATED_KEYS para atrapar el ID autoincremental que genere MySQL
                 String sqlInsert = "INSERT INTO INVENTARIO_DETALLE (id_inventario, id_producto, cantidad_inicial, cantidad_final) VALUES (?, ?, 0, 0)";
-                PreparedStatement psInsert = con.prepareStatement(sqlInsert, java.sql.Statement.RETURN_GENERATED_KEYS); // Le avisamos que queremos la llave primaria de retorno
-                psInsert.setInt(1, idInventario); // Seteamos id inventario
-                psInsert.setInt(2, idProducto); // Seteamos id producto
-                psInsert.executeUpdate(); // Insertamos fila oficialmente
+                PreparedStatement psInsert = con.prepareStatement(sqlInsert, java.sql.Statement.RETURN_GENERATED_KEYS); 
+                psInsert.setInt(1, idInventario); 
+                psInsert.setInt(2, idProducto); 
+                psInsert.executeUpdate(); // Insertamos
                 
-                ResultSet rsInsert = psInsert.getGeneratedKeys(); // Solicitamos ese ID auto-numérico que la BD generó
+                ResultSet rsInsert = psInsert.getGeneratedKeys(); // Pedimos el ID recién nacido
                 if (rsInsert.next()) { 
-                    idDetalle = rsInsert.getInt(1); // Nos guardamos ese ID
+                    idDetalle = rsInsert.getInt(1); // ¡Capturado!
                 }
-                rsInsert.close(); // Cerramos recolector de llaves
-                psInsert.close(); // Cerramos consulta de insertar
+                rsInsert.close(); // Cerramos objetos temporales internos
+                psInsert.close(); 
             }
         } catch (SQLException e) {
-            System.err.println("Error al obtener/crear detalle inventario: " + e.getMessage()); // Print de error en BD
+            System.err.println("Error al obtener/crear detalle inventario: " + e.getMessage()); 
             e.printStackTrace();
         } finally {
             try {
-                if (rs != null) rs.close(); // Cerrar memoria
-                if (ps != null) ps.close(); // Cerrar memoria
-                if (con != null) con.close(); // Cortar conexión
+                if (rs != null) rs.close(); 
+                if (ps != null) ps.close(); 
+                if (con != null) con.close(); 
             } catch (SQLException e) { e.printStackTrace(); }
         }
-        return idDetalle; // Finaliza devolviendo el ID que se logró encontrar o crear nuevo
+        return idDetalle; // Retornamos el ID (existente o recién creado)
     }
 }

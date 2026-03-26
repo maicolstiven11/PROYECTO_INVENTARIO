@@ -23,6 +23,7 @@ public class Producto { // Declaración de la clase pública
     private String imagen;         // Nombre del archivo de la foto (ej: "1710203942_cerveza.jpg")
     private Date fechaVencimiento; // Fecha en que vence el producto (puede ser nulo si no vence)
     private String cantidadMedida; // Descripción del tamaño o peso (ej: "750ml", "200gr")
+    private double stok_actual;
 
     /**
      * CONSTRUCTOR VACÍO.
@@ -58,7 +59,15 @@ public class Producto { // Declaración de la clase pública
     // =====================================================================
     // GETTERS Y SETTERS
     // =====================================================================
-
+    public double getStok_actual(){
+        return stok_actual;
+    }
+    
+    public void setStok_actual(double stok_actual){
+        this.stok_actual = stok_actual;
+    }
+    
+    
     /** Devuelve el ID del producto */
     public int getIdProducto() {
         return idProducto;
