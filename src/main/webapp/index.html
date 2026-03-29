@@ -1,31 +1,64 @@
+<!--=====================================================================
+    VISTA HTML: index.html - Página de Bienvenida al Sistema
+    
+    QUIÉN LA MUESTRA: Es la página raíz del proyecto (http://localhost:8080/PROYECTO_INVENTARIO/)
+    Puede ser accedida directamente o como redirección desde index.jsp
+    
+    PROPÓSITO:
+    - Servir como página de bienvenida y presentación del sistema
+    - Proporcionar acceso directo al inicio de sesión
+    - Mostrar el branding del proyecto
+    
+    ACCIONES QUE PERMITE:
+    - Enlace único: "Contabilidad-Sistematica" → view/Inicio_sesion.html
+    
+    IMPORTANCIA:
+    - Es la puerta de entrada visual del sistema
+    - Primer contacto del usuario con la interfaz
+    - Establece la identidad visual del proyecto
+    =====================================================================-->
 <!DOCTYPE html>
+<!-- Inicio del documento HTML con idioma inglés (configuración por defecto) -->
 <html lang="en">
 
+<!-- Cabecera del documento con metadatos y recursos -->
 <head>
+    <!-- Codificación de caracteres UTF-8 para soporte de caracteres especiales -->
     <meta charset="UTF-8">
+    <!-- Configuración de viewport para diseño responsive en dispositivos móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título de la página que aparece en el navegador -->
     <title>PROYECTO INVENTARIO</title>
+    <!-- Hoja de estilos CSS para la página de inicio -->
     <link rel="stylesheet" href="css/apartado_inicio.css">
 
 </head>
 
+<!-- Cuerpo principal del documento -->
 <body>
+    <!-- Cabecera con navegación y logo del sistema -->
     <header>
+        <!-- Barra de navegación principal -->
         <nav class="navbar">
+            <!-- Logo del sistema que aparece en la barra de navegación -->
             <img class="navbar__logo" src="assets/img/LOGO.png" alt="logo_sistema">
         </nav>
 
     </header>
+    <!-- Contenido principal de la página -->
     <main>
+        <!-- Título principal que funciona como enlace al inicio de sesión -->
         <a class="main__titulo" href="view/Inicio_sesion.html">
             Contabilidad-Sistematica
         </a>
 
     </main>
+    <!-- Pie de página (vacío en este caso) -->
     <footer>
 
     </footer>
 
 </body>
 
+<!-- Cierre del documento HTML -->
 </html>

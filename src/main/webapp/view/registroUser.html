@@ -1,91 +1,153 @@
+<!--=====================================================================
+    VISTA HTML: registroUser.html - Formulario de Registro de Usuarios
+    
+    QUIÉN LA MUESTRA: Inicio_sesion.html → Al hacer clic en "Registrarse"
+    o puede ser accedida directamente
+    
+    PROPÓSITO:
+    - Primer paso del registro de nuevos usuarios
+    - Recopilar información básica del usuario
+    - Determinar el rol (Administrador/Trabajador)
+    
+    ACCIONES QUE ENVÍA:
+    - Continuar registro: Navega a → registroUser2.html (segundo paso)
+    - Iniciar sesión: Navega a → Inicio_sesion.html
+    
+    MANEJO DE ERRORES:
+    - Detecta parámetros ?error=correo_duplicado o ?error=fallo_registro
+    - Muestra mensajes específicos según el tipo de error
+    - Limpia la URL después de mostrar el error
+    
+    IMPORTANCIA:
+    - Es el punto de entrada para nuevos usuarios
+    - Permite diferenciar entre administradores y trabajadores
+    - Primera barrera de validación en el proceso de registro
+    =====================================================================-->
 <!DOCTYPE html>
+<!-- Inicio del documento HTML con idioma inglés (configuración por defecto) -->
 <html lang="en">
 
+<!-- Cabecera del documento con metadatos y recursos -->
 <head>
+    <!-- Codificación de caracteres UTF-8 para soporte de caracteres especiales -->
     <meta charset="UTF-8">
+    <!-- Configuración de viewport para diseño responsive en dispositivos móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título de la página que aparece en el navegador -->
     <title>Registrarse</title>
+    <!-- Hoja de estilos CSS para el formulario de registro -->
     <link rel="stylesheet" href="../css/registro.css">
+    <!-- Librería Font Awesome: Iconos (fa-triangle-exclamation, fa-angle-down, fa-caret-right) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
 
+<!-- Cuerpo principal del documento -->
 <body>
+    <!-- Cabecera con navegación y logo del sistema -->
     <header>
+        <!-- Barra de navegación principal -->
         <nav class="navbar">
+            <!-- Logo del sistema que aparece en la barra de navegación -->
             <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
         </nav>
 
     </header>
+    <!-- Contenido principal de la página -->
     <main>
+        <!-- Título principal de la página -->
         <h1 class="main__titulo">Registrarse</h1>
+        <!-- Subtítulo con el nombre del sistema -->
         <h2 class="main__subtitulo">Contabilidad-Sistematica</h2>
+        <!-- Sección con opciones para iniciar sesión o registrarse -->
         <section class="seccion__inicioResgistrar">
+            <!-- Enlace para navegar a la página de inicio de sesión -->
             <a href="Inicio_sesion.html" class="inicio_sesion">Iniciar sesion</a>
+            <!-- Enlace para mostrar formulario de registro (actualmente solo muestra el formulario que ya está visible) -->
             <a href="#" class="registrarse">Registrarse</a>
         </section>
 
-        <!-- Contenedor para mensajes de error intuitivos -->
+        <!-- Contenedor para mensajes de error intuitivos (inicialmente oculto) -->
         <div id="mensajeError"
             style="display: none; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 5px; text-align: center; margin: 15px auto; width: 80%; border: 1px solid #f5c6cb; font-family: sans-serif; font-size: 14px;">
+            <!-- Icono de advertencia y texto de error dinámico -->
             <i class="fa-solid fa-triangle-exclamation"></i> <strong id="errorTexto">Error en el registro.</strong>
         </div>
 
+        <!-- Script para manejar mensajes de error desde parámetros URL -->
         <script>
+            // Se ejecuta cuando el DOM está completamente cargado
             document.addEventListener("DOMContentLoaded", function () {
+                // Obtiene los parámetros de la URL actual
                 const urlParams = new URLSearchParams(window.location.search);
+                // Verifica si existe el parámetro 'error'
                 if (urlParams.has('error')) {
+                    // Obtiene el valor del parámetro error
                     const error = urlParams.get('error');
+                    // Referencias a elementos del DOM
                     const divError = document.getElementById('mensajeError');
                     const spanTexto = document.getElementById('errorTexto');
 
+                    // Muestra el contenedor de error
                     divError.style.display = 'block';
 
+                    // Muestra mensaje específico según el tipo de error
                     if (error === 'correo_duplicado') {
                         spanTexto.textContent = 'Este correo electrónico ya está registrado por otro usuario.';
                     } else if (error === 'fallo_registro') {
                         spanTexto.textContent = 'Sucedió un error inesperado. Por favor, intenta de nuevo.';
                     }
 
-                    // Limpiar URL
+                    // Limpia la URL para que si el usuario recarga la página no siga apareciendo el error
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             });
         </script>
 
+        <!-- Formulario de registro que navega al segundo paso -->
         <form class="main__formulario" action="registroUser2.html">
+            <!-- Campo para seleccionar el rol del usuario -->
             <div class="form__iconTiposDoc">
+                <!-- Icono de flecha hacia abajo para el select -->
                 <i class="fas fa-angle-down icono"></i>
+                <!-- Select para elegir el rol del usuario -->
                 <select class="form__tiposDocumento" name="rol" required>
+                    <!-- Opción por defecto deshabilitada -->
                     <option disabled selected> Rol</option>
+                    <!-- Opción para rol de Administrador -->
                     <option value="ADMIN">Administrador</option>
+                    <!-- Opción para rol de Trabajador -->
                     <option value="TRABAJADOR">Trabajador</option>
                 </select>
             </div>
+            <!-- Campo para ingresar el nombre del usuario -->
             <div class="form__iconDocum">
+                <!-- Icono de flecha para el campo de nombre -->
                 <i class="fas fa-caret-right icono"></i>
+                <!-- Etiqueta para el campo de documento (no visible pero accesible) -->
                 <label for="formulario__documento"></label>
+                <!-- Campo de entrada para el nombre del usuario -->
                 <input type="text" id="numero-documento" name="nombre" placeholder="Nombre" required minlength="3"
                     maxlength="50">
             </div>
 
+            <!-- Contenedor con estilo difuminado para el botón -->
             <div class="estilo_difuminado">
+                <!-- Botón que navega al segundo paso del registro -->
                 <button class="contenedor__btnRegistro">Continuar</button>
             </div>
 
-
-
         </form>
 
-
-
-
     </main>
+    <!-- Pie de página (vacío en este caso) -->
     <footer>
 
     </footer>
 
+    <!-- Script de validaciones centralizadas -->
     <script src="../js/validaciones.js"></script>
 </body>
 
+<!-- Cierre del documento HTML -->
 </html>

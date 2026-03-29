@@ -1,32 +1,70 @@
+<!--=====================================================================
+    VISTA HTML: Bienvenida.html - Página de Bienvenida Personalizada
+    
+    QUIÉN LA MUESTRA: LoginServlet (POST exitoso) → 
+    response.sendRedirect("view/Bienvenida.html")
+    
+    DATOS QUE USA DE LA SESIÓN:
+    - ${sessionScope.usuario.nombre} → String. Nombre del usuario logueado
+    
+    PROPÓSITO:
+    - Mostrar mensaje de bienvenida personalizado
+    - Proporcionar acceso al registro de negocio
+    - Servir como página intermedia en el flujo de onboarding
+    
+    ACCIONES QUE ENVÍA:
+    - Registrar negocio: Navega a → registroBar.html
+    
+    IMPORTANCIA:
+    - Es la primera página que ve el usuario después de iniciar sesión
+    - Proporciona experiencia personalizada
+    - Guía al usuario hacia el siguiente paso del proceso
+    =====================================================================-->
 <!DOCTYPE html>
+<!-- Inicio del documento HTML con idioma inglés (configuración por defecto) -->
 <html lang="en">
 
+<!-- Cabecera del documento con metadatos y recursos -->
 <head>
+    <!-- Codificación de caracteres UTF-8 para soporte de caracteres especiales -->
     <meta charset="UTF-8">
+    <!-- Configuración de viewport para diseño responsive en dispositivos móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título de la página que aparece en el navegador -->
     <title>PROYECTO INVENTARIO</title>
+    <!-- Hoja de estilos CSS para la página de bienvenida -->
     <link rel="stylesheet" href="../css/bienvenida.css">
 
 </head>
 
+<!-- Cuerpo principal del documento -->
 <body>
+    <!-- Cabecera con navegación y logo del sistema -->
     <header>
+        <!-- Barra de navegación principal -->
         <nav class="navbar">
+            <!-- Logo del sistema que aparece en la barra de navegación -->
             <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
         </nav>
 
     </header>
+    <!-- Contenido principal de la página -->
     <main>
+        <!-- Mensaje de bienvenida personalizado con el nombre del usuario -->
         <h1 class="main__bienvenida">Bienvenido, ${sessionScope.usuario.nombre}</h1>
+        <!-- Contenedor para el título principal del sistema -->
         <div class="contenedor_titulo">
+            <!-- Enlace que lleva al formulario de registro de negocio -->
             <a class="main__sistema" href="registroBar.html">
                 Contabilidad-Sistematica
             </a>
         </div>
 
+        <!-- Logo del sistema como elemento visual central -->
         <img src="../assets/img/LOGO.png" alt="logo">
 
     </main>
+    <!-- Pie de página (vacío en este caso) -->
     <footer>
 
     </footer>

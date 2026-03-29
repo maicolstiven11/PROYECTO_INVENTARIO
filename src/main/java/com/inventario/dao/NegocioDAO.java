@@ -59,7 +59,7 @@ public class NegocioDAO {
             psNegocio = con.prepareStatement(sqlNegocio, PreparedStatement.RETURN_GENERATED_KEYS);
             psNegocio.setString(1, negocio.getNombre()); // Nombre del bar comercial
             psNegocio.setString(2, negocio.getDireccion()); // Ubicación física
-            psNegocio.setString(3, "inactivo"); // Estado de "en espera"
+            psNegocio.setString(3, "activo"); // Estado de "en espera"
             
             int filas = psNegocio.executeUpdate(); // Realizamos la inserción
             

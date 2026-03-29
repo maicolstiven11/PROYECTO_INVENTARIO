@@ -1,54 +1,97 @@
+<!--=====================================================================
+    VISTA HTML: registroBar.html - Formulario de Registro de Bares/Negocios
+    
+    QUIÉN LA MUESTRA: registroUser2.html → Al completar el registro de usuario
+    o puede ser accedida directamente
+    
+    PROPÓSITO:
+    - Registrar información del negocio/bar del usuario
+    - Recopilar datos básicos del establecimiento
+    - Completar el proceso de onboarding
+    
+    ACCIONES QUE ENVÍA:
+    - Finalizar registro: POST → NegocioServlet (creación del negocio)
+    Envía: nombre (nombre del bar), dirección (ubicación)
+    
+    IMPORTANCIA:
+    - Es el paso final del proceso de registro
+    - Permite asociar un usuario con su negocio
+    - Fundamental para el funcionamiento multi-tenant del sistema
+    =====================================================================-->
 <!DOCTYPE html>
+<!-- Inicio del documento HTML con idioma inglés (configuración por defecto) -->
 <html lang="en">
 
+<!-- Cabecera del documento con metadatos y recursos -->
 <head>
+    <!-- Codificación de caracteres UTF-8 para soporte de caracteres especiales -->
     <meta charset="UTF-8">
+    <!-- Configuración de viewport para diseño responsive en dispositivos móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título de la página que aparece en el navegador -->
     <title>Registro 2</title>
+    <!-- Hoja de estilos CSS para el formulario de registro de bares -->
     <link rel="stylesheet" href="../css/registroBar.css">
+    <!-- Librería Font Awesome: Iconos para la interfaz -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
 
+<!-- Cuerpo principal del documento -->
 <body>
+    <!-- Cabecera con navegación y logo del sistema -->
     <header>
+        <!-- Barra de navegación principal -->
         <nav class="navbar">
+            <!-- Logo del sistema que aparece en la barra de navegación -->
             <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
         </nav>
 
     </header>
+    <!-- Contenido principal de la página -->
     <main>
+        <!-- Título principal de la página -->
         <h1 class="main__titulo">Registre su bar</h1>
+        <!-- Subtítulo con el nombre del sistema -->
         <h2 class="main__subtitulo">Contabilidad-Sistematica</h2>
 
-
+        <!-- Formulario de registro del negocio que envía datos al NegocioServlet -->
         <form class="main__formulario" action="../NegocioServlet" method="POST">
+            <!-- Campo para ingresar el nombre del bar -->
             <div class="campo">
+                <!-- Etiqueta para el campo de nombre (no visible pero accesible) -->
                 <label for="name" class="formulario__nombre"></label>
+                <!-- Campo de entrada para el nombre del negocio/bar -->
                 <input id="name" class="form__input_name" type="text" name="nombre" required
                     placeholder="Nombre del bar" maxlength="100">
             </div>
 
+            <!-- Campo para ingresar la dirección del bar -->
             <div class="campo">
+                <!-- Etiqueta para el campo de dirección (no visible pero accesible) -->
                 <label for="direccion" class="formulario__direccion"></label>
+                <!-- Campo de entrada para la dirección del negocio -->
                 <input id="direccion" class="form__input_direccion" type="text" name="direccion" required
                     placeholder="Direccion" maxlength="200">
             </div>
 
+            <!-- Contenedor con estilo difuminado para el botón de envío -->
             <div class="estilo_difuminado">
+                <!-- Botón que envía el formulario para crear el negocio -->
                 <button class="contenedor__btnRegistro">Finalizar</button>
             </div>
 
         </form>
 
-
-
     </main>
+    <!-- Pie de página (vacío en este caso) -->
     <footer>
 
     </footer>
 
+    <!-- Script para validaciones -->
     <script src="../js/validaciones.js"></script>
 </body>
 
+<!-- Cierre del documento HTML -->
 </html>

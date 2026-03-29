@@ -1,51 +1,100 @@
+<!--
+=====================================================================
+    VISTA HTML: Inicio_inv.html - Inicialización de Inventario
+    
+    QUIÉN LA MUESTRA: Se accede desde lista_bares.jsp → 
+    <a href="../view/Inicio_inv.html?idNegocio=X&nombreBar=Y">Iniciar Inventario</a>
+    
+    DATOS QUE ENVÍA AL CONTROLADOR:
+    - GET → InventarioServlet?action=iniciar
+    Envía: idNegocio, fecha, tipo (semanal/mensual)
+    
+    DATOS QUE RECIBE DE URL:
+    - ?idNegocio=X → ID del negocio para iniciar inventario
+    - ?nombreBar=Y → Nombre del bar para mostrar en título
+    
+    IMPORTANCIA:
+    - Es el primer paso del ciclo de contabilidad
+    - Permite crear un nuevo período de inventario
+    - Define el tipo de control (semanal/mensual) para el período
+    - Fundamental para el seguimiento de stock y ventas
+    ======================================================================-->
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- Cabecera del documento con metadatos y recursos -->
 <head>
+  <!-- Codificación de caracteres UTF-8 para soporte de caracteres especiales -->
   <meta charset="UTF-8">
+  <!-- Configuración de viewport para diseño responsive -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Título de la página que aparece en el navegador -->
   <title>Registro 2</title>
+  <!-- Hoja de estilos CSS específica para esta página -->
   <link rel="stylesheet" href="../css/inicio_inv.css">
+  <!-- Librería Font Awesome: Iconos (fa-angle-down, fa-arrow-left) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
+<!-- Cuerpo principal del documento -->
 <body>
+  <!-- Cabecera con navegación y logo del sistema -->
   <header>
     <nav class="navbar">
+      <!-- Logo del sistema que aparece en la barra de navegación -->
       <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
     </nav>
   </header>
 
+  <!-- Contenido principal de la página -->
   <main>
+    <!-- Sección principal del formulario -->
     <section>
+      <!-- Título principal de la página -->
       <h1 class="main__titulo">Inicializacion de inventario: </h1>
       <!-- Aquí pondremos el nombre del bar con JS -->
       <h2 id="nombreBarTitulo" class="main__subtitulo"></h2>
 
+      <!-- Formulario para iniciar el inventario -->
       <form class="main__formulario" action="../InventarioServlet" method="GET">
         <!-- Inputs ocultos necesarios para el Servlet -->
+        <!-- Campo oculto con la acción de iniciar -->
         <input type="hidden" name="action" value="iniciar">
+        <!-- Campo oculto con el ID del negocio -->
         <input type="hidden" id="idNegocioInput" name="idNegocio" value="">
 
+        <!-- Botón para regresar a la lista de bares -->
         <a href="../NegocioServlet" class="btn-regresar">
+          <!-- Icono de flecha hacia atrás -->
           <i class="fa-solid fa-arrow-left"></i>
         </a>
 
+        <!-- Campo para seleccionar la fecha de inicio -->
         <div class="campo">
+          <!-- Etiqueta para el campo de fecha -->
           <label for="fecha" class="formulario__nombre"></label>
+          <!-- Campo de entrada para la fecha -->
           <input id="fecha" class="form__input_name" type="date" name="fecha" required>
         </div>
 
+        <!-- Campo para seleccionar el tipo de control -->
         <div class="form__iconTiposDoc">
+          <!-- Icono de flecha hacia abajo -->
           <i class="fas fa-angle-down icono"></i>
+          <!-- Select para tipo de control -->
           <select name="tipo" class="form__tiposControl" required>
+            <!-- Opción por defecto deshabilitada -->
             <option disabled selected value="">Seleccione tipo de control</option>
+            <!-- Opción de control semanal -->
             <option value="semanal">Semanal</option>
+            <!-- Opción de control mensual -->
             <option value="mensual">Mensual</option>
           </select>
         </div>
 
+        <!-- Contenedor con estilo difuminado para el botón -->
         <div class="estilo_difuminado">
+          <!-- Botón para finalizar/iniciar el inventario -->
           <button class="contenedor__btnRegistro">Finalizar</button>
         </div>
 
@@ -53,10 +102,12 @@
     </section>
   </main>
 
+  <!-- Pie de página -->
   <footer></footer>
 
+  <!-- Script para autocompletar datos desde la URL -->
   <script>
-    // Script para autocompletar datos desde la URL
+    // Se ejecuta cuando la página termina de cargar
     window.onload = function () {
       // 1. Obtener parámetros de la URL
       const params = new URLSearchParams(window.location.search);
@@ -78,7 +129,9 @@
     };
   </script>
 
+  <!-- Script de validaciones externo -->
   <script src="../js/validaciones.js"></script>
 </body>
 
+<!-- Cierre del documento HTML -->
 </html>

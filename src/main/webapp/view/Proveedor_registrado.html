@@ -1,47 +1,89 @@
+<!--
+=====================================================================
+    VISTA HTML: Proveedor_registrado.html - Confirmación de Registro de Proveedor
+    
+    QUIÉN LA MUESTRA: ProveedorServlet (POST con action=agregar) → 
+    response.sendRedirect("view/Proveedor_registrado.html")
+    
+    DATOS QUE ENVÍA AL CONTROLADOR:
+    - No envía datos, es una página de confirmación
+    
+    ACCIONES QUE PERMITE:
+    - Agregar otro proveedor: GET → Registro_datos_prv.html
+    - Finalizar registro: GET → Menu_sistema.jsp
+    
+    IMPORTANCIA:
+    - Proporciona retroalimentación al usuario sobre operación exitosa
+    - Facilita la navegación continua del flujo de trabajo
+    - Mejora la experiencia de usuario con confirmaciones claras
+    ======================================================================-->
 <!DOCTYPE html>
 <html lang="es">
 
+<!-- Cabecera del documento con metadatos y recursos -->
 <head>
+    <!-- Codificación de caracteres UTF-8 para soporte de caracteres especiales -->
     <meta charset="UTF-8">
+    <!-- Configuración de viewport para diseño responsive -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título de la página que aparece en el navegador -->
     <title>Proveedor registrado</title>
+    <!-- Hoja de estilos CSS específica para esta página -->
     <link rel="stylesheet" href="../css/Proveedor_registrado.css">
+    <!-- Librería Font Awesome: Iconos (fa-plus, fa-circle-check) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
 
+<!-- Cuerpo principal del documento -->
 <body>
+    <!-- Cabecera con navegación y logo del sistema -->
     <header>
         <nav class="navbar">
+            <!-- Logo del sistema que aparece en la barra de navegación -->
             <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
         </nav>
     </header>
+    <!-- Contenido principal de la página -->
     <main>
+        <!-- Título principal del sistema -->
         <h1 class="main__titulo">Contabilidad-Sistematica</h1>
 
+        <!-- Sección principal con mensaje de confirmación -->
         <section class="main__section__prv_regist">
             <div>
+                <!-- Mensaje de éxito -->
                 <h2>PROVEEDOR REGISTRADO <br> CON EXITO</h2>
+                <!-- Icono de confirmación visual -->
                 <img src="../assets/img/icono_correcto.png" alt="img_correcto">
             </div>
         </section>
+        <!-- Sección con opciones de navegación -->
         <section class="main__section__rutas">
+            <!-- Opción para agregar otro proveedor -->
             <a href="Registro_datos_prv.html" class="section__agg">
+                <!-- Icono de más -->
                 <i class="fa-solid fa-plus"></i>
+                <!-- Texto descriptivo -->
                 <h3>Agregar otro proveedor</h3>
             </a>
 
+            <!-- Opción para finalizar el registro -->
             <a href="Menu_sistema.jsp" class="section__fin_regis">
+                <!-- Icono de check -->
                 <i class="fa-solid fa-circle-check"></i>
+                <!-- Texto descriptivo -->
                 <h3>Finalizar el registro <br> de proveedores</h3>
 
             </a>
 
         </section>
     </main>
+    <!-- Pie de página -->
     <footer>
 
     </footer>
 </body>
 
+<!-- Cierre del documento HTML -->
 </html>

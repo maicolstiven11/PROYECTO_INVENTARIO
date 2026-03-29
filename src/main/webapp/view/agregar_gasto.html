@@ -1,62 +1,110 @@
+<!--=====================================================================
+    VISTA HTML: agregar_gasto.html - Formulario de Registro de Gastos
+    
+    QUIÉN LA MUESTRA: menu_inventario.jsp → Al hacer clic en "Agregar gasto"
+    o puede ser accedida directamente
+    
+    PROPÓSITO:
+    - Registrar gastos diarios del negocio
+    - Controlar salidas de dinero
+    - Mantener registro contable detallado
+    
+    ACCIONES QUE ENVÍA:
+    - Registrar gasto: POST → GastoServlet (creación del gasto)
+    Envía: descripcion, fecha, cantidad, subtotal
+    
+    IMPORTANCIA:
+    - Es fundamental para el control financiero del negocio
+    - Permite tracking detallado de egresos
+    - Base para cálculos de rentabilidad y balances
+    =====================================================================-->
 <!DOCTYPE html>
+<!-- Inicio del documento HTML con idioma español -->
 <html lang="es">
 
+<!-- Cabecera del documento con metadatos y recursos -->
 <head>
+    <!-- Codificación de caracteres UTF-8 para soporte de caracteres especiales -->
     <meta charset="UTF-8">
+    <!-- Configuración de viewport para diseño responsive en dispositivos móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título de la página que aparece en el navegador -->
     <title>Agregar Gasto</title>
+    <!-- Hoja de estilos CSS para el formulario de gastos -->
     <link rel="stylesheet" href="../css/agg_gasto.css">
+    <!-- Librería Font Awesome: Iconos (fa-arrow-left) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
+<!-- Cuerpo principal del documento -->
 <body>
 
+    <!-- Cabecera con navegación y logo del sistema -->
     <header>
+        <!-- Barra de navegación principal -->
         <nav class="navbar">
+            <!-- Logo del sistema que aparece en la barra de navegación -->
             <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
         </nav>
     </header>
+    <!-- Contenido principal de la página -->
     <main>
 
+        <!-- Contenedor principal del formulario de gastos -->
         <div class="gasto">
             <div class="gasto__contenedor">
 
+                <!-- Título del formulario -->
                 <h1 class="gasto__titulo">Registrar Gasto Diario</h1>
 
+                <!-- Formulario que envía los datos del gasto al GastoServlet -->
                 <form class="formulario-gasto" action="../GastoServlet" method="POST">
 
-                    <!-- DESCRIPCION -->
+                    <!-- Campo para la descripción del gasto -->
                     <div class="formulario-gasto__grupo">
+                        <!-- Etiqueta para el campo de descripción -->
                         <label for="descripcion" class="formulario-gasto__label">Descripción</label>
+                        <!-- Área de texto para detalles del gasto -->
                         <textarea id="descripcion" name="descripcion" class="formulario-gasto__input"
                             placeholder="Detalles del gasto..." rows="3" maxlength="255" required></textarea>
                     </div>
 
-                    <!-- FECHA -->
+                    <!-- Campo para la fecha del gasto -->
                     <div class="formulario-gasto__grupo">
+                        <!-- Etiqueta para el campo de fecha -->
                         <label for="fecha" class="formulario-gasto__label">Fecha</label>
+                        <!-- Campo de tipo date para seleccionar la fecha del gasto -->
                         <input id="fecha" name="fecha" type="date" class="formulario-gasto__input" required>
                     </div>
 
-                    <!-- CANTIDAD Y SUBTOTAL -->
+                    <!-- Campos para cantidad y subtotal en la misma fila -->
                     <div class="formulario-gasto__fila">
+                        <!-- Campo para la cantidad de artículos/items del gasto -->
                         <div class="formulario-gasto__grupo formulario-gasto__grupo--col">
+                            <!-- Etiqueta para el campo de cantidad -->
                             <label for="cantidad" class="formulario-gasto__label">Cantidad</label>
+                            <!-- Campo numérico para la cantidad -->
                             <input id="cantidad" name="cantidad" type="number" class="formulario-gasto__input"
                                 placeholder="Ej: 1" min="1" max="10000" required>
                         </div>
+                        <!-- Campo para el subtotal del gasto -->
                         <div class="formulario-gasto__grupo formulario-gasto__grupo--col">
+                            <!-- Etiqueta para el campo de subtotal -->
                             <label for="subtotal" class="formulario-gasto__label">Subtotal</label>
+                            <!-- Campo numérico para el valor monetario del gasto -->
                             <input id="subtotal" name="subtotal" type="number" class="formulario-gasto__input"
                                 placeholder="Ej: 50000" min="0" max="999999999" required>
                         </div>
                     </div>
 
+                    <!-- Pie del formulario con botones de acción -->
                     <div class="formulario-gasto__pie">
+                        <!-- Botón para regresar al menú de inventario -->
                         <a href="../view/menu_inventario.jsp" class="btn-regresar">
                             <i class="fa-solid fa-arrow-left"></i> Regresar
                         </a>
 
+                        <!-- Botón que envía el formulario para registrar el gasto -->
                         <button type="submit" class="formulario-gasto__boton">
                             Registrar Gasto
                         </button>
@@ -66,12 +114,17 @@
             </div>
         </div>
     </main>
+    <!-- Pie de página (vacío en este caso) -->
     <footer>
     </footer>
+    <!-- Script para establecer la fecha actual por defecto en el campo de fecha -->
     <script>
+        // Asigna la fecha actual al campo de fecha cuando carga la página
         document.getElementById("fecha").valueAsDate = new Date();
     </script>
+    <!-- Script de validaciones centralizadas -->
     <script src="../js/validaciones.js"></script>
 </body>
 
+<!-- Cierre del documento HTML -->
 </html>

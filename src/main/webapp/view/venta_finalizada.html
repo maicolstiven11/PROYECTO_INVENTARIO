@@ -1,31 +1,71 @@
+<!--=====================================================================
+    VISTA HTML: venta_finalizada.html - Página de Confirmación de Venta Finalizada
+    
+    QUIÉN LA MUESTRA: VentaServlet (POST exitoso) → 
+    response.sendRedirect("view/venta_finalizada.html")
+    
+    PROPÓSITO:
+    - Confirmar que la venta ha sido procesada exitosamente
+    - Proporcionar opciones para continuar trabajando
+    - Ofrecer retroalimentación visual positiva al usuario
+    
+    ACCIONES QUE PERMITE:
+    - Volver al menú: Navega a → menu_inventario.jsp
+    - Agregar otra venta: Navega a → VentaServlet (nueva venta)
+    
+    IMPORTANCIA:
+    - Proporciona cierre al proceso de registro de ventas
+    - Mejora la experiencia de usuario con confirmación visual
+    - Facilita el flujo continuo de trabajo en el punto de venta
+    =====================================================================-->
 <!DOCTYPE html>
+<!-- Inicio del documento HTML con idioma español -->
 <html lang="es">
 
+<!-- Cabecera del documento con metadatos y recursos -->
 <head>
+    <!-- Codificación de caracteres UTF-8 para soporte de caracteres especiales -->
     <meta charset="UTF-8">
+    <!-- Configuración de viewport para diseño responsive en dispositivos móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título de la página que aparece en el navegador -->
     <title>Venta Finalizada</title>
+    <!-- Hoja de estilos CSS para la página de confirmación -->
     <link rel="stylesheet" href="../css/venta_finalizada.css">
+    <!-- Librería Font Awesome: Iconos (fa-arrow-left, fa-plus) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
+<!-- Cuerpo principal del documento -->
 <body>
+    <!-- Cabecera con navegación y logo del sistema -->
     <header>
+        <!-- Barra de navegación principal -->
         <nav class="navbar">
+            <!-- Logo del sistema que aparece en la barra de navegación -->
             <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
         </nav>
     </header>
+    <!-- Contenido principal de la página -->
     <main>
+        <!-- Título con el nombre del establecimiento -->
         <h1 class="main__titulo">Fuente de Soda La Jenny</h1>
+        <!-- Sección con fondo difuminado para el mensaje de confirmación -->
         <section class="fondo-blur">
+            <!-- Contenedor principal del mensaje de confirmación -->
             <div class="registro_confirmacion">
+                <!-- Mensaje principal de éxito -->
                 <h2>VENTA FINALIZADA CON ÉXITO</h2>
+                <!-- Icono visual de confirmación -->
                 <img src="../assets/img/icono_correcto.png" alt="icono_correcto">
 
+                <!-- Botones de acción para continuar -->
                 <div class="botones-accion">
+                    <!-- Botón para volver al menú principal de inventario -->
                     <a href="menu_inventario.jsp" class="btn-accion btn-volver">
                         <i class="fa-solid fa-arrow-left"></i> Volver
                     </a>
+                    <!-- Botón para iniciar una nueva venta -->
                     <a href="../VentaServlet" class="btn-accion btn-agregar">
                         <i class="fa-solid fa-plus"></i> Agregar otro
                     </a>
@@ -33,8 +73,10 @@
             </div>
         </section>
     </main>
+    <!-- Pie de página (vacío en este caso) -->
     <footer>
     </footer>
 </body>
 
+<!-- Cierre del documento HTML -->
 </html>

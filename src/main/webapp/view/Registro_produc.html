@@ -1,114 +1,199 @@
+<!--=====================================================================
+    VISTA HTML: Registro_produc.html - Formulario de Registro de Productos
+    
+    QUIÉN LA MUESTRA: menu_inventario.jsp → Al hacer clic en "Registrar nuevo producto"
+    (solo visible para administradores)
+    
+    PROPÓSITO:
+    - Agregar nuevos productos al catálogo del sistema
+    - Definir características principales de los productos
+    - Gestionar inventario base del negocio
+    
+    ACCIONES QUE ENVÍA:
+    - Registrar producto: POST → ProductoServlet (creación del producto)
+    Envía: nombre, precio, marca, tipo, fecha_vencimiento, cantidad_medida, imagen
+    
+    MANEJO DE ERRORES:
+    - Detecta parámetros ?error=producto_duplicado o ?error genérico
+    - Muestra mensajes específicos según el tipo de error
+    - Limpia la URL después de mostrar el error
+    
+    IMPORTANCIA:
+    - Es fundamental para el catálogo de productos
+    - Permite expandir la oferta del negocio
+    - Base para todas las operaciones de venta e inventario
+    =====================================================================-->
 <!DOCTYPE html>
+<!-- Inicio del documento HTML con idioma español -->
 <html lang="es">
 
+<!-- Cabecera del documento con metadatos y recursos -->
 <head>
+    <!-- Codificación de caracteres UTF-8 para soporte de caracteres especiales -->
     <meta charset="UTF-8">
+    <!-- Configuración de viewport para diseño responsive en dispositivos móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título de la página que aparece en el navegador -->
     <title>Registro de los productos</title>
+    <!-- Hoja de estilos CSS para el formulario de registro de productos -->
     <link rel="stylesheet" href="../css/registro_produc.css">
+    <!-- Librería Font Awesome: Iconos (fa-triangle-exclamation) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
 
+<!-- Cuerpo principal del documento -->
 <body>
+    <!-- Cabecera con navegación y logo del sistema -->
     <header>
         <nav class="navbar">
+            <!-- Logo del sistema que aparece en la barra de navegación -->
             <img class="navbar__logo" src="../assets/img/LOGO.png" alt="logo_sistema">
         </nav>
     </header>
+    <!-- Contenido principal de la página -->
     <main>
 
+        <!-- Subtítulo de la página -->
         <h2 class="main__subtitulo">Registre los productos</h2>
 
-        <!-- Contenedor para mensajes de error intuitivos -->
+        <!-- Contenedor para mensajes de error intuitivos (inicialmente oculto) -->
         <div id="mensajeError"
             style="display: none; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 5px; text-align: center; margin: 15px auto; width: 80%; border: 1px solid #f5c6cb; font-family: sans-serif; font-size: 14px;">
+            <!-- Icono de advertencia y texto de error dinámico -->
             <i class="fa-solid fa-triangle-exclamation"></i> <strong id="errorTexto">Error al registrar
                 producto.</strong>
         </div>
 
+        <!-- Script para manejar mensajes de error desde parámetros URL -->
         <script>
+            // Se ejecuta cuando el DOM está completamente cargado
             document.addEventListener("DOMContentLoaded", function () {
+                // Obtiene los parámetros de la URL actual
                 const urlParams = new URLSearchParams(window.location.search);
+                // Verifica si existe el parámetro 'error'
                 if (urlParams.has('error')) {
+                    // Obtiene el valor del parámetro error
                     const error = urlParams.get('error');
+                    // Referencias a elementos del DOM
                     const divError = document.getElementById('mensajeError');
                     const spanTexto = document.getElementById('errorTexto');
+                    // Muestra el contenedor de error
                     divError.style.display = 'block';
+                    // Muestra mensaje específico según el tipo de error
                     if (error === 'producto_duplicado') {
                         spanTexto.textContent = 'Este nombre de producto ya está registrado en el inventario.';
                     } else {
                         spanTexto.textContent = 'No se pudo guardar el producto. Verifica los datos.';
                     }
+                    // Limpia la URL para que si el usuario recarga la página no siga apareciendo el error
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             });
         </script>
 
+        <!-- Contenedor principal del formulario -->
         <section class="main__contenedorForm">
+            <!-- Formulario que envía los datos del producto al ProductoServlet -->
             <form class="main__formulario" action="../ProductoServlet" method="POST" enctype="multipart/form-data">
+                <!-- Campo para el nombre del producto -->
                 <div class="campo">
+                    <!-- Etiqueta para el campo de nombre (no visible pero accesible) -->
                     <label for="name" class="formulario__nombre"></label>
+                    <!-- Campo de entrada para el nombre del producto -->
                     <input id="name" class="form__input_name" name="nombre" type="text" required
                         placeholder="Nombre del producto" maxlength="100">
                 </div>
+                <!-- Campo para el precio del producto -->
                 <div class="campo">
+                    <!-- Etiqueta para el campo de precio (no visible pero accesible) -->
                     <label for="precio_producto"></label>
+                    <!-- Campo numérico para el precio con decimales -->
                     <input type="number" step="0.01" id="precio_producto" name="precio"
                         placeholder="Precio del producto" required min="0" max="999999999">
                 </div>
+                <!-- Campo para la marca del producto -->
                 <div class="campo">
+                    <!-- Etiqueta para el campo de marca (no visible pero accesible) -->
                     <label for="precio_producto"></label>
+                    <!-- Campo de texto para la marca del producto -->
                     <input type="text" id="marca_producto" name="marca" placeholder="marca" required maxlength="50">
                 </div>
+                <!-- Campo para seleccionar el tipo de producto -->
                 <div class="form__iconTiposDoc">
-
+                    <!-- Select para elegir la categoría del producto -->
                     <select class="form__tiposDocumento" name="tipo" required>
+                        <!-- Opción por defecto deshabilitada -->
                         <option disabled selected> Tipo de Producto</option>
+                        <!-- Opciones de categorías disponibles -->
                         <option value="bebida">Bebidas</option>
                         <option value="snack">Snacks</option>
                         <option value="dulce">Dulces</option>
                         <option value="cigarro">Cigarros</option>
                     </select>
                 </div>
+                <!-- Campo para la fecha de vencimiento -->
                 <div class="campo">
+                    <!-- Etiqueta para el campo de fecha de vencimiento -->
                     <label for="fecha_vencimiento" class="formulario__fecha">Fecha Vencimiento:</label>
+                    <!-- Campo de tipo date para la fecha de vencimiento -->
                     <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" required>
                 </div>
+                <!-- Campo para la cantidad de medida -->
                 <div class="campo">
+                    <!-- Etiqueta para el campo de cantidad de medida (no visible pero accesible) -->
                     <label for="cantidad_medida"></label>
+                    <!-- Campo de texto para la unidad de medida (ej: 500ml, 1kg, etc.) -->
                     <input type="text" id="cantidad_medida" name="cantidad_medida" placeholder="cantidad de medida"
                         required maxlength="50">
                 </div>
+                <!-- Campo para subir imagen del producto -->
                 <div class="campo_img">
+                    <!-- Etiqueta para el campo de imagen -->
                     <label for="imagen" class="boton_img">Imagen del producto</label>
+                    <!-- Campo de tipo file para seleccionar imagen -->
                     <input type="file" id="imagen" name="imagen" accept="image/*">
+                    <!-- Contenedor para la previsualización de la imagen -->
                     <div id="preview" class="cuadro-imagen"></div>
                 </div>
 
+                <!-- Botón para finalizar el registro -->
                 <button class="contenedor__btnfinalizar">Finalizar</button>
             </form>
         </section>
     </main>
+    <!-- Pie de página (vacío en este caso) -->
     <footer>
 
     </footer>
+    <!-- Script de validaciones centralizadas -->
     <script src="../js/validaciones.js?v=20240311"></script>
+    <!-- Script para previsualizar la imagen seleccionada -->
     <script>
+        // Se ejecuta cuando el usuario selecciona una imagen
         document.getElementById('imagen').addEventListener('change', function (e) {
+            // Obtiene el archivo seleccionado
             var file = e.target.files[0];
+            // Si se seleccionó un archivo
             if (file) {
+                // Crea un objeto FileReader para leer el archivo
                 var reader = new FileReader();
+                // Se ejecuta cuando la lectura del archivo se completa
                 reader.onload = function (e) {
+                    // Obtiene el contenedor de previsualización
                     var preview = document.getElementById('preview');
+                    // Muestra la imagen en el contenedor con estilo específico
                     preview.innerHTML = '<img src="' + e.target.result + '" style="max-width: 150px; border-radius: 8px; margin-top: 10px;" alt="Previsualización">';
                 }
+                // Inicia la lectura del archivo como URL de datos
                 reader.readAsDataURL(file);
             } else {
+                // Si no hay archivo, limpia el contenedor de previsualización
                 document.getElementById('preview').innerHTML = '';
             }
         });
     </script>
 </body>
 
+<!-- Cierre del documento HTML -->
 </html>

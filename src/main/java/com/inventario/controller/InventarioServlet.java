@@ -220,7 +220,7 @@ public class InventarioServlet extends HttpServlet {
                         long diffDias = diffMs / (1000 * 60 * 60 * 24); // Convertir Milisegundos a Días transcurridos
                         
                         String tipo = invActual.getTipoControl(); 
-                        boolean puedeCerrar = true; 
+                        boolean puedeCerrar = false; 
                         
                         // Evaluar
                         if ("semanal".equalsIgnoreCase(tipo) && diffDias >= 7) puedeCerrar = true; 
